@@ -1,0 +1,6 @@
+{
+  "name": "Example Project",
+  "baseUrl": "https://example.com",
+  "monitoringTypes": ["web", "rest"]
+}
+

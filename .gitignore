@@ -1,0 +1,113 @@
+
+# ────────────────────────────────
+# AI Assistants
+# ────────────────────────────────
+.claude/
+.gemini/
+.cursor/
+.task-flow/
+CLAUDE.md
+GEMINI.md
+
+# ────────────────────────────────
+# Dependencies
+# ────────────────────────────────
+node_modules/
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ────────────────────────────────
+# Next.js
+# ────────────────────────────────
+/.next/
+/out/
+next-env.d.ts
+.vercel
+
+# ────────────────────────────────
+# Environment Variables
+# ────────────────────────────────
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ────────────────────────────────
+# Cypress
+# ────────────────────────────────
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+cypress/.cache/
+
+# ────────────────────────────────
+# Firebase
+# ────────────────────────────────
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebaserc.local
+
+# ────────────────────────────────
+# Logs
+# ────────────────────────────────
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# ────────────────────────────────
+# Testing
+# ────────────────────────────────
+coverage/
+.nyc_output/
+*.lcov
+
+# ────────────────────────────────
+# IDEs and Editors
+# ────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# ────────────────────────────────
+# OS Files
+# ────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ────────────────────────────────
+# Build and Cache
+# ────────────────────────────────
+*.tsbuildinfo
+.turbo/
+.cache/
+dist/
+build/
+*.pid
+*.seed
+*.pid.lock
+
+# ────────────────────────────────
+# Temporary Files
+# ────────────────────────────────
+*.tmp
+*.temp
+.cache/
+.temp/
