@@ -1,4 +1,4 @@
-import type { HealthCheckResponse, HealthCheckOptions } from '@/types'
+import type { HealthCheckOptions, HealthCheckResponse } from '@/types'
 
 const DEFAULT_TIMEOUT = 30000
 const DEFAULT_EXPECTED_STATUS = 200
@@ -8,7 +8,7 @@ export async function checkWebPage(
   options?: {
     timeout?: number
     expectedStatus?: number
-  }
+  },
 ): Promise<HealthCheckResponse> {
   const startTime = Date.now()
   const timeout = options?.timeout ?? DEFAULT_TIMEOUT
@@ -63,7 +63,9 @@ export async function checkWebPage(
       success,
       statusCode,
       responseTime,
-      errorMessage: success ? undefined : `HTTP ${statusCode} - Expected ${expectedStatus}`,
+      errorMessage: success
+        ? undefined
+        : `HTTP ${statusCode} - Expected ${expectedStatus}`,
     }
   } catch (error) {
     clearTimeout(timeoutId)
@@ -102,7 +104,7 @@ export async function checkWebPage(
 }
 
 export async function checkRestEndpoint(
-  options: HealthCheckOptions
+  options: HealthCheckOptions,
 ): Promise<HealthCheckResponse> {
   const startTime = Date.now()
   const timeout = options.timeout ?? DEFAULT_TIMEOUT
@@ -190,7 +192,9 @@ export async function checkRestEndpoint(
       success,
       statusCode,
       responseTime,
-      errorMessage: success ? undefined : `HTTP ${statusCode} - Expected ${expectedStatus}`,
+      errorMessage: success
+        ? undefined
+        : `HTTP ${statusCode} - Expected ${expectedStatus}`,
     }
   } catch (error) {
     clearTimeout(timeoutId)
@@ -240,7 +244,7 @@ export async function checkWordPress(
   baseUrl: string,
   options?: {
     timeout?: number
-  }
+  },
 ): Promise<WordPressHealthCheckResult> {
   const startTime = Date.now()
   const timeout = options?.timeout ?? DEFAULT_TIMEOUT
@@ -399,7 +403,8 @@ export async function checkWordPress(
   ])
 
   const totalResponseTime = Date.now() - startTime
-  const allSuccessful = wpJsonResult.success && postsResult.success && pagesResult.success
+  const allSuccessful =
+    wpJsonResult.success && postsResult.success && pagesResult.success
 
   return {
     success: allSuccessful,

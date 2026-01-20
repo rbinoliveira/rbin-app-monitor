@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 import { checkRestEndpoint } from '@/services'
-import type { ApiResponse, HealthCheckOptions, HealthCheckResponse } from '@/types'
+import type {
+  ApiResponse,
+  HealthCheckOptions,
+  HealthCheckResponse,
+} from '@/types'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +17,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: 'URL is required and must be a string',
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -28,7 +33,7 @@ export async function POST(request: NextRequest) {
             success: false,
             error: `Method must be one of: ${validMethods.join(', ')}`,
           },
-          { status: 400 }
+          { status: 400 },
         )
       }
       options.method = body.method
@@ -41,7 +46,7 @@ export async function POST(request: NextRequest) {
             success: false,
             error: 'Headers must be an object',
           },
-          { status: 400 }
+          { status: 400 },
         )
       }
       options.headers = body.headers
@@ -54,7 +59,7 @@ export async function POST(request: NextRequest) {
             success: false,
             error: 'Body must be a string',
           },
-          { status: 400 }
+          { status: 400 },
         )
       }
       options.body = body.body
@@ -62,13 +67,17 @@ export async function POST(request: NextRequest) {
 
     if (body.expectedStatus !== undefined) {
       const expectedStatus = parseInt(String(body.expectedStatus), 10)
-      if (isNaN(expectedStatus) || expectedStatus < 100 || expectedStatus >= 600) {
+      if (
+        isNaN(expectedStatus) ||
+        expectedStatus < 100 ||
+        expectedStatus >= 600
+      ) {
         return NextResponse.json<ApiResponse>(
           {
             success: false,
             error: 'Expected status must be a valid HTTP status code (100-599)',
           },
-          { status: 400 }
+          { status: 400 },
         )
       }
       options.expectedStatus = expectedStatus
@@ -82,7 +91,7 @@ export async function POST(request: NextRequest) {
             success: false,
             error: 'Timeout must be a positive number',
           },
-          { status: 400 }
+          { status: 400 },
         )
       }
       options.timeout = timeout
@@ -95,7 +104,7 @@ export async function POST(request: NextRequest) {
         success: true,
         data: result,
       },
-      { status: 200 }
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json<ApiResponse>(
@@ -103,8 +112,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
-

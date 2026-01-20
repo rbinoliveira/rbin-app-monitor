@@ -1,7 +1,12 @@
-import { getProjectById, updateProjectStatus } from './projects'
+import type {
+  HealthCheckResponse,
+  MonitoringType,
+  ProjectStatus,
+} from '@/types'
+
 import { saveHealthCheckResult } from './health-check-results'
+import { getProjectById, updateProjectStatus } from './projects'
 import { sendNotification } from './telegram'
-import type { HealthCheckResponse, MonitoringType, ProjectStatus } from '@/types'
 
 export interface ProcessHealthCheckResultInput {
   projectId: string
@@ -11,7 +16,7 @@ export interface ProcessHealthCheckResultInput {
 }
 
 export async function processHealthCheckResult(
-  input: ProcessHealthCheckResultInput
+  input: ProcessHealthCheckResultInput,
 ): Promise<void> {
   const project = await getProjectById(input.projectId)
 
@@ -20,7 +25,9 @@ export async function processHealthCheckResult(
   }
 
   const previousStatus = project.status
-  const newStatus: ProjectStatus = input.result.success ? 'healthy' : 'unhealthy'
+  const newStatus: ProjectStatus = input.result.success
+    ? 'healthy'
+    : 'unhealthy'
   const statusChanged = previousStatus !== newStatus
 
   await saveHealthCheckResult({
@@ -39,7 +46,8 @@ export async function processHealthCheckResult(
         type: 'health_check_failed',
         projectId: input.projectId,
         projectName: project.name,
-        details: input.result.errorMessage || `Health check failed for ${input.type}`,
+        details:
+          input.result.errorMessage || `Health check failed for ${input.type}`,
         timestamp: new Date(),
       })
     } else if (newStatus === 'healthy' && previousStatus === 'unhealthy') {
@@ -53,4 +61,3 @@ export async function processHealthCheckResult(
     }
   }
 }
-

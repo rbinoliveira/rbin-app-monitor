@@ -1,4 +1,4 @@
-import { clsx, type ClassValue } from 'clsx'
+import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
@@ -19,7 +19,9 @@ export function formatDuration(ms: number): string {
   return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`
 }
 
-export function getStatusColor(status: 'healthy' | 'unhealthy' | 'unknown'): string {
+export function getStatusColor(
+  status: 'healthy' | 'unhealthy' | 'unknown',
+): string {
   switch (status) {
     case 'healthy':
       return 'text-success-600 bg-success-50'

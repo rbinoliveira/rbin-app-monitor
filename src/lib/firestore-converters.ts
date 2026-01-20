@@ -1,17 +1,18 @@
 import {
+  type FirestoreDataConverter,
   type QueryDocumentSnapshot,
   type SnapshotOptions,
-  type FirestoreDataConverter,
-  type WithFieldValue,
   Timestamp,
+  type WithFieldValue,
 } from 'firebase/firestore'
+
 import type {
-  Project,
-  ProjectDoc,
-  HealthCheckResult,
-  HealthCheckResultDoc,
   CypressResult,
   CypressResultDoc,
+  HealthCheckResult,
+  HealthCheckResultDoc,
+  Project,
+  ProjectDoc,
 } from '@/types'
 
 // Helper to convert Firestore Timestamp to Date
@@ -39,7 +40,7 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
   },
   fromFirestore(
     snapshot: QueryDocumentSnapshot<ProjectDoc>,
-    options?: SnapshotOptions
+    options?: SnapshotOptions,
   ): Project {
     const data = snapshot.data(options)
     return {
@@ -65,7 +66,7 @@ export const healthCheckResultConverter: FirestoreDataConverter<
   HealthCheckResultDoc
 > = {
   toFirestore(
-    result: WithFieldValue<HealthCheckResult>
+    result: WithFieldValue<HealthCheckResult>,
   ): WithFieldValue<HealthCheckResultDoc> {
     const r = result as HealthCheckResult
     return {
@@ -82,7 +83,7 @@ export const healthCheckResultConverter: FirestoreDataConverter<
   },
   fromFirestore(
     snapshot: QueryDocumentSnapshot<HealthCheckResultDoc>,
-    options?: SnapshotOptions
+    options?: SnapshotOptions,
   ): HealthCheckResult {
     const data = snapshot.data(options)
     return {
@@ -109,7 +110,7 @@ export const cypressResultConverter: FirestoreDataConverter<
   CypressResultDoc
 > = {
   toFirestore(
-    result: WithFieldValue<CypressResult>
+    result: WithFieldValue<CypressResult>,
   ): WithFieldValue<CypressResultDoc> {
     const r = result as CypressResult
     return {
@@ -128,7 +129,7 @@ export const cypressResultConverter: FirestoreDataConverter<
   },
   fromFirestore(
     snapshot: QueryDocumentSnapshot<CypressResultDoc>,
-    options?: SnapshotOptions
+    options?: SnapshotOptions,
   ): CypressResult {
     const data = snapshot.data(options)
     return {

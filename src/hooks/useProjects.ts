@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+
 import type { Project } from '@/types'
 
 interface UseProjectsState {
@@ -43,7 +44,8 @@ export function useProjects(): UseProjectsReturn {
       setState({
         projects: [],
         loading: false,
-        error: err instanceof Error ? err.message : 'An unexpected error occurred',
+        error:
+          err instanceof Error ? err.message : 'An unexpected error occurred',
       })
     }
   }, [])
@@ -65,4 +67,3 @@ export function useProjects(): UseProjectsReturn {
     refresh: fetchProjects,
   }
 }
-

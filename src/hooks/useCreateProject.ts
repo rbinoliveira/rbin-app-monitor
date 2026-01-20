@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { CreateProjectInput, MonitoringType } from '@/types'
+import { useState } from 'react'
+
+import type { CreateProjectInput } from '@/types'
 
 interface UseCreateProjectState {
   loading: boolean
@@ -44,7 +45,8 @@ export function useCreateProject(): UseCreateProjectReturn {
     } catch (err) {
       setState({
         loading: false,
-        error: err instanceof Error ? err.message : 'An unexpected error occurred',
+        error:
+          err instanceof Error ? err.message : 'An unexpected error occurred',
       })
       throw err
     } finally {
@@ -58,4 +60,3 @@ export function useCreateProject(): UseCreateProjectReturn {
     createProject,
   }
 }
-

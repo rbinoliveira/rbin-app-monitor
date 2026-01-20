@@ -1,4 +1,4 @@
-import type { NotificationType, NotificationPayload } from '@/types'
+import type { NotificationPayload } from '@/types'
 
 const TELEGRAM_API_BASE_URL = 'https://api.telegram.org/bot'
 const MAX_RETRIES = 3
@@ -38,7 +38,7 @@ export interface SendMessageResult {
 
 export async function sendMessage(
   message: string,
-  options?: SendMessageOptions
+  options?: SendMessageOptions,
 ): Promise<SendMessageResult> {
   const token = getTelegramBotToken()
   const chatId = options?.chatId ?? getTelegramChatId()
@@ -66,7 +66,8 @@ export async function sendMessage(
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(
-          errorData.description || `Telegram API error: ${response.status} ${response.statusText}`
+          errorData.description ||
+            `Telegram API error: ${response.status} ${response.statusText}`,
         )
       }
 
@@ -107,7 +108,9 @@ function formatHealthCheckFailedMessage(payload: NotificationPayload): string {
 ${escapeHtml(payload.details)}`
 }
 
-function formatHealthCheckRestoredMessage(payload: NotificationPayload): string {
+function formatHealthCheckRestoredMessage(
+  payload: NotificationPayload,
+): string {
   return `<b>✅ Health Check Restored</b>
 
 <b>Project:</b> ${escapeHtml(payload.projectName)}
@@ -153,7 +156,7 @@ function formatTimestamp(date: Date): string {
 
 export async function sendNotification(
   payload: NotificationPayload,
-  options?: SendMessageOptions
+  options?: SendMessageOptions,
 ): Promise<SendMessageResult> {
   let message: string
 
@@ -176,4 +179,3 @@ export async function sendNotification(
 
   return sendMessage(message, { ...options, parseMode: 'HTML' })
 }
-

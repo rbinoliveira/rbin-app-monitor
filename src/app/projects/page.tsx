@@ -1,11 +1,12 @@
 'use client'
 
+import Link from 'next/link'
+
 import { MainLayout } from '@/components/layout/MainLayout'
+import { ProjectCard } from '@/components/projects'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { ProjectCard } from '@/components/projects'
 import { useProjects } from '@/hooks'
-import Link from 'next/link'
 
 export default function ProjectsPage() {
   const { projects, loading, error, refresh } = useProjects()
@@ -61,7 +62,9 @@ export default function ProjectsPage() {
           <Card className="border-danger-200 bg-danger-50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-danger-800">Error loading projects</p>
+                <p className="text-danger-800 text-sm font-medium">
+                  Error loading projects
+                </p>
                 <p className="mt-1 text-sm text-danger-600">{error}</p>
               </div>
               <Button variant="secondary" size="sm" onClick={refresh}>
@@ -86,7 +89,9 @@ export default function ProjectsPage() {
                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
               />
             </svg>
-            <h3 className="mt-4 text-lg font-semibold text-gray-900">No projects yet</h3>
+            <h3 className="mt-4 text-lg font-semibold text-gray-900">
+              No projects yet
+            </h3>
             <p className="mt-2 text-sm text-gray-500">
               Get started by creating your first project to monitor
             </p>
@@ -102,20 +107,32 @@ export default function ProjectsPage() {
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Card className="p-4">
-                <div className="text-sm font-medium text-gray-500">Total Projects</div>
-                <div className="mt-1 text-2xl font-semibold text-gray-900">{projects.length}</div>
+                <div className="text-sm font-medium text-gray-500">
+                  Total Projects
+                </div>
+                <div className="mt-1 text-2xl font-semibold text-gray-900">
+                  {projects.length}
+                </div>
               </Card>
               <Card className="p-4">
                 <div className="text-sm font-medium text-gray-500">Healthy</div>
-                <div className="mt-1 text-2xl font-semibold text-success-600">{healthyCount}</div>
+                <div className="mt-1 text-2xl font-semibold text-success-600">
+                  {healthyCount}
+                </div>
               </Card>
               <Card className="p-4">
-                <div className="text-sm font-medium text-gray-500">Unhealthy</div>
-                <div className="mt-1 text-2xl font-semibold text-danger-600">{unhealthyCount}</div>
+                <div className="text-sm font-medium text-gray-500">
+                  Unhealthy
+                </div>
+                <div className="mt-1 text-2xl font-semibold text-danger-600">
+                  {unhealthyCount}
+                </div>
               </Card>
               <Card className="p-4">
                 <div className="text-sm font-medium text-gray-500">Unknown</div>
-                <div className="mt-1 text-2xl font-semibold text-gray-400">{unknownCount}</div>
+                <div className="mt-1 text-2xl font-semibold text-gray-400">
+                  {unknownCount}
+                </div>
               </Card>
             </div>
 
@@ -130,4 +147,3 @@ export default function ProjectsPage() {
     </MainLayout>
   )
 }
-

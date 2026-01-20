@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 import { checkWordPress } from '@/services'
 import type { ApiResponse } from '@/types'
 
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
           success: false,
           error: 'URL parameter is required',
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
             success: false,
             error: 'Timeout must be a positive number',
           },
-          { status: 400 }
+          { status: 400 },
         )
       }
       options.timeout = timeout
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
         success: true,
         data: result,
       },
-      { status: 200 }
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json<ApiResponse>(
@@ -52,8 +53,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
-

@@ -13,12 +13,16 @@ export default function HomePage() {
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div className="card">
-            <div className="text-sm font-medium text-gray-500">Total Projects</div>
+            <div className="text-sm font-medium text-gray-500">
+              Total Projects
+            </div>
             <div className="mt-1 text-3xl font-semibold text-gray-900">0</div>
           </div>
           <div className="card">
             <div className="text-sm font-medium text-gray-500">Healthy</div>
-            <div className="mt-1 text-3xl font-semibold text-success-600">0</div>
+            <div className="mt-1 text-3xl font-semibold text-success-600">
+              0
+            </div>
           </div>
           <div className="card">
             <div className="text-sm font-medium text-gray-500">Unhealthy</div>
@@ -31,7 +35,9 @@ export default function HomePage() {
         </div>
 
         <div className="card">
-          <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Recent Activity
+          </h2>
           <p className="mt-4 text-sm text-gray-500">
             No activity yet. Add a project to start monitoring.
           </p>

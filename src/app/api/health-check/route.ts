@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 import type { ApiResponse } from '@/types'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     return NextResponse.json<ApiResponse>({
       success: true,
@@ -13,12 +14,12 @@ export async function GET(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     return NextResponse.json<ApiResponse>({
       success: true,
@@ -30,8 +31,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
-

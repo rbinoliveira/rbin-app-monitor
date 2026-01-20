@@ -1,6 +1,7 @@
 'use client'
 
 import { Fragment, type ReactNode } from 'react'
+
 import { cn } from '@/lib/utils'
 
 export interface ModalProps {
@@ -24,7 +25,7 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
         <div
           className={cn(
             'relative max-h-[90vh] w-full max-w-lg overflow-auto rounded-xl bg-white p-6 shadow-xl',
-            className
+            className,
           )}
           role="dialog"
           aria-modal="true"
@@ -36,7 +37,11 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
   )
 }
 
-export function ModalHeader({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function ModalHeader({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn('mb-4', className)} {...props}>
       {children}
@@ -44,15 +49,26 @@ export function ModalHeader({ className, children, ...props }: React.HTMLAttribu
   )
 }
 
-export function ModalTitle({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+export function ModalTitle({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h2 className={cn('text-lg font-semibold text-gray-900', className)} {...props}>
+    <h2
+      className={cn('text-lg font-semibold text-gray-900', className)}
+      {...props}
+    >
       {children}
     </h2>
   )
 }
 
-export function ModalDescription({ className, children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
+export function ModalDescription({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p className={cn('mt-1 text-sm text-gray-500', className)} {...props}>
       {children}
@@ -60,7 +76,11 @@ export function ModalDescription({ className, children, ...props }: React.HTMLAt
   )
 }
 
-export function ModalContent({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function ModalContent({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn('', className)} {...props}>
       {children}
@@ -68,7 +88,11 @@ export function ModalContent({ className, children, ...props }: React.HTMLAttrib
   )
 }
 
-export function ModalFooter({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function ModalFooter({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn('mt-6 flex justify-end gap-3', className)} {...props}>
       {children}

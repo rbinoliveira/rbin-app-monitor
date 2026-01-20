@@ -1,9 +1,11 @@
 'use client'
 
 import { type ReactNode } from 'react'
+
 import { ToastProvider } from '@/components/ui'
-import { Sidebar } from './Sidebar'
+
 import { Header } from './Header'
+import { Sidebar } from './Sidebar'
 
 interface MainLayoutProps {
   children: ReactNode

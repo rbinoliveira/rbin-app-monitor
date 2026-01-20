@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 import { checkWebPage } from '@/services'
 import type { ApiResponse, HealthCheckResponse } from '@/types'
 
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
           success: false,
           error: 'URL parameter is required',
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
             success: false,
             error: 'Timeout must be a positive number',
           },
-          { status: 400 }
+          { status: 400 },
         )
       }
       options.timeout = timeout
@@ -41,13 +42,17 @@ export async function GET(request: NextRequest) {
 
     if (expectedStatusParam) {
       const expectedStatus = parseInt(expectedStatusParam, 10)
-      if (isNaN(expectedStatus) || expectedStatus < 100 || expectedStatus >= 600) {
+      if (
+        isNaN(expectedStatus) ||
+        expectedStatus < 100 ||
+        expectedStatus >= 600
+      ) {
         return NextResponse.json<ApiResponse>(
           {
             success: false,
             error: 'Expected status must be a valid HTTP status code (100-599)',
           },
-          { status: 400 }
+          { status: 400 },
         )
       }
       options.expectedStatus = expectedStatus
@@ -60,7 +65,7 @@ export async function GET(request: NextRequest) {
         success: true,
         data: result,
       },
-      { status: 200 }
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json<ApiResponse>(
@@ -68,8 +73,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
-

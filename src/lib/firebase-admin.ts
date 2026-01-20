@@ -1,5 +1,5 @@
-import { initializeApp, getApps, cert, type App } from 'firebase-admin/app'
-import { getFirestore, type Firestore } from 'firebase-admin/firestore'
+import { type App, cert, getApps, initializeApp } from 'firebase-admin/app'
+import { type Firestore, getFirestore } from 'firebase-admin/firestore'
 
 function getFirebaseAdmin(): App {
   if (getApps().length > 0) {
@@ -32,7 +32,7 @@ function getFirebaseAdmin(): App {
   }
 
   throw new Error(
-    'Firebase Admin credentials not found. Set FIREBASE_SERVICE_ACCOUNT_KEY or individual FIREBASE_* environment variables.'
+    'Firebase Admin credentials not found. Set FIREBASE_SERVICE_ACCOUNT_KEY or individual FIREBASE_* environment variables.',
   )
 }
 

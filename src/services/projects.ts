@@ -1,12 +1,13 @@
 import { Timestamp } from 'firebase-admin/firestore'
+
 import { adminDb } from '@/lib/firebase-admin'
 import type {
+  COLLECTIONS,
+  CreateProjectInput,
   Project,
   ProjectDoc,
-  CreateProjectInput,
-  UpdateProjectInput,
   ProjectStatus,
-  COLLECTIONS,
+  UpdateProjectInput,
 } from '@/types'
 
 const PROJECTS_COLLECTION = COLLECTIONS.PROJECTS
@@ -18,7 +19,9 @@ function projectToFirestore(project: Project): ProjectDoc {
     monitoringTypes: project.monitoringTypes,
     status: project.status,
     isActive: project.isActive,
-    lastCheckAt: project.lastCheckAt ? Timestamp.fromDate(project.lastCheckAt) : null,
+    lastCheckAt: project.lastCheckAt
+      ? Timestamp.fromDate(project.lastCheckAt)
+      : null,
     createdAt: Timestamp.fromDate(project.createdAt),
     updatedAt: Timestamp.fromDate(project.updatedAt),
   }
@@ -38,7 +41,9 @@ function projectFromFirestore(docId: string, data: ProjectDoc): Project {
   }
 }
 
-export async function createProject(input: CreateProjectInput): Promise<Project> {
+export async function createProject(
+  input: CreateProjectInput,
+): Promise<Project> {
   if (!input.name || input.name.trim().length < 3) {
     throw new Error('Project name must be at least 3 characters long')
   }
@@ -48,7 +53,10 @@ export async function createProject(input: CreateProjectInput): Promise<Project>
   }
 
   try {
-    new URL(input.baseUrl.trim())
+    const url = new URL(input.baseUrl.trim())
+    if (!url) {
+      throw new Error('Base URL must be a valid URL')
+    }
   } catch {
     throw new Error('Base URL must be a valid URL')
   }
@@ -58,7 +66,9 @@ export async function createProject(input: CreateProjectInput): Promise<Project>
   }
 
   const validMonitoringTypes = ['web', 'rest', 'wordpress', 'cypress']
-  const invalidTypes = input.monitoringTypes.filter((type) => !validMonitoringTypes.includes(type))
+  const invalidTypes = input.monitoringTypes.filter(
+    (type) => !validMonitoringTypes.includes(type),
+  )
   if (invalidTypes.length > 0) {
     throw new Error(`Invalid monitoring types: ${invalidTypes.join(', ')}`)
   }
@@ -85,7 +95,9 @@ export async function createProject(input: CreateProjectInput): Promise<Project>
   }
 }
 
-export async function getProjectById(projectId: string): Promise<Project | null> {
+export async function getProjectById(
+  projectId: string,
+): Promise<Project | null> {
   const docRef = adminDb.collection(PROJECTS_COLLECTION).doc(projectId)
   const docSnap = await docRef.get()
 
@@ -120,7 +132,7 @@ export async function getActiveProjects(): Promise<Project[]> {
 
 export async function updateProject(
   projectId: string,
-  input: UpdateProjectInput
+  input: UpdateProjectInput,
 ): Promise<Project> {
   const project = await getProjectById(projectId)
 
@@ -141,7 +153,10 @@ export async function updateProject(
 
   if (input.baseUrl !== undefined) {
     try {
-      new URL(input.baseUrl.trim())
+      const url = new URL(input.baseUrl.trim())
+      if (!url) {
+        throw new Error('Base URL must be a valid URL')
+      }
     } catch {
       throw new Error('Base URL must be a valid URL')
     }
@@ -154,7 +169,7 @@ export async function updateProject(
     }
     const validMonitoringTypes = ['web', 'rest', 'wordpress', 'cypress']
     const invalidTypes = input.monitoringTypes.filter(
-      (type) => !validMonitoringTypes.includes(type)
+      (type) => !validMonitoringTypes.includes(type),
     )
     if (invalidTypes.length > 0) {
       throw new Error(`Invalid monitoring types: ${invalidTypes.join(', ')}`)
@@ -176,9 +191,13 @@ export async function updateProject(
   if (updates.baseUrl !== undefined) updateData.baseUrl = updatedProject.baseUrl
   if (updates.monitoringTypes !== undefined)
     updateData.monitoringTypes = updatedProject.monitoringTypes
-  if (updates.isActive !== undefined) updateData.isActive = updatedProject.isActive
+  if (updates.isActive !== undefined)
+    updateData.isActive = updatedProject.isActive
 
-  await adminDb.collection(PROJECTS_COLLECTION).doc(projectId).update(updateData)
+  await adminDb
+    .collection(PROJECTS_COLLECTION)
+    .doc(projectId)
+    .update(updateData)
 
   return updatedProject
 }
@@ -196,7 +215,7 @@ export async function deleteProject(projectId: string): Promise<void> {
 export async function updateProjectStatus(
   projectId: string,
   status: ProjectStatus,
-  lastCheckAt?: Date
+  lastCheckAt?: Date,
 ): Promise<void> {
   const project = await getProjectById(projectId)
   if (!project) {
@@ -212,6 +231,8 @@ export async function updateProjectStatus(
     updateData.lastCheckAt = Timestamp.fromDate(lastCheckAt)
   }
 
-  await adminDb.collection(PROJECTS_COLLECTION).doc(projectId).update(updateData)
+  await adminDb
+    .collection(PROJECTS_COLLECTION)
+    .doc(projectId)
+    .update(updateData)
 }
-

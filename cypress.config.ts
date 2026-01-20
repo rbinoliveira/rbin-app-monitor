@@ -3,7 +3,7 @@ import { defineConfig } from 'cypress'
 export default defineConfig({
   e2e: {
     baseUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-    setupNodeEvents(on, config) {
+    setupNodeEvents(_on, _config) {
       // implement node event listeners here
     },
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
@@ -24,4 +24,3 @@ export default defineConfig({
     },
   },
 })
-

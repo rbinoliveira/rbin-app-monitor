@@ -1,10 +1,18 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import { type FormEvent, useState } from 'react'
+
 import { MainLayout } from '@/components/layout/MainLayout'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { useCreateProject } from '@/hooks'
 import type { MonitoringType } from '@/types'
@@ -44,7 +52,8 @@ export default function NewProjectPage() {
           newErrors.baseUrl = 'URL must use HTTP or HTTPS protocol'
         }
       } catch {
-        newErrors.baseUrl = 'Please enter a valid URL (e.g., https://example.com)'
+        newErrors.baseUrl =
+          'Please enter a valid URL (e.g., https://example.com)'
       }
     }
 
@@ -93,7 +102,12 @@ export default function NewProjectPage() {
     }
   }
 
-  const monitoringTypes: MonitoringType[] = ['web', 'rest', 'wordpress', 'cypress']
+  const monitoringTypes: MonitoringType[] = [
+    'web',
+    'rest',
+    'wordpress',
+    'cypress',
+  ]
 
   return (
     <MainLayout>
@@ -110,7 +124,8 @@ export default function NewProjectPage() {
             <CardHeader>
               <CardTitle>Project Information</CardTitle>
               <CardDescription>
-                Enter the basic information about the project you want to monitor
+                Enter the basic information about the project you want to
+                monitor
               </CardDescription>
             </CardHeader>
 
@@ -168,13 +183,15 @@ export default function NewProjectPage() {
                   ))}
                 </div>
                 {errors.monitoringTypes && (
-                  <p className="mt-1.5 text-sm text-danger-600">{errors.monitoringTypes}</p>
+                  <p className="mt-1.5 text-sm text-danger-600">
+                    {errors.monitoringTypes}
+                  </p>
                 )}
               </div>
 
               {hookError && (
-                <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
-                  <p className="text-sm font-medium text-danger-800">Error</p>
+                <div className="border-danger-200 rounded-lg border bg-danger-50 p-4">
+                  <p className="text-danger-800 text-sm font-medium">Error</p>
                   <p className="mt-1 text-sm text-danger-600">{hookError}</p>
                 </div>
               )}
@@ -199,4 +216,3 @@ export default function NewProjectPage() {
     </MainLayout>
   )
 }
-

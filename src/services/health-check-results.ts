@@ -1,16 +1,19 @@
 import { Timestamp } from 'firebase-admin/firestore'
+
 import { adminDb } from '@/lib/firebase-admin'
 import type {
+  COLLECTIONS,
+  HealthCheckResponse,
   HealthCheckResult,
   HealthCheckResultDoc,
   MonitoringType,
-  COLLECTIONS,
-  HealthCheckResponse,
 } from '@/types'
 
 const HEALTH_CHECK_RESULTS_COLLECTION = COLLECTIONS.HEALTH_CHECK_RESULTS
 
-function healthCheckResultToFirestore(result: HealthCheckResult): HealthCheckResultDoc {
+function healthCheckResultToFirestore(
+  result: HealthCheckResult,
+): HealthCheckResultDoc {
   return {
     projectId: result.projectId,
     projectName: result.projectName,
@@ -33,7 +36,7 @@ export interface SaveHealthCheckResultInput {
 }
 
 export async function saveHealthCheckResult(
-  input: SaveHealthCheckResultInput
+  input: SaveHealthCheckResultInput,
 ): Promise<HealthCheckResult> {
   if (!input.projectId || typeof input.projectId !== 'string') {
     throw new Error('Project ID is required')
@@ -49,7 +52,9 @@ export async function saveHealthCheckResult(
 
   const validTypes: MonitoringType[] = ['web', 'rest', 'wordpress', 'cypress']
   if (!validTypes.includes(input.type)) {
-    throw new Error(`Invalid monitoring type. Must be one of: ${validTypes.join(', ')}`)
+    throw new Error(
+      `Invalid monitoring type. Must be one of: ${validTypes.join(', ')}`,
+    )
   }
 
   if (!input.url || typeof input.url !== 'string') {
@@ -75,11 +80,12 @@ export async function saveHealthCheckResult(
   }
 
   const docRef = adminDb.collection(HEALTH_CHECK_RESULTS_COLLECTION).doc()
-  await docRef.set(healthCheckResultToFirestore({ ...healthCheckResult, id: docRef.id }))
+  await docRef.set(
+    healthCheckResultToFirestore({ ...healthCheckResult, id: docRef.id }),
+  )
 
   return {
     ...healthCheckResult,
     id: docRef.id,
   }
 }
-

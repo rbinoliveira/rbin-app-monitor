@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 import { createProject, getAllProjects } from '@/services'
 import type { ApiResponse, CreateProjectInput } from '@/types'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const projects = await getAllProjects()
 
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
         success: true,
         data: projects,
       },
-      { status: 200 }
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json<ApiResponse>(
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
@@ -35,18 +36,18 @@ export async function POST(request: NextRequest) {
         success: true,
         data: project,
       },
-      { status: 201 }
+      { status: 201 },
     )
   } catch (error) {
-    const statusCode = error instanceof Error && error.message.includes('not found') ? 404 : 400
+    const statusCode =
+      error instanceof Error && error.message.includes('not found') ? 404 : 400
 
     return NextResponse.json<ApiResponse>(
       {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: statusCode }
+      { status: statusCode },
     )
   }
 }
-
