@@ -1,8 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 
+import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
+import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/utils'
 import type { Project, ProjectStatus } from '@/types'
 import { MONITORING_TYPE_LABELS } from '@/types'
@@ -34,6 +37,58 @@ const statusConfig: Record<
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const status = statusConfig[project.status]
+  const { addToast } = useToast()
+  const [isRunningTests, setIsRunningTests] = useState(false)
+
+  const hasCypressMonitoring = project.monitoringTypes.includes('cypress')
+
+  const handleRunTests = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    setIsRunningTests(true)
+    addToast('Running Cypress tests...', 'info')
+
+    try {
+      const response = await fetch('/api/cypress/run', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          projectId: project.id,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success && result.data) {
+        const { passed, failed, totalTests, duration } = result.data
+        const durationSeconds = Math.round(duration / 1000)
+
+        if (failed > 0) {
+          addToast(
+            `Tests failed: ${failed}/${totalTests} failed in ${durationSeconds}s`,
+            'error',
+          )
+        } else {
+          addToast(
+            `All tests passed: ${passed}/${totalTests} in ${durationSeconds}s`,
+            'success',
+          )
+        }
+      } else {
+        addToast(result.error || 'Failed to run tests', 'error')
+      }
+    } catch (error) {
+      addToast(
+        error instanceof Error ? error.message : 'Failed to run tests',
+        'error',
+      )
+    } finally {
+      setIsRunningTests(false)
+    }
+  }
 
   return (
     <Link href={`/projects/${project.id}`}>
@@ -69,6 +124,20 @@ export function ProjectCard({ project }: ProjectCardProps) {
               </span>
             ))}
           </div>
+
+          {hasCypressMonitoring && (
+            <div className="mt-4">
+              <Button
+                size="sm"
+                variant="secondary"
+                loading={isRunningTests}
+                onClick={handleRunTests}
+                disabled={!project.isActive}
+              >
+                {isRunningTests ? 'Running Tests...' : 'Run Tests'}
+              </Button>
+            </div>
+          )}
 
           <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
             <span>

@@ -166,10 +166,23 @@ This project uses:
 
 ### Vercel (Recommended)
 
+#### Automatic Deployment
+
 1. Push your code to GitHub/GitLab/Bitbucket
 2. Import project in [Vercel](https://vercel.com)
-3. Add environment variables in Vercel dashboard
-4. Deploy!
+3. Vercel will automatically detect Next.js and configure deployment
+4. Add environment variables in Vercel dashboard (see below)
+5. Deploy automatically happens on every push to main branch
+
+#### Manual Deployment
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+```
 
 ### Environment Variables in Vercel
 
@@ -177,6 +190,62 @@ Make sure to add all environment variables in Vercel's dashboard:
 - Go to Project Settings > Environment Variables
 - Add all variables from `.env.local`
 - For `FIREBASE_SERVICE_ACCOUNT_KEY`, paste the entire JSON as a single line
+- Set `CRON_SECRET` for cron job authentication
+- Set `NEXT_PUBLIC_APP_URL` to your Vercel deployment URL
+
+### Vercel Configuration
+
+The project includes `vercel.json` with cron job configuration:
+- Cypress tests run daily at 2 AM UTC
+- Health checks run every hour
+
+Make sure to set `CRON_SECRET` environment variable in Vercel for cron authentication.
+
+### Firebase Deployment
+
+#### Prerequisites
+
+1. Install Firebase CLI:
+```bash
+npm install -g firebase-tools
+```
+
+2. Login to Firebase:
+```bash
+firebase login
+```
+
+3. Initialize Firebase (if not already done):
+```bash
+firebase init
+```
+
+#### Deploy to Firebase Hosting
+
+```bash
+# Build the application
+pnpm build
+
+# Deploy to Firebase
+firebase deploy --only hosting
+```
+
+#### Automatic Deployment via GitHub Actions
+
+The project includes `.github/workflows/firebase-deploy.yml` for automatic deployment:
+- Deploys on push to `main` branch
+- Can be triggered manually via `workflow_dispatch`
+- Requires `FIREBASE_SERVICE_ACCOUNT_KEY` secret in GitHub
+
+**Setup GitHub Secrets:**
+1. Go to GitHub repository Settings > Secrets and variables > Actions
+2. Add `FIREBASE_SERVICE_ACCOUNT_KEY` with your Firebase service account JSON
+3. Add all Firebase environment variables (same as Vercel)
+
+**Note:** Firebase Hosting configuration is provided, but Next.js API routes require a Node.js server. For full functionality, consider:
+- Using Vercel for deployment (recommended - supports API routes and cron jobs)
+- Setting up Firebase Functions for API routes (more complex setup)
+- Using Firebase Hosting only for static pages (API routes won't work)
 
 ## License
 

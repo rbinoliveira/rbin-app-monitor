@@ -121,12 +121,15 @@ Service is now operational.`
 }
 
 function formatCypressFailedMessage(payload: NotificationPayload): string {
+  const detailsContainsHtml =
+    payload.details.includes('<b>') || payload.details.includes('<a href')
+
   return `<b>❌ Cypress Tests Failed</b>
 
 <b>Project:</b> ${escapeHtml(payload.projectName)}
 <b>Time:</b> ${formatTimestamp(payload.timestamp)}
 
-${escapeHtml(payload.details)}`
+${detailsContainsHtml ? payload.details : escapeHtml(payload.details)}`
 }
 
 function formatCypressPassedMessage(payload: NotificationPayload): string {

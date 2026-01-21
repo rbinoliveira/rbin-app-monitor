@@ -53,10 +53,8 @@ export async function createProject(
   }
 
   try {
-    const url = new URL(input.baseUrl.trim())
-    if (!url) {
-      throw new Error('Base URL must be a valid URL')
-    }
+    // eslint-disable-next-line no-new
+    new URL(input.baseUrl.trim())
   } catch {
     throw new Error('Base URL must be a valid URL')
   }
@@ -153,10 +151,8 @@ export async function updateProject(
 
   if (input.baseUrl !== undefined) {
     try {
-      const url = new URL(input.baseUrl.trim())
-      if (!url) {
-        throw new Error('Base URL must be a valid URL')
-      }
+      // eslint-disable-next-line no-new
+      new URL(input.baseUrl.trim())
     } catch {
       throw new Error('Base URL must be a valid URL')
     }

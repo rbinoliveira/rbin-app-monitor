@@ -1,7 +1,9 @@
 import type { HealthCheckOptions, HealthCheckResponse } from '@/types'
 
-const DEFAULT_TIMEOUT = 30000
-const DEFAULT_EXPECTED_STATUS = 200
+export const DEFAULT_HEALTH_CHECK_TIMEOUT = 30000
+export const DEFAULT_EXPECTED_STATUS = 200
+
+const DEFAULT_TIMEOUT = DEFAULT_HEALTH_CHECK_TIMEOUT
 
 export async function checkWebPage(
   url: string,
