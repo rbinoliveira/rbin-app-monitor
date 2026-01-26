@@ -1,11 +1,7 @@
-import type { QueryDocumentSnapshot } from 'firebase-admin/firestore'
+import { Timestamp } from 'firebase-admin/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { adminDb } from '@/lib/firebase-admin'
-import {
-  cypressResultConverter,
-  healthCheckResultConverter,
-} from '@/lib/firestore-converters'
 import type {
   ApiResponse,
   CypressResult,
@@ -48,7 +44,7 @@ export async function GET(request: NextRequest) {
         healthCheckQuery = healthCheckQuery.where(
           'timestamp',
           '>=',
-          adminDb.Timestamp.fromDate(start),
+          Timestamp.fromDate(start),
         )
       }
 
@@ -57,16 +53,25 @@ export async function GET(request: NextRequest) {
         healthCheckQuery = healthCheckQuery.where(
           'timestamp',
           '<=',
-          adminDb.Timestamp.fromDate(end),
+          Timestamp.fromDate(end),
         )
       }
 
       const healthSnapshot = await healthCheckQuery.limit(limit + offset).get()
       const healthDocs = healthSnapshot.docs.slice(offset).map((doc) => {
-        return healthCheckResultConverter.fromFirestore(
-          doc as QueryDocumentSnapshot<HealthCheckResultDoc>,
-          undefined,
-        )
+        const data = doc.data() as HealthCheckResultDoc
+        return {
+          id: doc.id,
+          projectId: data.projectId,
+          projectName: data.projectName,
+          type: data.type,
+          url: data.url,
+          success: data.success,
+          statusCode: data.statusCode,
+          responseTime: data.responseTime,
+          errorMessage: data.errorMessage,
+          timestamp: data.timestamp.toDate(),
+        } as HealthCheckResult
       })
       results.push(...healthDocs)
     }
@@ -77,7 +82,7 @@ export async function GET(request: NextRequest) {
         cypressQuery = cypressQuery.where(
           'timestamp',
           '>=',
-          adminDb.Timestamp.fromDate(start),
+          Timestamp.fromDate(start),
         )
       }
 
@@ -86,16 +91,27 @@ export async function GET(request: NextRequest) {
         cypressQuery = cypressQuery.where(
           'timestamp',
           '<=',
-          adminDb.Timestamp.fromDate(end),
+          Timestamp.fromDate(end),
         )
       }
 
       const cypressSnapshot = await cypressQuery.limit(limit + offset).get()
       const cypressDocs = cypressSnapshot.docs.slice(offset).map((doc) => {
-        return cypressResultConverter.fromFirestore(
-          doc as QueryDocumentSnapshot<CypressResultDoc>,
-          undefined,
-        )
+        const data = doc.data() as CypressResultDoc
+        return {
+          id: doc.id,
+          projectId: data.projectId,
+          projectName: data.projectName,
+          success: data.success,
+          totalTests: data.totalTests,
+          passed: data.passed,
+          failed: data.failed,
+          skipped: data.skipped,
+          duration: data.duration,
+          specFiles: data.specFiles,
+          output: data.output,
+          timestamp: data.timestamp.toDate(),
+        } as CypressResult
       })
       results.push(...cypressDocs)
     }

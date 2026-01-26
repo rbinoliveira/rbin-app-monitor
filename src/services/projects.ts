@@ -1,8 +1,8 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
 import { adminDb } from '@/lib/firebase-admin'
+import { COLLECTIONS } from '@/types'
 import type {
-  COLLECTIONS,
   CreateProjectInput,
   Project,
   ProjectDoc,

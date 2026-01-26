@@ -2,6 +2,7 @@
 
 import { type ReactNode } from 'react'
 
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { ToastProvider } from '@/components/ui'
 
 import { Header } from './Header'
@@ -13,14 +14,16 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   return (
-    <ToastProvider>
-      <div className="min-h-screen bg-gray-50">
-        <Sidebar />
-        <div className="lg:pl-64">
-          <Header />
-          <main className="p-6">{children}</main>
+    <ProtectedRoute>
+      <ToastProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Sidebar />
+          <div className="lg:pl-64">
+            <Header />
+            <main className="p-6">{children}</main>
+          </div>
         </div>
-      </div>
-    </ToastProvider>
+      </ToastProvider>
+    </ProtectedRoute>
   )
 }

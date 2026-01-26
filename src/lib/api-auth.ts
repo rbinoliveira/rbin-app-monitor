@@ -121,7 +121,7 @@ export function requireRateLimit(
   request: NextRequest,
   options: RateLimitOptions = {},
 ): NextResponse | null {
-  const { allowed } = checkRateLimit(request, options)
+  const { allowed, resetAt } = checkRateLimit(request, options)
 
   if (!allowed) {
     return NextResponse.json(

@@ -9,6 +9,7 @@ import {
 import type {
   CypressResult,
   CypressResultDoc,
+  FirestoreTimestamp,
   HealthCheckResult,
   HealthCheckResultDoc,
   Project,
@@ -16,7 +17,9 @@ import type {
 } from '@/types'
 
 // Helper to convert Firestore Timestamp to Date
-function timestampToDate(timestamp: Timestamp | null): Date | null {
+function timestampToDate(
+  timestamp: FirestoreTimestamp | null,
+): Date | null {
   return timestamp ? timestamp.toDate() : null
 }
 

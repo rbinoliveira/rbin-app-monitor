@@ -6,7 +6,7 @@ import type { CypressResult, HealthCheckResult } from '@/types'
 
 export type HistoryItem = HealthCheckResult | CypressResult
 
-interface UseHistoryFilters {
+export interface UseHistoryFilters {
   type?: 'health_check' | 'cypress' | ''
   projectId?: string
   startDate?: string

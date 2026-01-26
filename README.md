@@ -72,6 +72,12 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 4. Scroll to "Your apps" section
 5. Copy the config values from your web app
 
+**Enable Google Sign-In:**
+1. Go to Firebase Console > Authentication > Sign-in method
+2. Click on "Google" provider and enable it
+3. Set your project support email
+4. For production, add your domain to the "Authorized domains" list
+
 ### Firebase Admin Configuration (Server-side)
 
 Choose one of the following options:

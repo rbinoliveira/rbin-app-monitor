@@ -1,5 +1,3 @@
-import type { Timestamp } from 'firebase/firestore'
-
 // ============================================
 // Enums and Constants
 // ============================================
@@ -7,6 +5,12 @@ import type { Timestamp } from 'firebase/firestore'
 export type ProjectStatus = 'healthy' | 'unhealthy' | 'unknown'
 
 export type MonitoringType = 'web' | 'rest' | 'wordpress' | 'cypress'
+
+// Firestore Timestamp type (compatible with both client and admin SDK)
+export type FirestoreTimestamp = {
+  toDate(): Date
+  toMillis(): number
+}
 
 export const MONITORING_TYPE_LABELS: Record<MonitoringType, string> = {
   web: 'Web Page',
@@ -48,9 +52,9 @@ export interface ProjectDoc {
   monitoringTypes: MonitoringType[]
   status: ProjectStatus
   isActive: boolean
-  lastCheckAt: Timestamp | null
-  createdAt: Timestamp
-  updatedAt: Timestamp
+  lastCheckAt: FirestoreTimestamp | null
+  createdAt: FirestoreTimestamp
+  updatedAt: FirestoreTimestamp
 }
 
 // Create/Update DTOs
@@ -94,7 +98,7 @@ export interface HealthCheckResultDoc {
   statusCode?: number
   responseTime: number
   errorMessage?: string
-  timestamp: Timestamp
+  timestamp: FirestoreTimestamp
 }
 
 // Health check request options
@@ -145,7 +149,7 @@ export interface CypressResultDoc {
   duration: number
   specFiles: string[]
   output: string
-  timestamp: Timestamp
+  timestamp: FirestoreTimestamp
 }
 
 // ============================================
