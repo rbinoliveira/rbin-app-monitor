@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 
-import { HistoryTable } from '@/components/history'
-import { MainLayout } from '@/components/layout/MainLayout'
-import { useProjects } from '@/hooks'
-import type { UseHistoryFilters } from '@/hooks/useHistory'
-import { useHistory } from '@/hooks/useHistory'
+import { HistoryTable } from '@/features/monitoring/components'
+import type { UseHistoryFilters } from '@/features/monitoring/hooks/useHistory'
+import { useHistory } from '@/features/monitoring/hooks/useHistory'
+import { useProjects } from '@/features/projects'
+import { MainLayout } from '@/shared/components/layout/MainLayout'
 
 export default function HistoryPage() {
   const { projects } = useProjects()

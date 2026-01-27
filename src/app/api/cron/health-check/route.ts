@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { requireApiAuth, requireRateLimit } from '@/lib/api-auth'
+import { requireApiAuth, requireRateLimit } from '@/features/auth/lib/api-auth'
 import {
   checkRestEndpoint,
   checkWebPage,
   checkWordPress,
-} from '@/services/health-check'
-import { processHealthCheckResult } from '@/services/health-check-notifications'
-import { getActiveProjects } from '@/services/projects'
-import type { ApiResponse } from '@/types'
+} from '@/features/monitoring/services/health-check'
+import { processHealthCheckResult } from '@/features/monitoring/services/health-check-notifications'
+import { getActiveProjects } from '@/features/projects/services/projects'
+import type { ApiResponse } from '@/shared/types'
 
 export const maxDuration = 300
 

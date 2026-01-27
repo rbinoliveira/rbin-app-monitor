@@ -1,79 +1,47 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 
-import { checkWebPage } from '@/services'
-import type { ApiResponse, HealthCheckResponse } from '@/types'
+import { checkWebPage } from '@/features/monitoring/services/health-check'
+import { withErrorHandling } from '@/shared/lib/api-response'
+import { inRange, isValidUrl, required } from '@/shared/lib/validation'
+import type { HealthCheckResponse } from '@/shared/types'
 
 export async function GET(request: NextRequest) {
-  try {
-    const searchParams = request.nextUrl.searchParams
-    const url = searchParams.get('url')
+  return withErrorHandling<HealthCheckResponse>(
+    async () => {
+      const searchParams = request.nextUrl.searchParams
 
-    if (!url) {
-      return NextResponse.json<ApiResponse>(
-        {
-          success: false,
-          error: 'URL parameter is required',
-        },
-        { status: 400 },
-      )
-    }
+      const url = isValidUrl(required(searchParams.get('url'), 'url'), 'url')
 
-    const timeoutParam = searchParams.get('timeout')
-    const expectedStatusParam = searchParams.get('expectedStatus')
+      const options: {
+        timeout?: number
+        expectedStatus?: number
+      } = {}
 
-    const options: {
-      timeout?: number
-      expectedStatus?: number
-    } = {}
+      const timeoutParam = searchParams.get('timeout')
+      if (timeoutParam) {
+        const timeout = parseInt(timeoutParam, 10)
+        if (isNaN(timeout)) {
+          throw new Error('Timeout must be a number')
+        }
+        options.timeout = inRange(timeout, 1, 300000, 'timeout')
+      }
 
-    if (timeoutParam) {
-      const timeout = parseInt(timeoutParam, 10)
-      if (isNaN(timeout) || timeout <= 0) {
-        return NextResponse.json<ApiResponse>(
-          {
-            success: false,
-            error: 'Timeout must be a positive number',
-          },
-          { status: 400 },
+      const expectedStatusParam = searchParams.get('expectedStatus')
+      if (expectedStatusParam) {
+        const expectedStatus = parseInt(expectedStatusParam, 10)
+        if (isNaN(expectedStatus)) {
+          throw new Error('Expected status must be a number')
+        }
+        options.expectedStatus = inRange(
+          expectedStatus,
+          100,
+          599,
+          'expectedStatus',
         )
       }
-      options.timeout = timeout
-    }
 
-    if (expectedStatusParam) {
-      const expectedStatus = parseInt(expectedStatusParam, 10)
-      if (
-        isNaN(expectedStatus) ||
-        expectedStatus < 100 ||
-        expectedStatus >= 600
-      ) {
-        return NextResponse.json<ApiResponse>(
-          {
-            success: false,
-            error: 'Expected status must be a valid HTTP status code (100-599)',
-          },
-          { status: 400 },
-        )
-      }
-      options.expectedStatus = expectedStatus
-    }
-
-    const result: HealthCheckResponse = await checkWebPage(url, options)
-
-    return NextResponse.json<ApiResponse<HealthCheckResponse>>(
-      {
-        success: true,
-        data: result,
-      },
-      { status: 200 },
-    )
-  } catch (error) {
-    return NextResponse.json<ApiResponse>(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 },
-    )
-  }
+      return await checkWebPage(url, options)
+    },
+    { errorStatus: 400 },
+  )
 }

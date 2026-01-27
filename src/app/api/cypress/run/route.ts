@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { acquireLock, releaseLock } from '@/services/cypress-lock'
-import { saveCypressResult } from '@/services/cypress-results'
-import { runCypressTests } from '@/services/cypress-runner'
-import { getProjectById } from '@/services/projects'
-import type { ApiResponse } from '@/types'
+import {
+  acquireLock,
+  releaseLock,
+} from '@/features/monitoring/services/cypress-lock'
+import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
+import { runCypressTests } from '@/features/monitoring/services/cypress-runner'
+import { getProjectById } from '@/features/projects/services/projects'
+import type { ApiResponse } from '@/shared/types'
 
 export const maxDuration = 300
 

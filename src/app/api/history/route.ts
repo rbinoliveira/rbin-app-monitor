@@ -1,15 +1,15 @@
 import { Timestamp } from 'firebase-admin/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { adminDb } from '@/lib/firebase-admin'
+import { COLLECTION_NAMES } from '@/shared/lib/constants'
+import { getAdminDb } from '@/shared/lib/firebase-admin'
 import type {
   ApiResponse,
   CypressResult,
   CypressResultDoc,
   HealthCheckResult,
   HealthCheckResultDoc,
-} from '@/types'
-import { COLLECTIONS } from '@/types'
+} from '@/shared/types'
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,12 +25,12 @@ export async function GET(request: NextRequest) {
     const limit = pageSize
     const offset = (page - 1) * pageSize
 
-    let healthCheckQuery = adminDb
-      .collection(COLLECTIONS.HEALTH_CHECK_RESULTS)
+    let healthCheckQuery = getAdminDb()
+      .collection(COLLECTION_NAMES.HEALTH_CHECK_RESULTS)
       .orderBy('timestamp', 'desc')
 
-    let cypressQuery = adminDb
-      .collection(COLLECTIONS.CYPRESS_RESULTS)
+    let cypressQuery = getAdminDb()
+      .collection(COLLECTION_NAMES.CYPRESS_RESULTS)
       .orderBy('timestamp', 'desc')
 
     if (projectId) {

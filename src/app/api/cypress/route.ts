@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import type { ApiResponse } from '@/types'
+import type { ApiResponse } from '@/shared/types'
 
 export async function POST(_request: NextRequest) {
   try {

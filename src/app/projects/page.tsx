@@ -2,11 +2,11 @@
 
 import Link from 'next/link'
 
-import { MainLayout } from '@/components/layout/MainLayout'
-import { ProjectCard } from '@/components/projects'
-import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
-import { useProjects } from '@/hooks'
+import { useProjects } from '@/features/projects'
+import { ProjectCard } from '@/features/projects/components'
+import { MainLayout } from '@/shared/components/layout/MainLayout'
+import { Button } from '@/shared/components/ui/Button'
+import { Card } from '@/shared/components/ui/Card'
 
 export default function ProjectsPage() {
   const { projects, loading, error, refresh } = useProjects()

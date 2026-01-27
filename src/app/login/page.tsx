@@ -3,9 +3,14 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-import { Button } from '@/components/ui/Button'
-import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/Card'
-import { useAuth } from '@/hooks'
+import { useAuth } from '@/features/auth'
+import { Button } from '@/shared/components/ui/Button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from '@/shared/components/ui/Card'
 
 export default function LoginPage() {
   const { user, loading, signInWithGoogle } = useAuth()
@@ -38,7 +43,7 @@ export default function LoginPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent mx-auto mb-4"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent mx-auto mb-4" />
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>

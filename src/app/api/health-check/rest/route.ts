@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { checkRestEndpoint } from '@/services'
+import { checkRestEndpoint } from '@/features/monitoring/services/health-check'
 import type {
   ApiResponse,
   HealthCheckOptions,
   HealthCheckResponse,
-} from '@/types'
+} from '@/shared/types'
 
 export async function POST(request: NextRequest) {
   try {

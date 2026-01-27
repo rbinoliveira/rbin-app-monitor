@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { requireApiAuth, requireRateLimit } from '@/lib/api-auth'
-import { acquireLock, releaseLock } from '@/services/cypress-lock'
-import { saveCypressResult } from '@/services/cypress-results'
-import { runCypressTests } from '@/services/cypress-runner'
-import { getActiveProjects } from '@/services/projects'
-import { sendNotification } from '@/services/telegram'
-import type { ApiResponse } from '@/types'
+import { requireApiAuth, requireRateLimit } from '@/features/auth/lib/api-auth'
+import {
+  acquireLock,
+  releaseLock,
+} from '@/features/monitoring/services/cypress-lock'
+import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
+import { runCypressTests } from '@/features/monitoring/services/cypress-runner'
+import { sendNotification } from '@/features/monitoring/services/telegram'
+import { getActiveProjects } from '@/features/projects/services/projects'
+import type { ApiResponse } from '@/shared/types'
 
 export const maxDuration = 300
 

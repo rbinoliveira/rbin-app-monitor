@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { checkWordPress } from '@/services'
-import type { ApiResponse } from '@/types'
+import { checkWordPress } from '@/features/monitoring/services/health-check'
+import type { ApiResponse } from '@/shared/types'
 
 export async function GET(request: NextRequest) {
   try {

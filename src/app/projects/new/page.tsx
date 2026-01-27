@@ -3,8 +3,9 @@
 import { useRouter } from 'next/navigation'
 import { type FormEvent, useState } from 'react'
 
-import { MainLayout } from '@/components/layout/MainLayout'
-import { Button } from '@/components/ui/Button'
+import { useCreateProject } from '@/features/projects'
+import { MainLayout } from '@/shared/components/layout/MainLayout'
+import { Button } from '@/shared/components/ui/Button'
 import {
   Card,
   CardContent,
@@ -12,11 +13,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/Card'
-import { Input } from '@/components/ui/Input'
-import { useCreateProject } from '@/hooks'
-import type { MonitoringType } from '@/types'
-import { MONITORING_TYPE_LABELS } from '@/types'
+} from '@/shared/components/ui/Card'
+import { Input } from '@/shared/components/ui/Input'
+import type { MonitoringType } from '@/shared/types'
+import { MONITORING_TYPE_LABELS } from '@/shared/types'
 
 interface FormErrors {
   name?: string
