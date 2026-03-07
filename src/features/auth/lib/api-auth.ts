@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
+import { appCookies } from '@/shared/constants/app-cookies.constant'
+
 export interface AuthOptions {
   requireSecret?: boolean
   secretKey?: string
@@ -10,7 +12,41 @@ export interface RateLimitOptions {
   windowMs?: number
 }
 
+export interface AuthenticatedUser {
+  id: string
+  email: string
+  name?: string | null
+  photo?: string | null
+}
+
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>()
+
+export function getAuthenticatedUser(
+  request: NextRequest,
+): AuthenticatedUser | null {
+  const cookieValue = request.cookies.get(appCookies.USER)?.value
+
+  if (!cookieValue) {
+    return null
+  }
+
+  try {
+    const parsed = JSON.parse(cookieValue) as Partial<AuthenticatedUser>
+
+    if (!parsed.id || !parsed.email) {
+      return null
+    }
+
+    return {
+      id: parsed.id,
+      email: parsed.email,
+      name: parsed.name ?? null,
+      photo: parsed.photo ?? null,
+    }
+  } catch {
+    return null
+  }
+}
 
 export function verifyApiAuth(
   request: NextRequest,
@@ -70,6 +106,22 @@ export function requireApiAuth(
   }
 
   return null
+}
+
+export function requireFirebaseAuth(request: NextRequest): NextResponse | null {
+  const user = getAuthenticatedUser(request)
+
+  if (user) {
+    return null
+  }
+
+  return NextResponse.json(
+    {
+      success: false,
+      error: 'Firebase authentication is required',
+    },
+    { status: 401 },
+  )
 }
 
 export function checkRateLimit(

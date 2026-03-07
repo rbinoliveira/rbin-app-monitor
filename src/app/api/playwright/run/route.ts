@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
 import {
   acquireLock,
   releaseLock,
@@ -17,6 +18,9 @@ interface PlaywrightRunRequest {
 }
 
 export async function POST(request: NextRequest) {
+  const authResponse = requireFirebaseAuth(request)
+  if (authResponse) return authResponse
+
   const lockId = `playwright-run-${Date.now()}`
   const lockAcquired = await acquireLock(lockId)
 
@@ -31,7 +35,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = (await request.json().catch(() => ({}))) as PlaywrightRunRequest
+    const body = (await request
+      .json()
+      .catch(() => ({}))) as PlaywrightRunRequest
     const projectId = body.projectId
     const timeout = body.timeout || 120000
 
@@ -57,7 +63,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await callRemotePlaywrightRun(project.playwrightRunUrl, { timeout })
+    const result = await callRemotePlaywrightRun(project.playwrightRunUrl, {
+      timeout,
+    })
 
     await savePlaywrightResult({
       projectId: project.id,

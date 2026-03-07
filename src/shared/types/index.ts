@@ -6,6 +6,8 @@ export type ProjectStatus = 'healthy' | 'unhealthy' | 'unknown'
 
 export type HealthCheckType = 'front' | 'back'
 
+export type TestRunner = 'cypress' | 'playwright'
+
 // Firestore Timestamp type (compatible with both client and admin SDK)
 export type FirestoreTimestamp = {
   toDate(): Date
@@ -120,6 +122,7 @@ export interface HealthCheckResponse {
 
 export interface CypressResult {
   id: string
+  runner: 'cypress'
   projectId: string
   projectName: string
   success: boolean
@@ -135,6 +138,7 @@ export interface CypressResult {
 
 // Firestore document type
 export interface CypressResultDoc {
+  runner: 'cypress'
   projectId: string
   projectName: string
   success: boolean
@@ -154,6 +158,7 @@ export interface CypressResultDoc {
 
 export interface PlaywrightResult {
   id: string
+  runner: 'playwright'
   projectId: string
   projectName: string
   success: boolean
@@ -164,11 +169,17 @@ export interface PlaywrightResult {
   duration: number
   specFiles: string[]
   output: string
+  error?: string
+  resourceUsage?: {
+    maxMemoryMB: number
+    avgCpu: number
+  }
   timestamp: Date
 }
 
 // Firestore document type
 export interface PlaywrightResultDoc {
+  runner: 'playwright'
   projectId: string
   projectName: string
   success: boolean
@@ -179,6 +190,11 @@ export interface PlaywrightResultDoc {
   duration: number
   specFiles: string[]
   output: string
+  error?: string
+  resourceUsage?: {
+    maxMemoryMB: number
+    avgCpu: number
+  }
   timestamp: FirestoreTimestamp
 }
 

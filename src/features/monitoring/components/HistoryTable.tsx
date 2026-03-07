@@ -9,7 +9,12 @@ import type {
 import { Button } from '@/shared/components/ui/Button'
 import { Card } from '@/shared/components/ui/Card'
 import { Input } from '@/shared/components/ui/Input'
-import type { CypressResult, HealthCheckResult, Project } from '@/shared/types'
+import type {
+  CypressResult,
+  HealthCheckResult,
+  PlaywrightResult,
+  Project,
+} from '@/shared/types'
 import { HEALTH_CHECK_TYPE_LABELS } from '@/shared/types'
 
 function getHealthCheckTypeLabel(type: string): string {
@@ -35,7 +40,11 @@ function isHealthCheckResult(item: HistoryItem): item is HealthCheckResult {
 }
 
 function isCypressResult(item: HistoryItem): item is CypressResult {
-  return 'totalTests' in item && 'passed' in item
+  return 'runner' in item && item.runner === 'cypress'
+}
+
+function isPlaywrightResult(item: HistoryItem): item is PlaywrightResult {
+  return 'runner' in item && item.runner === 'playwright'
 }
 
 export function HistoryTable({
@@ -72,6 +81,13 @@ export function HistoryTable({
             displayName: `Cypress Tests - ${item.projectName}`,
           }
         }
+        if (isPlaywrightResult(item)) {
+          return {
+            ...item,
+            itemType: 'playwright' as const,
+            displayName: `Playwright Tests - ${item.projectName}`,
+          }
+        }
         return null
       })
       .filter(Boolean)
@@ -93,6 +109,7 @@ export function HistoryTable({
               <option value="">All</option>
               <option value="health_check">Health Checks</option>
               <option value="cypress">Cypress Tests</option>
+              <option value="playwright">Playwright Tests</option>
             </select>
           </div>
 
@@ -208,9 +225,7 @@ export function HistoryTable({
                 formattedItems.map((item) => {
                   if (!item) return null
 
-                  const timestamp = isHealthCheckResult(item)
-                    ? item.timestamp
-                    : (item as CypressResult).timestamp
+                  const timestamp = item.timestamp
 
                   if (isHealthCheckResult(item)) {
                     return (
@@ -252,42 +267,48 @@ export function HistoryTable({
                     )
                   }
 
-                  if (isCypressResult(item)) {
-                    const cypressItem = item as CypressResult
+                  if (isCypressResult(item) || isPlaywrightResult(item)) {
+                    const testItem = item as CypressResult | PlaywrightResult
                     return (
-                      <tr key={cypressItem.id}>
+                      <tr key={testItem.id}>
                         <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                          Cypress Tests
+                          {isPlaywrightResult(item)
+                            ? 'Playwright Tests'
+                            : 'Cypress Tests'}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                          {cypressItem.projectName}
+                          {testItem.projectName}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm">
                           <span
                             className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                              cypressItem.success
+                              testItem.success
                                 ? 'bg-success-100 text-success-800'
                                 : 'bg-danger-100 text-danger-800'
                             }`}
                           >
-                            {cypressItem.success ? 'Passed' : 'Failed'}
+                            {testItem.success ? 'Passed' : 'Failed'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">
                           <div>
                             <span>
-                              {cypressItem.passed}/{cypressItem.totalTests}{' '}
-                              passed
+                              {testItem.passed}/{testItem.totalTests} passed
                             </span>
-                            {cypressItem.failed > 0 && (
+                            {testItem.failed > 0 && (
                               <span className="ml-2 text-danger-600">
-                                {cypressItem.failed} failed
+                                {testItem.failed} failed
                               </span>
                             )}
                           </div>
                           <div className="mt-1 text-xs">
-                            Duration: {Math.round(cypressItem.duration / 1000)}s
+                            Duration: {Math.round(testItem.duration / 1000)}s
                           </div>
+                          {'error' in testItem && testItem.error && (
+                            <div className="mt-1 text-xs text-danger-600">
+                              {testItem.error}
+                            </div>
+                          )}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                           {new Date(timestamp).toLocaleString()}

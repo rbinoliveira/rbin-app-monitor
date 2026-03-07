@@ -1,11 +1,15 @@
 import { NextRequest } from 'next/server'
 
+import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
 import { checkWebPage } from '@/features/monitoring/services/health-check'
 import { withErrorHandling } from '@/shared/lib/api-response'
 import { inRange, isValidUrl, required } from '@/shared/lib/validation'
 import type { HealthCheckResponse } from '@/shared/types'
 
 export async function GET(request: NextRequest) {
+  const authResponse = requireFirebaseAuth(request)
+  if (authResponse) return authResponse
+
   return withErrorHandling<HealthCheckResponse>(
     async () => {
       const searchParams = request.nextUrl.searchParams

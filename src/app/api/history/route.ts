@@ -1,6 +1,7 @@
 import { Timestamp } from 'firebase-admin/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
 import { COLLECTION_NAMES } from '@/shared/lib/constants'
 import { getAdminDb } from '@/shared/lib/firebase-admin'
 import type {
@@ -9,9 +10,14 @@ import type {
   CypressResultDoc,
   HealthCheckResult,
   HealthCheckResultDoc,
+  PlaywrightResult,
+  PlaywrightResultDoc,
 } from '@/shared/types'
 
 export async function GET(request: NextRequest) {
+  const authResponse = requireFirebaseAuth(request)
+  if (authResponse) return authResponse
+
   try {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type')
@@ -21,7 +27,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1', 10)
     const pageSize = parseInt(searchParams.get('pageSize') || '20', 10)
 
-    const results: (HealthCheckResult | CypressResult)[] = []
+    const results: (HealthCheckResult | CypressResult | PlaywrightResult)[] = []
     const limit = pageSize
     const offset = (page - 1) * pageSize
 
@@ -33,9 +39,14 @@ export async function GET(request: NextRequest) {
       .collection(COLLECTION_NAMES.CYPRESS_RESULTS)
       .orderBy('timestamp', 'desc')
 
+    let playwrightQuery = getAdminDb()
+      .collection(COLLECTION_NAMES.PLAYWRIGHT_RESULTS)
+      .orderBy('timestamp', 'desc')
+
     if (projectId) {
       healthCheckQuery = healthCheckQuery.where('projectId', '==', projectId)
       cypressQuery = cypressQuery.where('projectId', '==', projectId)
+      playwrightQuery = playwrightQuery.where('projectId', '==', projectId)
     }
 
     if (type === 'health_check' || !type) {
@@ -100,6 +111,7 @@ export async function GET(request: NextRequest) {
         const data = doc.data() as CypressResultDoc
         return {
           id: doc.id,
+          runner: data.runner ?? 'cypress',
           projectId: data.projectId,
           projectName: data.projectName,
           success: data.success,
@@ -114,6 +126,53 @@ export async function GET(request: NextRequest) {
         } as CypressResult
       })
       results.push(...cypressDocs)
+    }
+
+    if (type === 'playwright' || !type) {
+      if (startDate) {
+        const start = new Date(startDate)
+        playwrightQuery = playwrightQuery.where(
+          'timestamp',
+          '>=',
+          Timestamp.fromDate(start),
+        )
+      }
+
+      if (endDate) {
+        const end = new Date(endDate)
+        playwrightQuery = playwrightQuery.where(
+          'timestamp',
+          '<=',
+          Timestamp.fromDate(end),
+        )
+      }
+
+      const playwrightSnapshot = await playwrightQuery
+        .limit(limit + offset)
+        .get()
+      const playwrightDocs = playwrightSnapshot.docs
+        .slice(offset)
+        .map((doc) => {
+          const data = doc.data() as PlaywrightResultDoc
+          return {
+            id: doc.id,
+            runner: data.runner ?? 'playwright',
+            projectId: data.projectId,
+            projectName: data.projectName,
+            success: data.success,
+            totalTests: data.totalTests,
+            passed: data.passed,
+            failed: data.failed,
+            skipped: data.skipped,
+            duration: data.duration,
+            specFiles: data.specFiles,
+            output: data.output,
+            error: data.error,
+            resourceUsage: data.resourceUsage,
+            timestamp: data.timestamp.toDate(),
+          } as PlaywrightResult
+        })
+      results.push(...playwrightDocs)
     }
 
     results.sort((a, b) => {

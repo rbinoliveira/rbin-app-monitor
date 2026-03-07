@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
 import {
   acquireLock,
   releaseLock,
@@ -17,6 +18,9 @@ interface CypressRunRequest {
 }
 
 export async function POST(request: NextRequest) {
+  const authResponse = requireFirebaseAuth(request)
+  if (authResponse) return authResponse
+
   const lockId = `cypress-run-${Date.now()}`
   const lockAcquired = await acquireLock(lockId)
 
@@ -54,7 +58,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await callRemoteCypressRun(project.cypressRunUrl, { timeout })
+    const result = await callRemoteCypressRun(project.cypressRunUrl, {
+      timeout,
+    })
 
     await saveCypressResult({
       projectId: project.id,

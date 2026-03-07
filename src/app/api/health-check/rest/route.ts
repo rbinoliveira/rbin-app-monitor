@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
 import { checkRestEndpoint } from '@/features/monitoring/services/health-check'
 import type {
   ApiResponse,
@@ -8,6 +9,9 @@ import type {
 } from '@/shared/types'
 
 export async function POST(request: NextRequest) {
+  const authResponse = requireFirebaseAuth(request)
+  if (authResponse) return authResponse
+
   try {
     const body = await request.json()
 

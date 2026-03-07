@@ -2,12 +2,16 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-import type { CypressResult, HealthCheckResult } from '@/shared/types'
+import type {
+  CypressResult,
+  HealthCheckResult,
+  PlaywrightResult,
+} from '@/shared/types'
 
-export type HistoryItem = HealthCheckResult | CypressResult
+export type HistoryItem = HealthCheckResult | CypressResult | PlaywrightResult
 
 export interface UseHistoryFilters {
-  type?: 'health_check' | 'cypress' | ''
+  type?: 'health_check' | 'cypress' | 'playwright' | ''
   projectId?: string
   startDate?: string
   endDate?: string

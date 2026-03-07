@@ -73,10 +73,7 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
         data.monitoringTypes?.includes('wordpress')
       if (isFront) frontHealthCheckUrl = baseUrl
       if (isBack) backHealthCheckUrl = baseUrl
-      if (
-        data.runCypressTests ||
-        data.monitoringTypes?.includes('cypress')
-      ) {
+      if (data.runCypressTests || data.monitoringTypes?.includes('cypress')) {
         cypressRunUrl = baseUrl
       }
     }
@@ -153,6 +150,7 @@ export const cypressResultConverter: FirestoreDataConverter<
   ): WithFieldValue<CypressResultDoc> {
     const r = result as CypressResult
     return {
+      runner: 'cypress',
       projectId: r.projectId,
       projectName: r.projectName,
       success: r.success,
@@ -173,6 +171,7 @@ export const cypressResultConverter: FirestoreDataConverter<
     const data = snapshot.data(options)
     return {
       id: snapshot.id,
+      runner: data.runner ?? 'cypress',
       projectId: data.projectId,
       projectName: data.projectName,
       success: data.success,
@@ -201,6 +200,7 @@ export const playwrightResultConverter: FirestoreDataConverter<
   ): WithFieldValue<PlaywrightResultDoc> {
     const r = result as PlaywrightResult
     return {
+      runner: 'playwright',
       projectId: r.projectId,
       projectName: r.projectName,
       success: r.success,
@@ -211,6 +211,8 @@ export const playwrightResultConverter: FirestoreDataConverter<
       duration: r.duration,
       specFiles: r.specFiles,
       output: r.output,
+      error: r.error,
+      resourceUsage: r.resourceUsage,
       timestamp: Timestamp.fromDate(r.timestamp),
     }
   },
@@ -221,6 +223,7 @@ export const playwrightResultConverter: FirestoreDataConverter<
     const data = snapshot.data(options)
     return {
       id: snapshot.id,
+      runner: data.runner ?? 'playwright',
       projectId: data.projectId,
       projectName: data.projectName,
       success: data.success,
@@ -231,6 +234,8 @@ export const playwrightResultConverter: FirestoreDataConverter<
       duration: data.duration,
       specFiles: data.specFiles,
       output: data.output,
+      error: data.error,
+      resourceUsage: data.resourceUsage,
       timestamp: data.timestamp.toDate(),
     }
   },

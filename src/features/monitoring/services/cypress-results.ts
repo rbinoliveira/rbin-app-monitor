@@ -9,6 +9,7 @@ const CYPRESS_RESULTS_COLLECTION = 'cypressResults'
 
 function cypressResultToFirestore(result: CypressResult): CypressResultDoc {
   return {
+    runner: 'cypress',
     projectId: result.projectId,
     projectName: result.projectName,
     success: result.success,
@@ -43,6 +44,7 @@ export async function saveCypressResult(
   const now = new Date()
   const cypressResult: CypressResult = {
     id: '',
+    runner: 'cypress',
     projectId: input.projectId,
     projectName: input.projectName,
     success: input.result.success,

@@ -1,14 +1,18 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
+import { COLLECTION_NAMES } from '@/shared/lib/constants'
 import { getAdminDb } from '@/shared/lib/firebase-admin'
 import type { PlaywrightResult, PlaywrightResultDoc } from '@/shared/types'
 
 import type { PlaywrightRunResult } from './playwright-runner'
 
-const PLAYWRIGHT_RESULTS_COLLECTION = 'playwrightResults'
+const PLAYWRIGHT_RESULTS_COLLECTION = COLLECTION_NAMES.PLAYWRIGHT_RESULTS
 
-function playwrightResultToFirestore(result: PlaywrightResult): PlaywrightResultDoc {
+function playwrightResultToFirestore(
+  result: PlaywrightResult,
+): PlaywrightResultDoc {
   return {
+    runner: 'playwright',
     projectId: result.projectId,
     projectName: result.projectName,
     success: result.success,
@@ -19,6 +23,8 @@ function playwrightResultToFirestore(result: PlaywrightResult): PlaywrightResult
     duration: result.duration,
     specFiles: result.specFiles,
     output: result.output,
+    error: result.error,
+    resourceUsage: result.resourceUsage,
     timestamp: Timestamp.fromDate(result.timestamp),
   }
 }
@@ -47,6 +53,7 @@ export async function savePlaywrightResult(
   const now = new Date()
   const playwrightResult: PlaywrightResult = {
     id: '',
+    runner: 'playwright',
     projectId: input.projectId,
     projectName: input.projectName,
     success: input.result.success,
@@ -57,6 +64,8 @@ export async function savePlaywrightResult(
     duration: input.result.duration,
     specFiles: input.result.specFiles,
     output: input.result.output,
+    error: input.result.error,
+    resourceUsage: input.result.resourceUsage,
     timestamp: now,
   }
 
