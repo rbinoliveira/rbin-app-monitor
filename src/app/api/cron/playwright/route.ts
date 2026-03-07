@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { requireApiAuth, requireRateLimit } from '@/features/auth/lib/api-auth'
+import { sendNotification } from '@/features/monitoring/services/email'
 import { callRemotePlaywrightRun } from '@/features/monitoring/services/playwright-remote'
 import { savePlaywrightResult } from '@/features/monitoring/services/playwright-results'
-import { sendNotification } from '@/features/monitoring/services/email'
 import { getActiveProjects } from '@/features/projects/services/projects'
 import type { ApiResponse } from '@/shared/types'
 
@@ -24,9 +24,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const projects = await getActiveProjects()
-    const projectsWithPlaywright = projects.filter(
-      (project) => project.playwrightRunUrl,
-    )
+    const projectsWithPlaywright = projects.filter((p) => p.playwrightRunUrl)
 
     const results = []
 
@@ -48,12 +46,10 @@ export async function GET(request: NextRequest) {
             const baseUrl =
               process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
             const dashboardUrl = `${baseUrl}/dashboard`
-
             const failedTestsDetails =
               result.failed > 0
                 ? `\n<b>Failed Tests:</b> ${result.failed} out of ${result.totalTests}`
                 : ''
-
             const details = `Playwright tests failed for project "${project.name}"${failedTestsDetails}\n\n<b>View Details:</b> <a href="${dashboardUrl}">${dashboardUrl}</a>`
 
             await sendNotification({
@@ -79,10 +75,6 @@ export async function GET(request: NextRequest) {
           passed: result.passed,
           failed: result.failed,
         })
-
-        console.log(
-          `Completed Playwright for project: ${project.name} - Success: ${result.success}`,
-        )
       } catch (error) {
         console.error(
           `Error running Playwright for project ${project.name}:`,
@@ -99,10 +91,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json<ApiResponse>({
       success: true,
-      data: {
-        totalProjects: projectsWithPlaywright.length,
-        results,
-      },
+      data: { totalProjects: projectsWithPlaywright.length, results },
     })
   } catch (error) {
     console.error('Error in cron Playwright execution:', error)

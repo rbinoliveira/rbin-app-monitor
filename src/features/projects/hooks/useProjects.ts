@@ -1,9 +1,8 @@
 'use client'
 
+import { useApi } from '@/shared/hooks'
 import { REFRESH_INTERVAL } from '@/shared/lib/constants'
 import type { Project } from '@/shared/types'
-
-import { useApi } from '@/shared/hooks'
 
 interface UseProjectsReturn {
   projects: Project[]

@@ -39,17 +39,17 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const { addToast } = useToast()
   const [isRunningTests, setIsRunningTests] = useState(false)
 
-  const hasCypress = Boolean(project.cypressRunUrl)
+  const hasPlaywright = Boolean(project.playwrightRunUrl)
 
   const handleRunTests = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
     setIsRunningTests(true)
-    addToast('Running Cypress tests...', 'info')
+    addToast('Running Playwright tests...', 'info')
 
     try {
-      const response = await fetch('/api/cypress/run', {
+      const response = await fetch('/api/playwright/run', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,8 +116,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 {project.backHealthCheckUrl && (
                   <span title={project.backHealthCheckUrl}>Back</span>
                 )}
-                {project.cypressRunUrl && (
-                  <span title={project.cypressRunUrl}>Cypress</span>
+                {project.playwrightRunUrl && (
+                  <span title={project.playwrightRunUrl}>Playwright</span>
                 )}
               </div>
             </div>
@@ -134,14 +134,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 Back
               </span>
             )}
-            {project.cypressRunUrl && (
+            {project.playwrightRunUrl && (
               <span className="inline-flex items-center rounded-md bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700">
-                Cypress
+                Playwright
               </span>
             )}
           </div>
 
-          {hasCypress && (
+          {hasPlaywright && (
             <div className="mt-4">
               <Button
                 size="sm"

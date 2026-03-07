@@ -79,4 +79,3 @@ export async function checkRestEndpoint(
     expectedStatus: options.expectedStatus ?? DEFAULT_EXPECTED_STATUS,
   })
 }
-

@@ -1,6 +1,12 @@
 # Running Tests
 
-This project is migrating from Cypress to Playwright.
+This project uses Playwright for E2E tests. Legacy Cypress endpoints remain for backward compatibility.
+
+## Prerequisites
+
+- Node.js 18+
+- Dependencies installed (`npm install` or `pnpm install`)
+- Firebase and app env vars configured (see below)
 
 ## Current test runners
 
@@ -12,7 +18,8 @@ This project is migrating from Cypress to Playwright.
 1. Install dependencies:
 
 ```bash
-pnpm install
+npm install
+# or: pnpm install
 ```
 
 2. Configure the environment variables required by Next.js and Firebase.
@@ -38,7 +45,8 @@ Optional execution variables:
 3. Start the app locally:
 
 ```bash
-pnpm dev
+npm run dev
+# or: pnpm dev
 ```
 
 ## Playwright
@@ -46,13 +54,15 @@ pnpm dev
 Run the Playwright suite locally:
 
 ```bash
-pnpm playwright:run
+npm run playwright:run
+# or: pnpm playwright:run
 ```
 
 Open the Playwright UI runner locally:
 
 ```bash
-pnpm playwright:open
+npm run playwright:open
+# or: pnpm playwright:open
 ```
 
 Manual API execution for a monitored project:

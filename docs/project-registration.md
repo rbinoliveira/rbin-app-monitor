@@ -44,14 +44,7 @@ This document defines the information required to register a monitored project i
   - `output`
   - `error`
 
-### 5. Legacy Cypress execution URL
-
-- Field: `cypressRunUrl`
-- Use when: the monitored project still depends on a legacy Cypress remote trigger.
-- Why it matters: this keeps backward compatibility while projects migrate to Playwright.
-- Recommendation: leave this empty for new projects unless Cypress is still required.
-
-### 6. Project type
+### 5. Project type
 
 - Suggested product-level field: `type`
 - Values:
@@ -69,7 +62,6 @@ This document defines the information required to register a monitored project i
   - `frontHealthCheckUrl`
 - Optional:
   - `playwrightRunUrl`
-  - `cypressRunUrl`
 - Typical case: public website, admin panel, SPA, or marketing site.
 
 ### Backend project
@@ -79,7 +71,6 @@ This document defines the information required to register a monitored project i
   - `backHealthCheckUrl`
 - Optional:
   - `playwrightRunUrl`
-  - `cypressRunUrl`
 - Typical case: REST API, GraphQL API, microservice, webhook processor.
 
 ### Fullstack project
@@ -137,7 +128,7 @@ Recommended backend JSON examples:
 
 ### Remote test execution prerequisites
 
-To support `playwrightRunUrl` or `cypressRunUrl`, the monitored project must provide:
+To support `playwrightRunUrl`, the monitored project must provide:
 
 - an HTTP endpoint that starts the test run
 - a JSON response with execution summary fields
@@ -199,9 +190,7 @@ This reduces operator confusion and avoids registrations where a project is miss
   - `frontHealthCheckUrl`
   - `backHealthCheckUrl`
   - `playwrightRunUrl`
-  - `cypressRunUrl`
 - If `type = front`, require `frontHealthCheckUrl`
 - If `type = back`, require `backHealthCheckUrl`
 - If `type = fullstack`, require at least one health URL and recommend both
 - Validate all URLs as absolute `http` or `https` URLs
-- Prefer `playwrightRunUrl` over `cypressRunUrl` for new setups

@@ -6,7 +6,7 @@ export type ProjectStatus = 'healthy' | 'unhealthy' | 'unknown'
 
 export type HealthCheckType = 'front' | 'back'
 
-export type TestRunner = 'cypress' | 'playwright'
+export type TestRunner = 'playwright'
 
 // Firestore Timestamp type (compatible with both client and admin SDK)
 export type FirestoreTimestamp = {
@@ -28,7 +28,6 @@ export interface Project {
   name: string
   frontHealthCheckUrl: string | null
   backHealthCheckUrl: string | null
-  cypressRunUrl: string | null
   playwrightRunUrl: string | null
   status: ProjectStatus
   isActive: boolean
@@ -37,12 +36,10 @@ export interface Project {
   updatedAt: Date
 }
 
-// Firestore document type (uses Timestamp instead of Date)
 export interface ProjectDoc {
   name: string
   frontHealthCheckUrl: string | null
   backHealthCheckUrl: string | null
-  cypressRunUrl: string | null
   playwrightRunUrl: string | null
   status: ProjectStatus
   isActive: boolean
@@ -51,12 +48,10 @@ export interface ProjectDoc {
   updatedAt: FirestoreTimestamp
 }
 
-// Create/Update DTOs
 export interface CreateProjectInput {
   name: string
   frontHealthCheckUrl?: string | null
   backHealthCheckUrl?: string | null
-  cypressRunUrl?: string | null
   playwrightRunUrl?: string | null
 }
 
@@ -64,7 +59,6 @@ export interface UpdateProjectInput {
   name?: string
   frontHealthCheckUrl?: string | null
   backHealthCheckUrl?: string | null
-  cypressRunUrl?: string | null
   playwrightRunUrl?: string | null
   isActive?: boolean
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { ProtectedRoute, useAuth } from '@/features/auth'
 import { useProjects } from '@/features/projects/hooks/useProjects'
@@ -22,6 +22,7 @@ import type {
   PlaywrightResult,
   Project,
   ProjectStatus,
+  UpdateProjectInput,
 } from '@/shared/types'
 
 type ExecutionHistoryItem = HealthCheckResult | CypressResult | PlaywrightResult
@@ -152,7 +153,6 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
     name: '',
     frontHealthCheckUrl: '',
     backHealthCheckUrl: '',
-    cypressRunUrl: '',
     playwrightRunUrl: '',
   })
 
@@ -174,7 +174,6 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
           name: form.name,
           frontHealthCheckUrl: form.frontHealthCheckUrl || null,
           backHealthCheckUrl: form.backHealthCheckUrl || null,
-          cypressRunUrl: form.cypressRunUrl || null,
           playwrightRunUrl: form.playwrightRunUrl || null,
         }),
       })
@@ -190,7 +189,6 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
         name: '',
         frontHealthCheckUrl: '',
         backHealthCheckUrl: '',
-        cypressRunUrl: '',
         playwrightRunUrl: '',
       })
       onClose()
@@ -242,13 +240,6 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
             type="url"
           />
           <Input
-            label="Legacy Cypress trigger"
-            value={form.cypressRunUrl ?? ''}
-            onChange={setField('cypressRunUrl')}
-            placeholder="https://ci.example.com/api/cypress/run"
-            type="url"
-          />
-          <Input
             label="Playwright trigger"
             value={form.playwrightRunUrl ?? ''}
             onChange={setField('playwrightRunUrl')}
@@ -269,11 +260,135 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
   )
 }
 
+interface EditProjectModalProps {
+  project: Project
+  open: boolean
+  onClose: () => void
+  onSuccess: () => Promise<void>
+}
+
+function EditProjectModal({
+  project,
+  open,
+  onClose,
+  onSuccess,
+}: EditProjectModalProps) {
+  const { addToast } = useToast()
+  const [loading, setLoading] = useState(false)
+  const initialForm = useMemo<UpdateProjectInput>(
+    () => ({
+      name: project.name,
+      frontHealthCheckUrl: project.frontHealthCheckUrl ?? '',
+      backHealthCheckUrl: project.backHealthCheckUrl ?? '',
+      playwrightRunUrl: project.playwrightRunUrl ?? '',
+    }),
+    [project.id],
+  )
+  const [form, setForm] = useState<UpdateProjectInput>(initialForm)
+
+  useEffect(() => {
+    if (open) setForm(initialForm)
+  }, [open, initialForm])
+
+  const setField =
+    (field: keyof UpdateProjectInput) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setForm((prev) => ({ ...prev, [field]: event.target.value }))
+    }
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/projects/${project.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name || undefined,
+          frontHealthCheckUrl: form.frontHealthCheckUrl || null,
+          backHealthCheckUrl: form.backHealthCheckUrl || null,
+          playwrightRunUrl: form.playwrightRunUrl || null,
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update project')
+      }
+      addToast('Project updated successfully', 'success')
+      onClose()
+      await onSuccess()
+    } catch (error) {
+      addToast(
+        error instanceof Error ? error.message : 'Failed to update project',
+        'error',
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <ModalHeader>
+        <ModalTitle>Edit application</ModalTitle>
+        <p className="mt-1 text-sm text-slate-300/80">
+          Update name and URLs for this monitored application.
+        </p>
+      </ModalHeader>
+      <ModalContent>
+        <form
+          id="edit-project-form"
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
+          <Input
+            label="Project name"
+            value={form.name ?? ''}
+            onChange={setField('name')}
+            placeholder="Payments API"
+            required
+          />
+          <Input
+            label="Frontend URL"
+            value={form.frontHealthCheckUrl ?? ''}
+            onChange={setField('frontHealthCheckUrl')}
+            placeholder="https://app.example.com"
+            type="url"
+          />
+          <Input
+            label="Backend health URL"
+            value={form.backHealthCheckUrl ?? ''}
+            onChange={setField('backHealthCheckUrl')}
+            placeholder="https://api.example.com/health"
+            type="url"
+          />
+          <Input
+            label="Playwright trigger"
+            value={form.playwrightRunUrl ?? ''}
+            onChange={setField('playwrightRunUrl')}
+            placeholder="https://ci.example.com/api/playwright/run"
+            type="url"
+          />
+        </form>
+      </ModalContent>
+      <ModalFooter>
+        <Button variant="ghost" onClick={onClose} disabled={loading}>
+          Cancel
+        </Button>
+        <Button type="submit" form="edit-project-form" loading={loading}>
+          Save changes
+        </Button>
+      </ModalFooter>
+    </Modal>
+  )
+}
+
 interface ProjectRowProps {
   project: Project
   historyItems: ExecutionHistoryItem[]
   historyLoading: boolean
   onRefresh: () => Promise<void>
+  onEdit: (project: Project) => void
 }
 
 function ProjectRow({
@@ -281,6 +396,7 @@ function ProjectRow({
   historyItems,
   historyLoading,
   onRefresh,
+  onEdit,
 }: ProjectRowProps) {
   const { addToast } = useToast()
   const [runningAction, setRunningAction] = useState<string | null>(null)
@@ -373,7 +489,6 @@ function ProjectRow({
               <div className="mt-2 flex flex-wrap gap-2 text-xs uppercase tracking-[0.18em] text-slate-400/80">
                 {project.frontHealthCheckUrl && <span>Front</span>}
                 {project.backHealthCheckUrl && <span>Back</span>}
-                {project.cypressRunUrl && <span>Cypress</span>}
                 {project.playwrightRunUrl && <span>Playwright</span>}
               </div>
             </div>
@@ -459,21 +574,6 @@ function ProjectRow({
               Health Check
             </Button>
           )}
-          {project.cypressRunUrl && (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() =>
-                runAction('Cypress', '/api/cypress/run', {
-                  projectId: project.id,
-                })
-              }
-              loading={runningAction === 'Cypress'}
-              disabled={isRunning || !project.isActive}
-            >
-              Cypress
-            </Button>
-          )}
           {project.playwrightRunUrl && (
             <Button
               size="sm"
@@ -492,6 +592,14 @@ function ProjectRow({
           <Button
             size="sm"
             variant="ghost"
+            onClick={() => onEdit(project)}
+            disabled={isRunning}
+          >
+            Edit
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
             onClick={handleToggle}
             disabled={isRunning}
           >
@@ -507,6 +615,7 @@ function DashboardScreen() {
   const { user } = useAuth()
   const { projects, loading, error, refresh } = useProjects()
   const [addOpen, setAddOpen] = useState(false)
+  const [editProject, setEditProject] = useState<Project | null>(null)
   const [historyByProject, setHistoryByProject] = useState<
     Record<string, ExecutionHistoryItem[]>
   >({})
@@ -646,6 +755,7 @@ function DashboardScreen() {
               historyItems={historyByProject[project.id] ?? []}
               historyLoading={historyLoading}
               onRefresh={refreshAll}
+              onEdit={setEditProject}
             />
           ))}
         </div>
@@ -656,6 +766,15 @@ function DashboardScreen() {
         onClose={() => setAddOpen(false)}
         onSuccess={refreshAll}
       />
+
+      {editProject && (
+        <EditProjectModal
+          project={editProject}
+          open={true}
+          onClose={() => setEditProject(null)}
+          onSuccess={refreshAll}
+        />
+      )}
     </div>
   )
 }

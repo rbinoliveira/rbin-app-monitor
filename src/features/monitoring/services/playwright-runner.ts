@@ -131,7 +131,9 @@ export async function runPlaywrightTests(
         }
       }
 
-      resolve(parsePlaywrightOutput(fullOutput, code === 0, duration, resourceUsage))
+      resolve(
+        parsePlaywrightOutput(fullOutput, code === 0, duration, resourceUsage),
+      )
     })
   })
 }
@@ -149,7 +151,12 @@ function parsePlaywrightOutput(
 
   try {
     const json = JSON.parse(output) as {
-      stats?: { expected?: number; unexpected?: number; skipped?: number; duration?: number }
+      stats?: {
+        expected?: number
+        unexpected?: number
+        skipped?: number
+        duration?: number
+      }
       suites?: Array<{ file?: string }>
     }
     passed = json.stats?.expected ?? 0

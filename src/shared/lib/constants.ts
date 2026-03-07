@@ -105,5 +105,4 @@ export const INTERVAL_HOURS = {
   MAX: 168,
 } as const
 
-
 export const VALID_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE'] as const

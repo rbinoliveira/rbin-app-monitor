@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 import { useAuth } from '@/features/auth'
+import { appRoutes } from '@/shared/constants/app-routes.constant'
 import { Button } from '@/shared/components/ui/Button'
 import {
   Card,
@@ -39,9 +41,16 @@ function GoogleMark() {
 }
 
 export default function LoginPage() {
+  const router = useRouter()
   const { user, loading, signInWithGoogle } = useAuth()
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace(appRoutes.dashboard)
+    }
+  }, [loading, user, router])
 
   const handleSignIn = async () => {
     try {

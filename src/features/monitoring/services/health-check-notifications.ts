@@ -8,8 +8,8 @@ import type {
   ProjectStatus,
 } from '@/shared/types'
 
-import { saveHealthCheckResult } from './health-check-results'
 import { sendNotification } from './email'
+import { saveHealthCheckResult } from './health-check-results'
 
 export interface ProcessHealthCheckResultInput {
   projectId: string

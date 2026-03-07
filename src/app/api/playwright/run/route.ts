@@ -43,10 +43,7 @@ export async function POST(request: NextRequest) {
 
     if (!projectId) {
       return NextResponse.json<ApiResponse>(
-        {
-          success: false,
-          error: 'projectId is required',
-        },
+        { success: false, error: 'projectId is required' },
         { status: 400 },
       )
     }

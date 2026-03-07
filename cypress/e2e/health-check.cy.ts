@@ -96,5 +96,4 @@ describe('Health Check E2E Tests', () => {
       }
     })
   })
-
 })

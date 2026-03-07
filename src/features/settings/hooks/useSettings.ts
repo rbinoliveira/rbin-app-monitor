@@ -2,9 +2,11 @@
 
 import { useCallback, useState } from 'react'
 
-import type { MonitorSettings, UpdateMonitorSettingsInput } from '@/shared/types'
-
 import { useApi } from '@/shared/hooks'
+import type {
+  MonitorSettings,
+  UpdateMonitorSettingsInput,
+} from '@/shared/types'
 
 interface UseSettingsReturn {
   settings: MonitorSettings | null
@@ -17,10 +19,12 @@ interface UseSettingsReturn {
 }
 
 export function useSettings(): UseSettingsReturn {
-  const { data, loading, error, fetch: refetch } = useApi<MonitorSettings>(
-    '/api/settings',
-    { autoFetch: true },
-  )
+  const {
+    data,
+    loading,
+    error,
+    fetch: refetch,
+  } = useApi<MonitorSettings>('/api/settings', { autoFetch: true })
 
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
