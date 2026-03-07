@@ -6,7 +6,7 @@ import { Outfit, Space_Mono as SpaceMono } from 'next/font/google'
 import { AppProvidersClient } from '@/features/platform/providers/app-providers-client'
 import { AppShell } from '@/shared/components/app-shell'
 import { GlassBackground } from '@/shared/components/glass-background'
-import { cn } from '@/shared/lib/utils'
+import { cn } from '@/shared/libs/tw-merge'
 
 const outfit = Outfit({
   subsets: ['latin'],

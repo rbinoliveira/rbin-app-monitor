@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { appCookies } from '@/shared/constants/app-cookies.constant'
+import { appCookies } from '@/shared/constants/app-cookies.constants'
 
 export interface AuthOptions {
   requireSecret?: boolean

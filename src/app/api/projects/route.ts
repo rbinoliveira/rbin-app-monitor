@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server'
 
-import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
+import { requireFirebaseAuth } from '@/features/auth/libs/api-auth'
 import {
   createProject,
   getAllProjects,
 } from '@/features/projects/services/projects'
-import { withErrorHandling } from '@/shared/lib/api-response'
+import { withErrorHandling } from '@/shared/libs/api-response'
 import type { CreateProjectInput, Project } from '@/shared/types/project.type'
 
 export async function GET(request: NextRequest) {

@@ -1,14 +1,14 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
-import { ApiError } from '@/shared/lib/api-response'
+import { ApiError } from '@/shared/libs/api-response'
 import {
   COLLECTION_NAMES,
   DEFAULT_INTERVAL_HOURS,
   HTTP_STATUS,
   INTERVAL_HOURS,
   SETTINGS_DOC_ID,
-} from '@/shared/lib/constants'
-import { getAdminDb } from '@/shared/lib/firebase-admin'
+} from '@/shared/libs/constants'
+import { getAdminDb } from '@/shared/libs/firebase-admin'
 import type {
   MonitorSettings,
   MonitorSettingsDoc,

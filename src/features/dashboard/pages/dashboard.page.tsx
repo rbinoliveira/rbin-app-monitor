@@ -2,16 +2,15 @@
 
 import { useMemo, useState } from 'react'
 
-import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute'
-import { useAuth } from '@/features/auth/contexts/AuthContext'
+import { ProtectedRoute } from '@/features/auth/components/protected-route'
+import { useAuth } from '@/features/auth/hooks/authentication.hook'
 import { AddProjectModal } from '@/features/dashboard/components/add-project-modal'
+import { DashboardProjectList } from '@/features/dashboard/components/dashboard-project-list'
 import { EditProjectModal } from '@/features/dashboard/components/edit-project-modal'
 import type { ExecutionHistoryItem } from '@/features/dashboard/components/project-row'
-import { ProjectRow } from '@/features/dashboard/components/project-row'
 import { SummaryCards } from '@/features/dashboard/components/summary-cards'
 import { useGetHistoryService } from '@/features/monitoring/services/get-history.service'
 import { useProjects } from '@/features/projects/hooks/use-projects.hook'
-import { DataHandler } from '@/shared/components/data-handler'
 import { Button } from '@/shared/components/button'
 import type { Project } from '@/shared/types/project.type'
 
@@ -103,48 +102,16 @@ function DashboardScreen() {
           </Button>
         </div>
 
-        <DataHandler
-          isLoading={loading}
-          isError={Boolean(error)}
+        <DashboardProjectList
+          projects={projects}
+          loading={loading}
           error={error}
-          onRetry={refresh}
-          skeleton={
-            <div className="glass-surface rounded-[1.75rem] p-8 text-center text-slate-300/80">
-              Carregando aplicações monitoradas...
-            </div>
-          }
-        >
-          {historyErrorMessage && (
-            <div className="mb-4 glass-surface rounded-[1.75rem] border-rose-400/25 p-5 text-rose-200">
-              {historyErrorMessage}
-            </div>
-          )}
-
-          {projects.length === 0 ? (
-            <div className="glass-surface rounded-[1.75rem] p-10 text-center">
-              <p className="text-lg font-medium text-white">
-                Nenhuma aplicação cadastrada ainda.
-              </p>
-              <p className="mt-2 text-sm text-slate-400/80">
-                Adicione a primeira aplicação para começar a registrar health
-                checks e execuções de testes.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {projects.map((project) => (
-                <ProjectRow
-                  key={project.id}
-                  project={project}
-                  historyItems={historyByProject[project.id] ?? []}
-                  historyLoading={historyLoading}
-                  onRefresh={refreshAll}
-                  onEdit={setEditProject}
-                />
-              ))}
-            </div>
-          )}
-        </DataHandler>
+          historyByProject={historyByProject}
+          historyLoading={historyLoading}
+          historyErrorMessage={historyErrorMessage}
+          onRefresh={refreshAll}
+          onEdit={setEditProject}
+        />
       </section>
 
       <AddProjectModal

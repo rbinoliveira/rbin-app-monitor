@@ -8,7 +8,7 @@ import {
   type PathValue,
 } from 'react-hook-form'
 
-import { cn } from '@/shared/lib/utils'
+import { cn } from '@/shared/libs/tw-merge'
 
 export type InputTextProps<T extends FieldValues> = {
   name: Path<T>

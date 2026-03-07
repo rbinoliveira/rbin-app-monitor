@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   requireFirebaseAuth,
   requireRateLimit,
-} from '@/features/auth/lib/api-auth'
+} from '@/features/auth/libs/api-auth'
 import {
   checkRestEndpoint,
   checkWebPage,

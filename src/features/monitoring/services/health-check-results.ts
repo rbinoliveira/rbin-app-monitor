@@ -1,7 +1,7 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
-import { COLLECTION_NAMES } from '@/shared/lib/constants'
-import { getAdminDb } from '@/shared/lib/firebase-admin'
+import { COLLECTION_NAMES } from '@/shared/libs/constants'
+import { getAdminDb } from '@/shared/libs/firebase-admin'
 import type {
   HealthCheckResponse,
   HealthCheckResult,

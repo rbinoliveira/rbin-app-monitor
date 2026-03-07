@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
+import { requireFirebaseAuth } from '@/features/auth/libs/api-auth'
 import {
   acquireLock,
   releaseLock,

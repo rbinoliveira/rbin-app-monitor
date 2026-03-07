@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { requireApiAuth, requireRateLimit } from '@/features/auth/lib/api-auth'
+import { requireApiAuth, requireRateLimit } from '@/features/auth/libs/api-auth'
 import { sendNotification } from '@/features/monitoring/services/email'
 import { callRemotePlaywrightRun } from '@/features/monitoring/services/playwright-remote'
 import { savePlaywrightResult } from '@/features/monitoring/services/playwright-results'

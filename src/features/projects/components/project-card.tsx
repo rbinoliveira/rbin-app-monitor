@@ -6,7 +6,7 @@ import { useRunPlaywrightService } from '@/features/monitoring/services/run-play
 import { Button } from '@/shared/components/button'
 import { Card, CardContent } from '@/shared/components/card'
 import { useToast } from '@/shared/components/toast'
-import { cn } from '@/shared/lib/utils'
+import { cn } from '@/shared/libs/tw-merge'
 import type { Project, ProjectStatus } from '@/shared/types/project.type'
 
 interface ProjectCardProps {

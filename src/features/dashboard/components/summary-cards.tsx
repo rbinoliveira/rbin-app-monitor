@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@/shared/lib/utils'
+import { cn } from '@/shared/libs/tw-merge'
 import type { Project } from '@/shared/types/project.type'
 
 export interface SummaryCardsProps {

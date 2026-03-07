@@ -12,10 +12,10 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import {
   appPublicRoutes,
   appRoutes,
-} from '@/shared/constants/app-routes.constant'
+} from '@/shared/constants/app-routes.constants'
 import { addAuthCookies } from '@/shared/utils/add-auth-cookies.util'
 import { deleteAuthCookies } from '@/shared/utils/delete-auth-cookies.util'
-import { getFirebaseAuthOptional } from '@/shared/lib/firebase'
+import { getFirebaseAuthOptional } from '@/shared/libs/firebase'
 
 interface AuthContextValue {
   user: User | null

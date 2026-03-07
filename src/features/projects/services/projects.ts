@@ -1,9 +1,11 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
-import { ApiError } from '@/shared/lib/api-response'
-import { COLLECTION_NAMES, HTTP_STATUS } from '@/shared/lib/constants'
-import { getAdminDb } from '@/shared/lib/firebase-admin'
-import { notEmpty, oneOf, optionalUrl } from '@/shared/lib/validation'
+import { ApiError } from '@/shared/libs/api-response'
+import { COLLECTION_NAMES, HTTP_STATUS } from '@/shared/libs/constants'
+import { getAdminDb } from '@/shared/libs/firebase-admin'
+import { notEmpty } from '@/shared/validations/required-string.validation'
+import { optionalUrl } from '@/shared/validations/optional-url.validation'
+import { oneOf } from '@/shared/validations/one-of.validation'
 import type {
   CreateProjectInput,
   Project,

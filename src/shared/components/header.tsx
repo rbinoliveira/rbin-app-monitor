@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { useState } from 'react'
 
-import { useAuth } from '@/features/auth/contexts/AuthContext'
+import { useAuth } from '@/features/auth/hooks/authentication.hook'
 import { Button } from '@/shared/components/button'
 
 export function Header() {

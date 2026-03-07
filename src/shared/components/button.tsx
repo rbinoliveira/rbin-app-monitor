@@ -2,7 +2,7 @@
 
 import { type ButtonHTMLAttributes, forwardRef } from 'react'
 
-import { cn } from '@/shared/lib/utils'
+import { cn } from '@/shared/libs/tw-merge'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost'

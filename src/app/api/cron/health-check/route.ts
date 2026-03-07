@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { requireApiAuth, requireRateLimit } from '@/features/auth/lib/api-auth'
+import { requireApiAuth, requireRateLimit } from '@/features/auth/libs/api-auth'
 import {
   checkRestEndpoint,
   checkWebPage,

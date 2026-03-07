@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server'
 
-import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
+import { requireFirebaseAuth } from '@/features/auth/libs/api-auth'
 import {
   getSettings,
   updateSettings,
 } from '@/features/settings/services/settings'
-import { withErrorHandling } from '@/shared/lib/api-response'
+import { withErrorHandling } from '@/shared/libs/api-response'
 import type {
   MonitorSettings,
   UpdateMonitorSettingsInput,

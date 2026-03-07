@@ -1,9 +1,9 @@
 import { Timestamp } from 'firebase-admin/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
-import { COLLECTION_NAMES } from '@/shared/lib/constants'
-import { getAdminDb } from '@/shared/lib/firebase-admin'
+import { requireFirebaseAuth } from '@/features/auth/libs/api-auth'
+import { COLLECTION_NAMES } from '@/shared/libs/constants'
+import { getAdminDb } from '@/shared/libs/firebase-admin'
 import type { ApiResponse } from '@/shared/types/api-response.type'
 import type { CypressResult, CypressResultDoc } from '@/shared/types/cypress-result.type'
 import type {

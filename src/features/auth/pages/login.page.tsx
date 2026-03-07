@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-import { useAuth } from '@/features/auth/contexts/AuthContext'
+import { useAuth } from '@/features/auth/hooks/authentication.hook'
 import { Button } from '@/shared/components/button'
 import {
   Card,
@@ -11,7 +11,7 @@ import {
   CardDescription,
   CardTitle,
 } from '@/shared/components/card'
-import { appRoutes } from '@/shared/constants/app-routes.constant'
+import { appRoutes } from '@/shared/constants/app-routes.constants'
 
 function GoogleMark() {
   return (

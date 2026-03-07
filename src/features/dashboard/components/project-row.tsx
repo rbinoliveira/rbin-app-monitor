@@ -7,7 +7,7 @@ import { useRunPlaywrightService } from '@/features/monitoring/services/run-play
 import { useUpdateProjectService } from '@/features/projects/services/update-project.service'
 import { Button } from '@/shared/components/button'
 import { useToast } from '@/shared/components/toast'
-import { cn } from '@/shared/lib/utils'
+import { cn } from '@/shared/libs/tw-merge'
 import type { CypressResult } from '@/shared/types/cypress-result.type'
 import type { HealthCheckResult } from '@/shared/types/health-check.type'
 import type { PlaywrightResult } from '@/shared/types/playwright-result.type'

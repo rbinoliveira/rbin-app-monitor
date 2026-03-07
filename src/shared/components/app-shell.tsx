@@ -2,8 +2,8 @@
 
 import { usePathname } from 'next/navigation'
 
-import { useAuth } from '@/features/auth/contexts/AuthContext'
-import { appPublicRoutes } from '@/shared/constants/app-routes.constant'
+import { useAuth } from '@/features/auth/hooks/authentication.hook'
+import { appPublicRoutes } from '@/shared/constants/app-routes.constants'
 
 import { Button } from './button'
 

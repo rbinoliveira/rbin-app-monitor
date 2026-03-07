@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react'
 
-import { cn } from '@/shared/lib/utils'
+import { cn } from '@/shared/libs/tw-merge'
 
 type ToastType = 'success' | 'error' | 'warning' | 'info'
 

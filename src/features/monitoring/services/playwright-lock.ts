@@ -1,6 +1,6 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
-import { getAdminDb } from '@/shared/lib/firebase-admin'
+import { getAdminDb } from '@/shared/libs/firebase-admin'
 
 const LOCKS_COLLECTION = 'playwrightLocks'
 const DEFAULT_LOCK_TIMEOUT_MS = 30 * 60 * 1000

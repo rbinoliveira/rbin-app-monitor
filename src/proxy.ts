@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { parseUserCookie } from '@/features/auth/schemas/user-cookie.schema'
-import { appCookies } from '@/shared/constants/app-cookies.constant'
+import { appCookies } from '@/shared/constants/app-cookies.constants'
 import {
   appPublicRoutes,
   appRoutes,
-} from '@/shared/constants/app-routes.constant'
+} from '@/shared/constants/app-routes.constants'
 
 const publicApiRoutes = ['/api/health', '/api/cron']
 

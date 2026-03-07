@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react'
 
-import { AuthProvider } from '@/features/auth/contexts/AuthContext'
+import { AuthProvider } from '@/features/auth/hooks/authentication.hook'
 import { ToastProvider } from '@/shared/components/toast'
 import { ReactQueryProvider } from '@/shared/providers/react-query-provider'
 

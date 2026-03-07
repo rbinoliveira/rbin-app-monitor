@@ -1,6 +1,6 @@
 import { setCookie } from 'cookies-next'
 
-import { appCookies } from '@/shared/constants/app-cookies.constant'
+import { appCookies } from '@/shared/constants/app-cookies.constants'
 
 export type AuthCookieUser = {
   id: string
