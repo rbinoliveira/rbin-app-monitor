@@ -1,30 +1,30 @@
-# Running Tests
+# Executando os testes
 
-This project uses Playwright for E2E tests. Legacy Cypress endpoints remain for backward compatibility.
+Este projeto usa Playwright para testes E2E. Endpoints legados do Cypress permanecem para compatibilidade.
 
-## Prerequisites
+## Pré-requisitos
 
 - Node.js 18+
-- Dependencies installed (`npm install` or `pnpm install`)
-- Firebase and app env vars configured (see below)
+- Dependências instaladas (`npm install` ou `pnpm install`)
+- Variáveis de ambiente do Firebase e da aplicação configuradas (ver abaixo)
 
-## Current test runners
+## Runners de teste atuais
 
-- Legacy: Cypress endpoints and saved history still exist for backward compatibility with monitored projects that have not migrated yet.
-- Standard: Playwright is the default runner for new executions and new project setup.
+- **Legado:** endpoints e histórico do Cypress ainda existem para compatibilidade com projetos monitorados que ainda não migraram.
+- **Padrão:** Playwright é o runner padrão para novas execuções e novos projetos.
 
-## Local setup
+## Configuração local
 
-1. Install dependencies:
+1. Instale as dependências:
 
 ```bash
 npm install
-# or: pnpm install
+# ou: pnpm install
 ```
 
-2. Configure the environment variables required by Next.js and Firebase.
+2. Configure as variáveis de ambiente exigidas pelo Next.js e Firebase.
 
-Required application variables:
+Variáveis obrigatórias:
 
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
 - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
@@ -36,124 +36,102 @@ Required application variables:
 - `FIREBASE_CLIENT_EMAIL`
 - `FIREBASE_PRIVATE_KEY`
 
-Optional execution variables:
+Variáveis opcionais:
 
-- `CRON_SECRET` for protected cron endpoints
-- `API_SECRET_KEY` if you use secret-based integrations
-- `NEXT_PUBLIC_APP_URL` for notification links
+- `CRON_SECRET` para proteção dos endpoints de cron
+- `API_SECRET_KEY` para integrações que usam segredo
+- `NEXT_PUBLIC_APP_URL` para links nas notificações
 
-3. Start the app locally:
+3. Inicie a aplicação localmente:
 
 ```bash
 npm run dev
-# or: pnpm dev
+# ou: pnpm dev
 ```
 
 ## Playwright
 
-Run the Playwright suite locally:
+Execute a suíte Playwright localmente:
 
 ```bash
 npm run playwright:run
-# or: pnpm playwright:run
+# ou: pnpm playwright:run
 ```
 
-Open the Playwright UI runner locally:
+Abra o runner em modo UI:
 
 ```bash
 npm run playwright:open
-# or: pnpm playwright:open
+# ou: pnpm playwright:open
 ```
 
-Manual API execution for a monitored project:
+Execução manual via API para um projeto monitorado:
 
-- Route: `POST /api/playwright/run`
+- Rota: `POST /api/playwright/run`
 - Body:
 
 ```json
 {
-  "projectId": "your-project-id"
+  "projectId": "id-do-projeto"
 }
 ```
 
-This route requires Firebase authentication through the app session cookie.
+Requer autenticação Firebase via cookie de sessão da aplicação.
 
-Scheduled execution:
+Execução agendada:
 
-- Route: `GET /api/cron/playwright`
+- Rota: `GET /api/cron/playwright`
 - Header: `Authorization: Bearer <CRON_SECRET>`
 
-The cron route calls each active project `playwrightRunUrl`, stores the result in Firestore, and sends a notification when the run fails.
+A rota de cron chama o `playwrightRunUrl` de cada projeto ativo, grava o resultado no Firestore e envia notificação em caso de falha.
 
-## Cypress (legacy)
+## Cypress (legado)
 
-Cypress remains documented only for monitored projects that still expose a Cypress execution endpoint.
+O Cypress permanece documentado apenas para projetos monitorados que ainda expõem endpoint de execução Cypress.
 
-Manual API execution for a monitored project:
+Execução manual via API:
 
-- Route: `POST /api/cypress/run`
-- Body:
+- Rota: `POST /api/cypress/run`
+- Body: `{ "projectId": "id-do-projeto" }`
 
-```json
-{
-  "projectId": "your-project-id"
-}
-```
+Execução agendada:
 
-Scheduled execution:
-
-- Route: `GET /api/cron/cypress`
+- Rota: `GET /api/cron/cypress`
 - Header: `Authorization: Bearer <CRON_SECRET>`
 
-If you still need local Cypress execution in a monitored project, keep that project’s own Cypress dependencies and remote run endpoint available. This monitor app no longer uses Cypress as the default local runner.
+Se ainda precisar executar Cypress localmente em um projeto monitorado, mantenha as dependências e o endpoint remoto desse projeto. Esta aplicação monitora não usa mais Cypress como runner local padrão.
 
 ## Health checks
 
-Manual health check execution:
+Execução manual:
 
-- Route: `POST /api/health-check`
-- Body:
+- Rota: `POST /api/health-check`
+- Body: `{ "projectId": "id-do-projeto" }`
 
-```json
-{
-  "projectId": "your-project-id"
-}
-```
+Execução agendada:
 
-Scheduled health check execution:
-
-- Route: `GET /api/cron/health-check`
+- Rota: `GET /api/cron/health-check`
 - Header: `Authorization: Bearer <CRON_SECRET>`
 
-Manual and scheduled runs both persist results to Firestore.
+Execuções manuais e agendadas persistem resultados no Firestore.
 
-## Expected monitored project configuration
+## Configuração esperada do projeto monitorado
 
-For each monitored project, configure the relevant URLs in the dashboard:
+Para cada projeto, configure no dashboard as URLs relevantes:
 
-- `frontHealthCheckUrl` for public frontend availability checks
-- `backHealthCheckUrl` for backend/API health checks
-- `cypressRunUrl` only for legacy remote Cypress execution
-- `playwrightRunUrl` for the remote Playwright trigger
+- `frontHealthCheckUrl` para checagem de disponibilidade do front
+- `backHealthCheckUrl` para health do back/API
+- `cypressRunUrl` apenas para execução remota legada do Cypress
+- `playwrightRunUrl` para o disparo remoto do Playwright
 
-The remote Playwright or Cypress endpoint should return JSON with these fields when possible:
+O endpoint remoto (Playwright ou Cypress) deve retornar JSON com os campos quando possível: `success`, `passed`, `failed`, `skipped`, `totalTests`, `duration`, `specFiles`, `output`, `error`.
 
-- `success`
-- `passed`
-- `failed`
-- `skipped`
-- `totalTests`
-- `duration`
-- `specFiles`
-- `output`
-- `error`
+## Persistência no Firestore
 
-## Firestore persistence
-
-Execution results are stored in these collections:
+Resultados são armazenados nas coleções:
 
 - `healthCheckResults`
 - `cypressResults`
 - `playwrightResults`
 
-Projects are read from `projects`, and only active projects are processed by cron routes.
+Projetos vêm da coleção `projects`; apenas projetos ativos são processados pelas rotas de cron.

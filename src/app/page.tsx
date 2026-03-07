@@ -59,17 +59,17 @@ export default function LoginPage() {
       await signInWithGoogle()
     } catch {
       setError(
-        'Google sign-in failed. Check your Firebase configuration and try again.',
+        'Falha ao entrar com Google. Verifique a configuração do Firebase e tente novamente.',
       )
       setIsSigningIn(false)
     }
   }
 
   const message = loading
-    ? 'Validating current session...'
+    ? 'Validando sessão atual...'
     : user
-      ? 'Redirecting to the dashboard...'
-      : 'Authenticate with Google to access the monitoring cockpit.'
+      ? 'Redirecionando para o painel...'
+      : 'Autentique com Google para acessar o painel de monitoramento.'
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10 sm:px-6">
@@ -80,17 +80,17 @@ export default function LoginPage() {
               RBIN App Monitor
             </p>
             <h1 className="mt-4 max-w-xl text-4xl font-semibold leading-tight text-white sm:text-5xl">
-              Welcome Back
+              Bem-vindo de volta
             </h1>
             <p className="mt-4 max-w-2xl text-base text-slate-300/80 sm:text-lg">
-              Centralize frontend uptime, backend health, and remote Playwright
-              execution in one dark glass workspace.
+              Centralize disponibilidade do front, saúde do back e execução
+              remota do Playwright em um único painel.
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               <div className="glass-surface rounded-[1.5rem] p-4">
                 <p className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-slate-400/80">
-                  Checks
+                  Checagens
                 </p>
                 <p className="mt-2 text-lg font-semibold text-white">
                   Front + API
@@ -98,18 +98,18 @@ export default function LoginPage() {
               </div>
               <div className="glass-surface rounded-[1.5rem] p-4">
                 <p className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-slate-400/80">
-                  Runs
+                  Execuções
                 </p>
                 <p className="mt-2 text-lg font-semibold text-white">
-                  Playwright first
+                  Playwright em primeiro
                 </p>
               </div>
               <div className="glass-surface rounded-[1.5rem] p-4">
                 <p className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-slate-400/80">
-                  Storage
+                  Armazenamento
                 </p>
                 <p className="mt-2 text-lg font-semibold text-white">
-                  Firebase history
+                  Histórico no Firebase
                 </p>
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function LoginPage() {
                 RB
               </div>
               <CardTitle className="mt-6 text-center text-3xl">
-                Welcome Back
+                Bem-vindo de volta
               </CardTitle>
               <CardDescription className="mt-2 text-center">
                 {message}
@@ -136,7 +136,7 @@ export default function LoginPage() {
                   className="w-full"
                 >
                   <GoogleMark />
-                  {isSigningIn ? 'Signing in...' : 'Sign in with Google'}
+                  {isSigningIn ? 'Entrando...' : 'Entrar com Google'}
                 </Button>
               </div>
 
@@ -148,12 +148,11 @@ export default function LoginPage() {
 
               <div className="mt-8 rounded-[1.5rem] border border-white/10 bg-slate-950/28 p-4">
                 <p className="font-mono text-[0.68rem] uppercase tracking-[0.22em] text-slate-400/75">
-                  Google-only access
+                  Acesso apenas com Google
                 </p>
                 <p className="mt-2 text-sm text-slate-300/80">
-                  Email/password, Apple, and GitHub sign-in paths were removed.
-                  Access is now managed only through Firebase Google
-                  authentication.
+                  Login por e-mail/senha, Apple e GitHub foi removido. O acesso
+                  é feito apenas pela autenticação Google do Firebase.
                 </p>
               </div>
             </CardContent>

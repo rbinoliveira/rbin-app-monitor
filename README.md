@@ -1,276 +1,185 @@
 # RBIN App Monitor
 
-Monitor your applications health, run Cypress tests and receive email notifications.
+Monitore a saúde das suas aplicações, execute testes Playwright e receba notificações por e-mail.
 
-## Features
+## Funcionalidades
 
-- 🏥 **Health Checks**: Monitor front-end (page) and back-end (API) health
-- 🧪 **Cypress Integration**: Run E2E tests automatically or on-demand
-- 📧 **Email Notifications**: Get alerts when health checks fail or Cypress tests fail
-- 📊 **Dashboard**: View project status and execution history
-- ⚡ **Automated Monitoring**: Scheduled health checks and test runs
+- 🏥 **Health checks**: monitore a saúde do front (página) e do back (API)
+- 🧪 **Integração Playwright**: execute testes E2E automaticamente ou sob demanda
+- 📧 **Notificações por e-mail**: alertas quando health checks ou testes Playwright falharem
+- 📊 **Dashboard**: visualize o status dos projetos e o histórico de execuções
+- ⚡ **Monitoramento automatizado**: health checks e execuções de testes agendados
 
-## Getting Started
+## Começando
 
-### Prerequisites
+### Pré-requisitos
 
-- Node.js 18+ and npm/yarn/pnpm
-- Firebase project with Firestore enabled
-- SMTP credentials for sending email (e.g. Gmail, SendGrid, Mailgun)
+- Node.js 18+ e npm/yarn/pnpm
+- Projeto Firebase com Firestore habilitado
+- Credenciais SMTP para envio de e-mail (ex.: Gmail, SendGrid, Mailgun)
 
-### Installation
+### Instalação
 
-1. Clone the repository:
+1. Clone o repositório:
+
 ```bash
-git clone <repository-url>
+git clone <url-do-repositorio>
 cd rbin-app-monitor
 ```
 
-2. Install dependencies:
+2. Instale as dependências:
+
 ```bash
 npm install
-# or
+# ou
 yarn install
-# or
+# ou
 pnpm install
 ```
 
-3. Set up environment variables (see [Environment Variables](#environment-variables) section)
+3. Configure as variáveis de ambiente (veja a seção [Variáveis de ambiente](#variáveis-de-ambiente))
 
-4. Run the development server:
+4. Inicie o servidor de desenvolvimento:
+
 ```bash
 npm run dev
-# or
+# ou
 yarn dev
-# or
+# ou
 pnpm dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+5. Abra [http://localhost:3000](http://localhost:3000) no navegador
 
-## Environment Variables
+## Variáveis de ambiente
 
-Create a `.env.local` file in the root directory with the following variables:
+Crie um arquivo `.env.local` na raiz do projeto com as variáveis abaixo.
 
-### Firebase Configuration (Client-side)
+### Configuração Firebase (client-side)
 
-These variables are exposed to the browser (required `NEXT_PUBLIC_` prefix):
+Essas variáveis são expostas ao navegador (prefixo obrigatório `NEXT_PUBLIC_`):
 
 ```env
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+NEXT_PUBLIC_FIREBASE_API_KEY=sua_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=seu_projeto
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=seu_projeto.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=seu_app_id
 ```
 
-**How to get these values:**
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project
-3. Go to Project Settings > General
-4. Scroll to "Your apps" section
-5. Copy the config values from your web app
+**Como obter:** Firebase Console > Projeto > Configurações do projeto > Geral > Seção "Seus apps" > copie a configuração do app web.
 
-**Enable Google Sign-In:**
-1. Go to Firebase Console > Authentication > Sign-in method
-2. Click on "Google" provider and enable it
-3. Set your project support email
-4. For production, add your domain to the "Authorized domains" list
+**Habilitar login com Google:** Firebase Console > Autenticação > Método de login > Provedor "Google" > ativar e configurar e-mail de suporte. Em produção, adicione seu domínio em "Domínios autorizados".
 
-### Firebase Admin Configuration (Server-side)
+### Configuração Firebase Admin (server-side)
 
-Choose one of the following options:
-
-#### Option 1: Service Account JSON (Recommended for Vercel)
+**Opção 1: JSON da conta de serviço (recomendado para Vercel)**
 
 ```env
 FIREBASE_SERVICE_ACCOUNT_KEY={"type":"service_account","project_id":"...","private_key":"...","client_email":"..."}
 ```
 
-**How to get this:**
-1. Go to Firebase Console > Project Settings > Service Accounts
-2. Click "Generate new private key"
-3. Copy the entire JSON content and paste it as a single line (or escaped JSON string)
+Obtenha em: Firebase Console > Configurações do projeto > Contas de serviço > Gerar nova chave privada. Cole o JSON em uma única linha (ou string escapada).
 
-#### Option 2: Individual Environment Variables
+**Opção 2: Variáveis individuais**
 
 ```env
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your_project_id.iam.gserviceaccount.com
+FIREBASE_PROJECT_ID=seu_projeto
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@seu_projeto.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
-**How to get these:**
-1. Same as Option 1, but extract individual fields from the JSON
+### Notificações por e-mail
 
-### Email Notifications
+Os alertas (health check falhou/restaurado, Playwright falhou) são enviados para `NOTIFICATION_EMAIL_TO`.
 
-Alerts (health check failed/restored, Cypress failed) are sent to `NOTIFICATION_EMAIL_TO`.
-
-**Option A – Resend (recommended, free tier: 100 emails/day, 3,000/month)**  
-Uses only an API key (no SMTP password). Sign up at [resend.com](https://resend.com), create an API key at [resend.com/api-keys](https://resend.com/api-keys).
+**Opção A – Resend (recomendado)**  
+Apenas API key. Cadastro em [resend.com](https://resend.com), criar API key em [resend.com/api-keys](https://resend.com/api-keys).
 
 ```env
 RESEND_API_KEY=re_xxxxxxxxxxxx
-NOTIFICATION_EMAIL_TO=your@email.com
+NOTIFICATION_EMAIL_TO=seu@email.com
 ```
 
-For testing you can use the default sender `onboarding@resend.dev`. For production, add and verify your domain in Resend and set:
+Para testes pode usar o remetente padrão `onboarding@resend.dev`. Em produção, adicione e verifique seu domínio no Resend e defina:
 
 ```env
-RESEND_FROM=App Monitor <noreply@yourdomain.com>
+RESEND_FROM=App Monitor <noreply@seudominio.com>
 ```
 
-**Option B – SMTP**  
-If you don’t set `RESEND_API_KEY`, the app uses SMTP (Gmail, SendGrid, Mailgun, etc.):
+**Opção B – SMTP**  
+Se não definir `RESEND_API_KEY`, o app usa SMTP (Gmail, SendGrid, Mailgun, etc.):
 
 ```env
-SMTP_HOST=smtp.example.com
+SMTP_HOST=smtp.exemplo.com
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=your_smtp_user
-SMTP_PASS=your_smtp_password
-NOTIFICATION_EMAIL_TO=alerts@example.com
+SMTP_USER=seu_usuario
+SMTP_PASS=sua_senha
+NOTIFICATION_EMAIL_TO=alertas@exemplo.com
 ```
 
-### API Security (Optional but Recommended)
+### Segurança da API (opcional, recomendado)
 
 ```env
-API_SECRET_KEY=your_random_secret_key_here
+API_SECRET_KEY=sua_chave_secreta_aleatoria
 ```
 
-Generate a random secret key for protecting cron endpoints. You can use:
+Gere uma chave aleatória, por exemplo:
+
 ```bash
 openssl rand -base64 32
 ```
 
-## Project Structure
+## Estrutura do projeto
 
 ```
 src/
-├── app/                    # Next.js App Router pages and API routes
-│   ├── api/               # API routes
-│   │   ├── health-check/  # Health check endpoints
-│   │   ├── cypress/       # Cypress test execution
-│   │   └── notify/        # Notification endpoints
-│   ├── projects/          # Project management pages
-│   └── history/           # Execution history
-├── components/            # React components
-│   ├── layout/            # Layout components (Header, Sidebar)
-│   └── ui/                # UI components (Button, Card, Input, etc.)
-├── hooks/                 # Custom React hooks
-├── lib/                   # Utility libraries
-│   ├── firebase.ts        # Firebase client-side config
-│   ├── firebase-admin.ts  # Firebase Admin server-side config
-│   └── utils.ts           # Utility functions
-├── services/              # Business logic services
-└── types/                 # TypeScript type definitions
+├── app/                    # Rotas do App Router e APIs
+│   ├── api/               # Rotas de API
+│   │   ├── health-check/  # Health check
+│   │   ├── playwright/    # Execução de testes Playwright
+│   │   └── notify/        # Notificações
+│   ├── projects/          # Páginas de projetos
+│   └── history/           # Histórico de execuções
+├── features/              # Lógica por domínio
+├── shared/                # Componentes, libs e tipos compartilhados
 ```
 
-## Development
+## Desenvolvimento
 
-### Available Scripts
+### Scripts disponíveis
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run format` - Format code with Prettier
+- `npm run dev` – Servidor de desenvolvimento
+- `npm run build` – Build de produção
+- `npm run start` – Servidor de produção
+- `npm run lint` – ESLint
+- `npm run format` – Prettier
 
-### Code Style
+### Estilo de código
 
-This project uses:
-- **ESLint** for linting
-- **Prettier** for code formatting
-- **TypeScript** for type safety
+- **ESLint** para lint
+- **Prettier** para formatação
+- **TypeScript** em modo estrito
 
-## Deployment
+## Deploy
 
-### Vercel (Recommended)
+### Vercel (recomendado)
 
-#### Automatic Deployment
+1. Envie o código para GitHub/GitLab/Bitbucket
+2. Importe o projeto no [Vercel](https://vercel.com)
+3. Adicione as variáveis de ambiente no dashboard do Vercel
+4. O deploy ocorre automaticamente a cada push na branch principal
 
-1. Push your code to GitHub/GitLab/Bitbucket
-2. Import project in [Vercel](https://vercel.com)
-3. Vercel will automatically detect Next.js and configure deployment
-4. Add environment variables in Vercel dashboard (see below)
-5. Deploy automatically happens on every push to main branch
+Para deploy manual: `npm i -g vercel` e depois `vercel`.
 
-#### Manual Deployment
+Configure `CRON_SECRET` para os cron jobs e `NEXT_PUBLIC_APP_URL` com a URL do deploy.
 
-```bash
-# Install Vercel CLI
-npm i -g vercel
+### Firebase Hosting
 
-# Deploy
-vercel
-```
+O projeto inclui configuração para Firebase Hosting. Para uso completo (APIs e cron), o Vercel é recomendado; o Hosting do Firebase atende bem páginas estáticas.
 
-### Environment Variables in Vercel
-
-Make sure to add all environment variables in Vercel's dashboard:
-- Go to Project Settings > Environment Variables
-- Add all variables from `.env.local`
-- For `FIREBASE_SERVICE_ACCOUNT_KEY`, paste the entire JSON as a single line
-- Set `CRON_SECRET` for cron job authentication
-- Set `NEXT_PUBLIC_APP_URL` to your Vercel deployment URL
-
-### Vercel Configuration
-
-The project includes `vercel.json` with cron job configuration:
-- Cypress tests run daily at 2 AM UTC
-- Health checks run every hour
-
-Make sure to set `CRON_SECRET` environment variable in Vercel for cron authentication.
-
-### Firebase Deployment
-
-#### Prerequisites
-
-1. Install Firebase CLI:
-```bash
-npm install -g firebase-tools
-```
-
-2. Login to Firebase:
-```bash
-firebase login
-```
-
-3. Initialize Firebase (if not already done):
-```bash
-firebase init
-```
-
-#### Deploy to Firebase Hosting
-
-```bash
-# Build the application
-pnpm build
-
-# Deploy to Firebase
-firebase deploy --only hosting
-```
-
-#### Automatic Deployment via GitHub Actions
-
-The project includes `.github/workflows/firebase-deploy.yml` for automatic deployment:
-- Deploys on push to `main` branch
-- Can be triggered manually via `workflow_dispatch`
-- Requires `FIREBASE_SERVICE_ACCOUNT_KEY` secret in GitHub
-
-**Setup GitHub Secrets:**
-1. Go to GitHub repository Settings > Secrets and variables > Actions
-2. Add `FIREBASE_SERVICE_ACCOUNT_KEY` with your Firebase service account JSON
-3. Add all Firebase environment variables (same as Vercel)
-
-**Note:** Firebase Hosting configuration is provided, but Next.js API routes require a Node.js server. For full functionality, consider:
-- Using Vercel for deployment (recommended - supports API routes and cron jobs)
-- Setting up Firebase Functions for API routes (more complex setup)
-- Using Firebase Hosting only for static pages (API routes won't work)
-
-## License
+## Licença
 
 MIT
-

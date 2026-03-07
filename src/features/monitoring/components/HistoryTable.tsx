@@ -19,8 +19,8 @@ import { HEALTH_CHECK_TYPE_LABELS } from '@/shared/types'
 
 function getHealthCheckTypeLabel(type: string): string {
   if (type === 'front' || type === 'back') return HEALTH_CHECK_TYPE_LABELS[type]
-  if (type === 'web' || type === 'wordpress') return 'Front'
-  if (type === 'rest') return 'Back'
+  if (type === 'web' || type === 'wordpress') return 'Frente'
+  if (type === 'rest') return 'API'
   return type
 }
 
@@ -78,14 +78,14 @@ export function HistoryTable({
           return {
             ...item,
             itemType: 'cypress' as const,
-            displayName: `Cypress Tests - ${item.projectName}`,
+            displayName: `Testes Cypress - ${item.projectName}`,
           }
         }
         if (isPlaywrightResult(item)) {
           return {
             ...item,
             itemType: 'playwright' as const,
-            displayName: `Playwright Tests - ${item.projectName}`,
+            displayName: `Testes Playwright - ${item.projectName}`,
           }
         }
         return null
@@ -99,30 +99,30 @@ export function HistoryTable({
         <div className="grid gap-4 md:grid-cols-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              Type
+              Tipo
             </label>
             <select
               value={filters.type || ''}
               onChange={(e) => handleFilterChange('type', e.target.value)}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             >
-              <option value="">All</option>
-              <option value="health_check">Health Checks</option>
-              <option value="cypress">Cypress Tests</option>
-              <option value="playwright">Playwright Tests</option>
+              <option value="">Todos</option>
+              <option value="health_check">Health checks</option>
+              <option value="cypress">Testes Cypress</option>
+              <option value="playwright">Testes Playwright</option>
             </select>
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              Project
+              Projeto
             </label>
             <select
               value={filters.projectId || ''}
               onChange={(e) => handleFilterChange('projectId', e.target.value)}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             >
-              <option value="">All Projects</option>
+              <option value="">Todos os projetos</option>
               {projects.map((project) => (
                 <option key={project.id} value={project.id}>
                   {project.name}
@@ -133,7 +133,7 @@ export function HistoryTable({
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              Start Date
+              Data inicial
             </label>
             <Input
               type="date"
@@ -144,7 +144,7 @@ export function HistoryTable({
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              End Date
+              Data final
             </label>
             <Input
               type="date"
@@ -161,19 +161,19 @@ export function HistoryTable({
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Type
+                  Tipo
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Project
+                  Projeto
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Details
+                  Detalhes
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Timestamp
+                  Data/hora
                 </th>
               </tr>
             </thead>
@@ -203,7 +203,7 @@ export function HistoryTable({
                         />
                       </svg>
                       <p className="mt-4 text-sm text-gray-500">
-                        Loading history...
+                        Carregando histórico...
                       </p>
                     </div>
                   </td>
@@ -216,7 +216,7 @@ export function HistoryTable({
                     colSpan={5}
                     className="px-6 py-12 text-center text-sm text-gray-500"
                   >
-                    No history found
+                    Nenhum registro encontrado
                   </td>
                 </tr>
               )}
@@ -244,7 +244,7 @@ export function HistoryTable({
                                 : 'bg-danger-100 text-danger-800'
                             }`}
                           >
-                            {item.success ? 'Success' : 'Failed'}
+                            {item.success ? 'Sucesso' : 'Falha'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">

@@ -23,13 +23,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div>
                 <p className="app-header-title">RBIN Monitor</p>
                 <p className="app-header-copy">
-                  {user?.email ?? 'Application monitoring command center'}
+                  {user?.email ?? 'Painel de monitoramento de aplicações'}
                 </p>
               </div>
             </div>
 
             <Button variant="ghost" size="sm" onClick={signOut}>
-              Sign out
+              Sair
             </Button>
           </div>
         </header>

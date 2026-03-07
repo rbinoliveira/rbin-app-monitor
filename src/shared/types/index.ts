@@ -15,8 +15,8 @@ export type FirestoreTimestamp = {
 }
 
 export const HEALTH_CHECK_TYPE_LABELS: Record<HealthCheckType, string> = {
-  front: 'Front',
-  back: 'Back',
+  front: 'Frente',
+  back: 'API',
 }
 
 // ============================================

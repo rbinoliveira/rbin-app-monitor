@@ -32,17 +32,17 @@ const STATUS: Record<
   { label: string; dot: string; text: string }
 > = {
   healthy: {
-    label: 'Healthy',
+    label: 'Saudável',
     dot: 'bg-emerald-400',
     text: 'text-emerald-300',
   },
   unhealthy: {
-    label: 'Unhealthy',
+    label: 'Com falha',
     dot: 'bg-rose-400',
     text: 'text-rose-300',
   },
   unknown: {
-    label: 'Unknown',
+    label: 'Desconhecido',
     dot: 'bg-slate-500',
     text: 'text-slate-300',
   },
@@ -56,10 +56,14 @@ function isHealthCheckResult(
 
 function formatExecutionLabel(item: ExecutionHistoryItem): string {
   if (isHealthCheckResult(item)) {
-    return `${item.type === 'front' ? 'Front' : 'Back'} health check`
+    return item.type === 'front'
+      ? 'Health check frente'
+      : 'Health check API'
   }
 
-  return item.runner === 'playwright' ? 'Playwright run' : 'Cypress run'
+  return item.runner === 'playwright'
+    ? 'Execução Playwright'
+    : 'Execução Cypress'
 }
 
 function formatExecutionDetails(item: ExecutionHistoryItem): string {
@@ -107,11 +111,11 @@ function SummaryCards({ projects }: { projects: Project[] }) {
     .sort((left, right) => (right! > left! ? 1 : -1))[0]
 
   const cards = [
-    { label: 'Total Apps', value: total, accent: 'text-cyan-300' },
-    { label: 'Healthy', value: healthy, accent: 'text-emerald-300' },
-    { label: 'Failing', value: unhealthy, accent: 'text-rose-300' },
+    { label: 'Total de apps', value: total, accent: 'text-cyan-300' },
+    { label: 'Saudáveis', value: healthy, accent: 'text-emerald-300' },
+    { label: 'Com falha', value: unhealthy, accent: 'text-rose-300' },
     {
-      label: 'Last Check',
+      label: 'Última checagem',
       value: lastCheck ? new Date(lastCheck).toLocaleTimeString() : '—',
       accent: 'text-violet-300',
       compact: true,
@@ -181,10 +185,10 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create project')
+        throw new Error(data.error || 'Falha ao criar projeto')
       }
 
-      addToast('Project created successfully', 'success')
+      addToast('Projeto criado com sucesso', 'success')
       setForm({
         name: '',
         frontHealthCheckUrl: '',
@@ -195,7 +199,7 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
       await onSuccess()
     } catch (error) {
       addToast(
-        error instanceof Error ? error.message : 'Failed to create project',
+        error instanceof Error ? error.message : 'Falha ao criar projeto',
         'error',
       )
     } finally {
@@ -206,10 +210,10 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
   return (
     <Modal open={open} onClose={onClose}>
       <ModalHeader>
-        <ModalTitle>Add monitored application</ModalTitle>
+        <ModalTitle>Adicionar aplicação monitorada</ModalTitle>
         <p className="mt-1 text-sm text-slate-300/80">
-          Register a frontend, backend, and optional remote test endpoints for
-          one project.
+          Cadastre front, back e, se quiser, a URL de disparo remoto de testes
+          para um projeto.
         </p>
       </ModalHeader>
       <ModalContent>
@@ -219,41 +223,41 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
           className="space-y-4"
         >
           <Input
-            label="Project name"
+            label="Nome do projeto"
             value={form.name}
             onChange={setField('name')}
-            placeholder="Payments API"
+            placeholder="Ex.: API Pagamentos"
             required
           />
           <Input
-            label="Frontend URL"
+            label="URL do front"
             value={form.frontHealthCheckUrl ?? ''}
             onChange={setField('frontHealthCheckUrl')}
-            placeholder="https://app.example.com"
+            placeholder="https://app.exemplo.com"
             type="url"
           />
           <Input
-            label="Backend health URL"
+            label="URL de health do back"
             value={form.backHealthCheckUrl ?? ''}
             onChange={setField('backHealthCheckUrl')}
-            placeholder="https://api.example.com/health"
+            placeholder="https://api.exemplo.com/health"
             type="url"
           />
           <Input
-            label="Playwright trigger"
+            label="URL de disparo Playwright"
             value={form.playwrightRunUrl ?? ''}
             onChange={setField('playwrightRunUrl')}
-            placeholder="https://ci.example.com/api/playwright/run"
+            placeholder="https://ci.exemplo.com/api/playwright/run"
             type="url"
           />
         </form>
       </ModalContent>
       <ModalFooter>
         <Button variant="ghost" onClick={onClose} disabled={loading}>
-          Cancel
+          Cancelar
         </Button>
         <Button type="submit" form="add-project-form" loading={loading}>
-          Create project
+          Criar projeto
         </Button>
       </ModalFooter>
     </Modal>
@@ -312,14 +316,14 @@ function EditProjectModal({
       })
       const data = await response.json()
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to update project')
+        throw new Error(data.error || 'Falha ao atualizar projeto')
       }
-      addToast('Project updated successfully', 'success')
+      addToast('Projeto atualizado com sucesso', 'success')
       onClose()
       await onSuccess()
     } catch (error) {
       addToast(
-        error instanceof Error ? error.message : 'Failed to update project',
+        error instanceof Error ? error.message : 'Falha ao atualizar projeto',
         'error',
       )
     } finally {
@@ -330,9 +334,9 @@ function EditProjectModal({
   return (
     <Modal open={open} onClose={onClose}>
       <ModalHeader>
-        <ModalTitle>Edit application</ModalTitle>
+        <ModalTitle>Editar aplicação</ModalTitle>
         <p className="mt-1 text-sm text-slate-300/80">
-          Update name and URLs for this monitored application.
+          Atualize nome e URLs desta aplicação monitorada.
         </p>
       </ModalHeader>
       <ModalContent>
@@ -342,41 +346,41 @@ function EditProjectModal({
           className="space-y-4"
         >
           <Input
-            label="Project name"
+            label="Nome do projeto"
             value={form.name ?? ''}
             onChange={setField('name')}
-            placeholder="Payments API"
+            placeholder="Ex.: API Pagamentos"
             required
           />
           <Input
-            label="Frontend URL"
+            label="URL do front"
             value={form.frontHealthCheckUrl ?? ''}
             onChange={setField('frontHealthCheckUrl')}
-            placeholder="https://app.example.com"
+            placeholder="https://app.exemplo.com"
             type="url"
           />
           <Input
-            label="Backend health URL"
+            label="URL de health do back"
             value={form.backHealthCheckUrl ?? ''}
             onChange={setField('backHealthCheckUrl')}
-            placeholder="https://api.example.com/health"
+            placeholder="https://api.exemplo.com/health"
             type="url"
           />
           <Input
-            label="Playwright trigger"
+            label="URL de disparo Playwright"
             value={form.playwrightRunUrl ?? ''}
             onChange={setField('playwrightRunUrl')}
-            placeholder="https://ci.example.com/api/playwright/run"
+            placeholder="https://ci.exemplo.com/api/playwright/run"
             type="url"
           />
         </form>
       </ModalContent>
       <ModalFooter>
         <Button variant="ghost" onClick={onClose} disabled={loading}>
-          Cancel
+          Cancelar
         </Button>
         <Button type="submit" form="edit-project-form" loading={loading}>
-          Save changes
+          Salvar alterações
         </Button>
       </ModalFooter>
     </Modal>
@@ -406,7 +410,7 @@ function ProjectRow({
 
   const runAction = async (label: string, url: string, body: object) => {
     setRunningAction(label)
-    addToast(`Running ${label}...`, 'info')
+    addToast(`Executando ${label}...`, 'info')
 
     try {
       const response = await fetch(url, {
@@ -417,14 +421,14 @@ function ProjectRow({
       const data = await response.json()
 
       if (!data.success) {
-        throw new Error(data.error || `${label} failed`)
+        throw new Error(data.error || `${label} falhou`)
       }
 
-      addToast(`${label} completed successfully`, 'success')
+      addToast(`${label} concluído com sucesso`, 'success')
       await onRefresh()
     } catch (error) {
       addToast(
-        error instanceof Error ? error.message : `${label} failed`,
+        error instanceof Error ? error.message : `${label} falhou`,
         'error',
       )
     } finally {
@@ -442,17 +446,19 @@ function ProjectRow({
       const data = await response.json()
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to toggle project')
+        throw new Error(data.error || 'Falha ao ativar/desativar projeto')
       }
 
       addToast(
-        `Project ${project.isActive ? 'deactivated' : 'activated'}`,
+        project.isActive
+          ? 'Projeto desativado'
+          : 'Projeto ativado',
         'success',
       )
       await onRefresh()
     } catch (error) {
       addToast(
-        error instanceof Error ? error.message : 'Failed to toggle project',
+        error instanceof Error ? error.message : 'Falha ao ativar/desativar projeto',
         'error',
       )
     }
@@ -487,8 +493,8 @@ function ProjectRow({
                 </span>
               </div>
               <div className="mt-2 flex flex-wrap gap-2 text-xs uppercase tracking-[0.18em] text-slate-400/80">
-                {project.frontHealthCheckUrl && <span>Front</span>}
-                {project.backHealthCheckUrl && <span>Back</span>}
+                {project.frontHealthCheckUrl && <span>Frente</span>}
+                {project.backHealthCheckUrl && <span>API</span>}
                 {project.playwrightRunUrl && <span>Playwright</span>}
               </div>
             </div>
@@ -498,16 +504,16 @@ function ProjectRow({
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="min-w-0">
                 <p className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-slate-400/80">
-                  Latest execution
+                  Última execução
                 </p>
                 <p className="mt-1 text-sm text-slate-100">
                   {latestExecution
                     ? `${formatExecutionLabel(latestExecution)} • ${
-                        latestExecution.success ? 'Success' : 'Failed'
+                        latestExecution.success ? 'Sucesso' : 'Falha'
                       }`
                     : historyLoading
-                      ? 'Loading execution history...'
-                      : 'No execution history yet'}
+                      ? 'Carregando histórico...'
+                      : 'Nenhuma execução ainda'}
                 </p>
                 {latestExecution && (
                   <p className="mt-1 truncate text-sm text-slate-400/80">
@@ -527,7 +533,7 @@ function ProjectRow({
                   onClick={() => setExpanded((current) => !current)}
                   disabled={historyItems.length === 0}
                 >
-                  {expanded ? 'Hide history' : 'Show history'}
+                  {expanded ? 'Ocultar histórico' : 'Ver histórico'}
                 </Button>
               </div>
             </div>
@@ -542,7 +548,7 @@ function ProjectRow({
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-sm text-white">
                         {formatExecutionLabel(item)} •{' '}
-                        {item.success ? 'Success' : 'Failed'}
+                        {item.success ? 'Sucesso' : 'Falha'}
                       </p>
                       <span className="text-xs text-slate-400/75">
                         {new Date(item.timestamp).toLocaleString()}
@@ -595,7 +601,7 @@ function ProjectRow({
             onClick={() => onEdit(project)}
             disabled={isRunning}
           >
-            Edit
+            Editar
           </Button>
           <Button
             size="sm"
@@ -603,7 +609,7 @@ function ProjectRow({
             onClick={handleToggle}
             disabled={isRunning}
           >
-            {project.isActive ? 'Disable' : 'Enable'}
+            {project.isActive ? 'Desativar' : 'Ativar'}
           </Button>
         </div>
       </div>
@@ -631,7 +637,7 @@ function DashboardScreen() {
       const result = await response.json()
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to load execution history')
+        throw new Error(result.error || 'Falha ao carregar histórico de execuções')
       }
 
       const items = (result.data?.items ?? []) as ExecutionHistoryItem[]
@@ -654,7 +660,7 @@ function DashboardScreen() {
       setHistoryError(
         error instanceof Error
           ? error.message
-          : 'Failed to load execution history',
+          : 'Falha ao carregar histórico de execuções',
       )
       setHistoryByProject({})
     } finally {
@@ -676,23 +682,23 @@ function DashboardScreen() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <p className="font-mono text-[0.72rem] uppercase tracking-[0.26em] text-cyan-300/80">
-              Monitoring cockpit
+              Painel de monitoramento
             </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Unified monitoring for health checks and remote test runs.
+              Monitoramento unificado: health checks e execuções remotas de testes.
             </h1>
             <p className="mt-3 max-w-xl text-sm text-slate-300/80 sm:text-base">
-              One surface for manual triggers, latest execution context, and
-              active app status.
+              Um único painel para disparos manuais, última execução e status
+              das aplicações ativas.
             </p>
           </div>
 
           <div className="glass-surface rounded-[1.5rem] px-4 py-3">
             <p className="text-xs uppercase tracking-[0.18em] text-slate-400/75">
-              Signed in as
+              Conectado como
             </p>
             <p className="mt-1 text-sm font-medium text-white">
-              {user?.displayName || user?.email || 'Operator'}
+              {user?.displayName || user?.email || 'Operador'}
             </p>
           </div>
         </div>
@@ -705,21 +711,21 @@ function DashboardScreen() {
       <section className="mt-8">
         <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-white">Applications</h2>
+            <h2 className="text-xl font-semibold text-white">Aplicações</h2>
             <p className="mt-1 text-sm text-slate-400/80">
-              Trigger checks manually, inspect the latest execution, and keep
-              only active apps in rotation.
+              Dispare checagens manualmente, veja a última execução e mantenha
+              só as aplicações ativas em rotação.
             </p>
           </div>
 
           <Button onClick={() => setAddOpen(true)} size="lg">
-            Add application
+            Adicionar aplicação
           </Button>
         </div>
 
         {loading && (
           <div className="glass-surface rounded-[1.75rem] p-8 text-center text-slate-300/80">
-            Loading monitored applications...
+            Carregando aplicações monitoradas...
           </div>
         )}
 
@@ -738,11 +744,11 @@ function DashboardScreen() {
         {!loading && !error && projects.length === 0 && (
           <div className="glass-surface rounded-[1.75rem] p-10 text-center">
             <p className="text-lg font-medium text-white">
-              No applications registered yet.
+              Nenhuma aplicação cadastrada ainda.
             </p>
             <p className="mt-2 text-sm text-slate-400/80">
-              Add your first monitored app to start recording health and test
-              execution data.
+              Adicione a primeira aplicação para começar a registrar health checks
+              e execuções de testes.
             </p>
           </div>
         )}

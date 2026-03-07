@@ -18,17 +18,17 @@ const statusConfig: Record<
   { label: string; color: string; bgColor: string }
 > = {
   healthy: {
-    label: 'Healthy',
+    label: 'Saudável',
     color: 'text-success-700',
     bgColor: 'bg-success-100',
   },
   unhealthy: {
-    label: 'Unhealthy',
+    label: 'Com falha',
     color: 'text-danger-700',
     bgColor: 'bg-danger-100',
   },
   unknown: {
-    label: 'Unknown',
+    label: 'Desconhecido',
     color: 'text-gray-700',
     bgColor: 'bg-gray-100',
   },
@@ -46,7 +46,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
     e.stopPropagation()
 
     setIsRunningTests(true)
-    addToast('Running Playwright tests...', 'info')
+    addToast('Executando testes Playwright...', 'info')
 
     try {
       const response = await fetch('/api/playwright/run', {
@@ -67,21 +67,21 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
         if (failed > 0) {
           addToast(
-            `Tests failed: ${failed}/${totalTests} failed in ${durationSeconds}s`,
+            `Testes falharam: ${failed}/${totalTests} em ${durationSeconds}s`,
             'error',
           )
         } else {
           addToast(
-            `All tests passed: ${passed}/${totalTests} in ${durationSeconds}s`,
+            `Todos os testes passaram: ${passed}/${totalTests} em ${durationSeconds}s`,
             'success',
           )
         }
       } else {
-        addToast(result.error || 'Failed to run tests', 'error')
+        addToast(result.error || 'Falha ao executar testes', 'error')
       }
     } catch (error) {
       addToast(
-        error instanceof Error ? error.message : 'Failed to run tests',
+        error instanceof Error ? error.message : 'Falha ao executar testes',
         'error',
       )
     } finally {

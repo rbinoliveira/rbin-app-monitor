@@ -1,109 +1,74 @@
-# Project Registration Requirements
+# Requisitos para cadastro de projeto
 
-This document defines the information required to register a monitored project in RBIN App Monitor and the prerequisites the monitored system must satisfy for health checks and remote test execution to work reliably.
+Este documento define as informações necessárias para cadastrar um projeto monitorado no RBIN App Monitor e os pré-requisitos que o sistema monitorado deve atender para que health checks e execução remota de testes funcionem de forma confiável.
 
-## Required registration fields
+## Campos obrigatórios de cadastro
 
-### 1. Project name
+### 1. Nome do projeto
 
-- Field: `name`
-- Why it matters: this is the human-readable identifier shown in the dashboard, execution history, notifications, and Firestore records.
-- Recommendation: use a stable operational name such as `Billing API`, `Customer Portal`, or `Backoffice`.
+- Campo: `name`
+- Motivo: é o identificador legível mostrado no dashboard, histórico de execuções, notificações e registros no Firestore.
+- Recomendação: use um nome estável, por exemplo `Billing API`, `Customer Portal` ou `Backoffice`.
 
-### 2. Frontend URL
+### 2. URL do frontend
 
-- Field: `frontHealthCheckUrl`
-- Use when: the monitored project exposes a public frontend, landing page, SPA, or web app.
-- Why it matters: the monitor performs a public availability check against this URL and expects a successful HTTP response.
-- Typical examples:
-  - `https://app.example.com`
-  - `https://portal.example.com/login`
+- Campo: `frontHealthCheckUrl`
+- Use quando: o projeto monitorado expõe um front público, landing page, SPA ou web app.
+- Motivo: o monitor faz uma checagem de disponibilidade pública nessa URL e espera resposta HTTP de sucesso.
+- Exemplos: `https://app.example.com`, `https://portal.example.com/login`
 
-### 3. Backend health URL
+### 3. URL de health do backend
 
-- Field: `backHealthCheckUrl`
-- Use when: the monitored project exposes an API, service, worker control endpoint, or dedicated health route.
-- Why it matters: the monitor checks the API surface separately from the frontend and records backend-specific failures.
-- Typical examples:
-  - `https://api.example.com/health`
-  - `https://api.example.com/api/status`
+- Campo: `backHealthCheckUrl`
+- Use quando: o projeto expõe uma API, serviço ou rota de health.
+- Motivo: o monitor verifica o backend separadamente do front e registra falhas específicas.
+- Exemplos: `https://api.example.com/health`, `https://api.example.com/api/status`
 
-### 4. Playwright execution URL
+### 4. URL de execução Playwright
 
-- Field: `playwrightRunUrl`
-- Use when: the monitored project can trigger its own Playwright suite remotely and return a JSON result.
-- Why it matters: Playwright is the current default test runner for new monitored projects.
-- Expected response shape:
-  - `success`
-  - `passed`
-  - `failed`
-  - `skipped`
-  - `totalTests`
-  - `duration`
-  - `specFiles`
-  - `output`
-  - `error`
+- Campo: `playwrightRunUrl`
+- Use quando: o projeto pode disparar sua suíte Playwright remotamente e retornar um resultado JSON.
+- Motivo: Playwright é o runner padrão para novos projetos monitorados.
+- Forma esperada da resposta: `success`, `passed`, `failed`, `skipped`, `totalTests`, `duration`, `specFiles`, `output`, `error`
 
-### 5. Project type
+### 5. Tipo do projeto
 
-- Suggested product-level field: `type`
-- Values:
-  - `front`
-  - `back`
-  - `fullstack`
-- Why it matters: the type clarifies which URLs should be mandatory in the registration flow and how the monitor interprets missing fields.
+- Campo sugerido: `type`
+- Valores: `front`, `back`, `fullstack`
+- Motivo: define quais URLs são obrigatórias no fluxo de cadastro e como o monitor interpreta campos ausentes.
 
-## Minimum registration rules by project type
+## Regras mínimas por tipo de projeto
 
-### Frontend project
+### Projeto frontend
 
-- Required:
-  - `name`
-  - `frontHealthCheckUrl`
-- Optional:
-  - `playwrightRunUrl`
-- Typical case: public website, admin panel, SPA, or marketing site.
+- Obrigatório: `name`, `frontHealthCheckUrl`
+- Opcional: `playwrightRunUrl`
+- Caso típico: site público, painel admin, SPA.
 
-### Backend project
+### Projeto backend
 
-- Required:
-  - `name`
-  - `backHealthCheckUrl`
-- Optional:
-  - `playwrightRunUrl`
-- Typical case: REST API, GraphQL API, microservice, webhook processor.
+- Obrigatório: `name`, `backHealthCheckUrl`
+- Opcional: `playwrightRunUrl`
+- Caso típico: API REST, GraphQL, microserviço.
 
-### Fullstack project
+### Projeto fullstack
 
-- Required:
-  - `name`
-  - at least one of `frontHealthCheckUrl` or `backHealthCheckUrl`
-- Recommended:
-  - provide both frontend and backend URLs when both exist
-  - provide `playwrightRunUrl` if end-to-end tests are available
+- Obrigatório: `name` e pelo menos um de `frontHealthCheckUrl` ou `backHealthCheckUrl`
+- Recomendado: informar ambas as URLs quando existirem e `playwrightRunUrl` se houver testes E2E.
 
-## Prerequisites in the monitored project
+## Pré-requisitos no projeto monitorado
 
-### Health check prerequisites
+### Health check
 
-For the monitor to verify availability consistently, the monitored project should expose stable endpoints:
+Para o monitor verificar a disponibilidade de forma consistente:
 
-- Frontend:
-  - a public URL reachable from the monitor environment
-  - preferably returns HTTP `200`
-  - should not require login, CAPTCHA, or geo-restricted access for the basic uptime check
+- **Frontend:** URL pública acessível do ambiente do monitor, de preferência retornando HTTP 200, sem login/CAPTCHA/restrição geográfica para a checagem básica.
+- **Backend:** endpoint dedicado de health/status (ex.: `/health`, `/ready`, `/api/status`), de preferência HTTP 200 e, idealmente, JSON com status e dependências.
 
-- Backend:
-  - a dedicated health/status endpoint such as `/health`, `/ready`, `/status`, or `/api/status`
-  - preferably returns HTTP `200`
-  - ideally returns structured JSON with service status and optional dependency metadata
-
-Recommended backend JSON examples:
+Exemplos de JSON recomendados:
 
 ```json
-{
-  "status": "ok"
-}
+{ "status": "ok" }
 ```
 
 ```json
@@ -114,83 +79,60 @@ Recommended backend JSON examples:
 }
 ```
 
-### CORS considerations
+### CORS
 
-- Public frontend checks usually do not need CORS adjustments because the monitor performs server-side requests.
-- Remote test trigger endpoints may need to allow requests from the monitor environment if they validate origin or custom headers.
+- Checagens de frontend geralmente não exigem ajuste de CORS (requisições são server-side no monitor).
+- Endpoints de disparo remoto de testes podem precisar permitir origem ou headers do ambiente do monitor.
 
-### Authentication for health routes
+### Autenticação nas rotas de health
 
-- Frontend health URLs should usually remain public.
-- Backend health routes can be public if they return only minimal health metadata.
-- If authentication is required on the backend health route, the current monitor implementation does not yet inject custom credentials for per-project health checks.
-- Recommendation: expose a lightweight, non-sensitive readiness endpoint specifically for monitoring.
+- URLs de health do front costumam ser públicas.
+- Rotas de health do back podem ser públicas se retornarem apenas metadados mínimos.
+- Se a rota de health do back exigir autenticação, a implementação atual do monitor ainda não injeta credenciais por projeto.
+- Recomendação: expor um endpoint leve e não sensível só para monitoramento.
 
-### Remote test execution prerequisites
+### Pré-requisitos para execução remota de testes
 
-To support `playwrightRunUrl`, the monitored project must provide:
+Para suportar `playwrightRunUrl`, o projeto monitorado deve fornecer:
 
-- an HTTP endpoint that starts the test run
-- a JSON response with execution summary fields
-- enough environment configuration in that project to run the suite unattended
-- stable access to test credentials, base URLs, and any required fixtures
+- um endpoint HTTP que inicia a execução dos testes
+- resposta JSON com campos de resumo da execução
+- ambiente configurado para rodar a suíte sem intervenção
+- acesso estável a credenciais, URLs base e fixtures necessários
 
-The monitor does not require an agent or library installed inside the monitored project by default. What it needs is an accessible remote endpoint that the monitored project owns and controls.
+O monitor não exige agente ou biblioteca instalada dentro do projeto monitorado; precisa apenas de um endpoint remoto acessível controlado pelo projeto.
 
-## Do we need to distinguish frontend and backend projects?
+## Distinção entre projeto frontend e backend
 
-Yes. The distinction should exist in the registration model or at least in the UI flow because the monitoring behavior and required fields differ.
+Sim. A distinção deve existir no modelo de cadastro ou no fluxo da UI, pois o comportamento do monitoramento e os campos obrigatórios mudam.
 
-### Frontend health check behavior
+### Comportamento do health check frontend
 
-- The monitor checks a public web URL.
-- Success criteria:
-  - reachable URL
-  - expected HTTP success response, usually `200`
-- Best for:
-  - public apps
-  - portals
-  - dashboards
-  - static sites
+- O monitor checa uma URL web pública.
+- Critério de sucesso: URL acessível e resposta HTTP de sucesso (em geral 200).
+- Adequado para: apps públicos, portais, dashboards, sites estáticos.
 
-### Backend health check behavior
+### Comportamento do health check backend
 
-- The monitor checks an API or health endpoint.
-- Success criteria:
-  - reachable endpoint
-  - expected HTTP success response
-  - optionally structured JSON response from the service
-- Best for:
-  - APIs
-  - worker backends with status routes
-  - internal services exposed through a gateway
+- O monitor checa um endpoint de API ou health.
+- Critério de sucesso: endpoint acessível, resposta HTTP de sucesso e, opcionalmente, JSON com status do serviço.
+- Adequado para: APIs, backends com rotas de status.
 
-### Form impact
+### Impacto no formulário
 
-If the product distinguishes project type explicitly, the registration form can adapt:
+Se o produto distinguir o tipo de projeto explicitamente, o formulário pode:
 
-- `front`:
-  - emphasize `frontHealthCheckUrl`
-  - keep backend URL optional or hidden
+- **front:** destacar `frontHealthCheckUrl`, manter URL do back opcional ou oculta.
+- **back:** destacar `backHealthCheckUrl`, manter URL do front opcional ou oculta.
+- **fullstack:** mostrar os dois campos e explicar que front e back são monitorados de forma independente.
 
-- `back`:
-  - emphasize `backHealthCheckUrl`
-  - keep frontend URL optional or hidden
+Isso reduz confusão e evita cadastros em que falta o alvo principal de monitoramento para aquela arquitetura.
 
-- `fullstack`:
-  - show both fields
-  - explain that frontend and backend health are tracked independently
+## Regras de validação recomendadas no formulário
 
-This reduces operator confusion and avoids registrations where a project is missing the most important monitoring target for its architecture.
-
-## Recommended validation rules for the registration form
-
-- Require `name`
-- Require at least one of:
-  - `frontHealthCheckUrl`
-  - `backHealthCheckUrl`
-  - `playwrightRunUrl`
-- If `type = front`, require `frontHealthCheckUrl`
-- If `type = back`, require `backHealthCheckUrl`
-- If `type = fullstack`, require at least one health URL and recommend both
-- Validate all URLs as absolute `http` or `https` URLs
+- Exigir `name`
+- Exigir pelo menos um de: `frontHealthCheckUrl`, `backHealthCheckUrl`, `playwrightRunUrl`
+- Se `type = front`, exigir `frontHealthCheckUrl`
+- Se `type = back`, exigir `backHealthCheckUrl`
+- Se `type = fullstack`, exigir pelo menos uma URL de health e recomendar ambas
+- Validar todas as URLs como absolutas (http ou https)
