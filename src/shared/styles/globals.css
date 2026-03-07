@@ -1,39 +1,257 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+@theme {
+  --color-primary-50: #e9fbff;
+  --color-primary-500: #06b6d4;
+  --color-primary-600: #0891b2;
+  --color-primary-700: #0e7490;
+  --color-success-50: #e7fff5;
+  --color-success-500: #10b981;
+  --color-success-600: #059669;
+  --color-danger-50: #ffe7ec;
+  --color-danger-500: #ff5c7a;
+  --color-danger-600: #f43f5e;
+  --color-warning-50: #fff7db;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --font-sans: var(--font-outfit);
+  --font-mono: var(--font-space-mono);
+}
+
+:root {
+  color-scheme: dark;
+  --bg-base: #080c14;
+  --bg-elevated: rgba(10, 16, 28, 0.78);
+  --bg-overlay: rgba(6, 10, 18, 0.68);
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-bg-strong: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-strong: rgba(255, 255, 255, 0.18);
+  --text-primary: #f8fafc;
+  --text-secondary: rgba(226, 232, 240, 0.78);
+  --text-muted: rgba(148, 163, 184, 0.74);
+  --shadow-soft: 0 28px 80px rgba(2, 8, 23, 0.42);
+  --shadow-glow: 0 0 0 1px rgba(125, 211, 252, 0.08), 0 24px 60px rgba(12, 20, 36, 0.45);
+  --radius-xl: 1.5rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(6, 182, 212, 0.17), transparent 32%),
+    radial-gradient(circle at top right, rgba(124, 58, 237, 0.22), transparent 34%),
+    radial-gradient(circle at bottom center, rgba(16, 185, 129, 0.14), transparent 30%),
+    var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-outfit), sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.28);
+}
+
+.glass-surface {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+.glass-surface-strong {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--shadow-glow);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+}
+
+.glass-outline {
+  border: 1px solid var(--glass-border);
+}
+
+.glass-panel {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.42));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.orb-field {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.42;
+  animation: drift 18s ease-in-out infinite;
+}
+
+.orb-cyan {
+  width: 24rem;
+  height: 24rem;
+  top: 4rem;
+  left: -4rem;
+  background: rgba(6, 182, 212, 0.34);
+}
+
+.orb-violet {
+  width: 28rem;
+  height: 28rem;
+  top: 18%;
+  right: -8rem;
+  background: rgba(124, 58, 237, 0.3);
+  animation-delay: -6s;
+}
+
+.orb-emerald {
+  width: 22rem;
+  height: 22rem;
+  bottom: -3rem;
+  left: 28%;
+  background: rgba(16, 185, 129, 0.26);
+  animation-delay: -11s;
+}
+
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at center, black, transparent 82%);
+}
+
+.page-shell {
+  position: relative;
+  z-index: 1;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin: 0 auto;
+  width: min(100%, 88rem);
+  padding: 1rem 1rem 0;
+}
+
+.app-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-radius: 9999px;
+  padding: 0.9rem 1rem;
+}
+
+.app-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.app-header-badge {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.95rem;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.95), rgba(124, 58, 237, 0.85));
+  box-shadow: 0 14px 30px rgba(6, 182, 212, 0.24);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.app-header-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.app-header-copy {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.surface-text-muted {
+  color: var(--text-muted);
+}
+
+.surface-text-secondary {
+  color: var(--text-secondary);
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  25% {
+    transform: translate3d(1.5rem, -2rem, 0) scale(1.06);
+  }
+
+  50% {
+    transform: translate3d(-1rem, 1.5rem, 0) scale(0.96);
+  }
+
+  75% {
+    transform: translate3d(2rem, 0.75rem, 0) scale(1.02);
   }
 }
 
-@layer components {
-  .btn {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+@media (max-width: 640px) {
+  .app-header {
+    padding-inline: 0.75rem;
   }
 
-  .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  .app-header-inner {
+    border-radius: 1.25rem;
   }
 
-  .btn-secondary {
-    @apply bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500;
-  }
-
-  .btn-danger {
-    @apply bg-danger-600 text-white hover:bg-danger-500 focus:ring-danger-500;
-  }
-
-  .card {
-    @apply rounded-xl border border-gray-200 bg-white p-6 shadow-sm;
-  }
-
-  .input {
-    @apply block w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20;
-  }
-
-  .label {
-    @apply mb-1.5 block text-sm font-medium text-gray-700;
+  .orb-cyan,
+  .orb-violet,
+  .orb-emerald {
+    opacity: 0.3;
   }
 }

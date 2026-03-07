@@ -1,3 +1,2 @@
-export { Header } from './Header'
-export { MainLayout } from './MainLayout'
-export { Sidebar } from './Sidebar'
+export { AppShell } from './AppShell'
+export { GlassBackground } from './GlassBackground'

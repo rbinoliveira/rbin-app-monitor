@@ -17,14 +17,14 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
   return (
     <Fragment>
       <div
-        className="fixed inset-0 z-40 bg-black/50 transition-opacity"
+        className="fixed inset-0 z-40 bg-slate-950/72 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
           className={cn(
-            'relative max-h-[90vh] w-full max-w-lg overflow-auto rounded-xl bg-white p-6 shadow-xl',
+            'glass-surface-strong relative max-h-[90vh] w-full max-w-xl overflow-auto rounded-[2rem] p-6 text-slate-100',
             className,
           )}
           role="dialog"
@@ -56,7 +56,7 @@ export function ModalTitle({
 }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h2
-      className={cn('text-lg font-semibold text-gray-900', className)}
+      className={cn('text-xl font-semibold text-white', className)}
       {...props}
     >
       {children}
@@ -70,7 +70,7 @@ export function ModalDescription({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn('mt-1 text-sm text-gray-500', className)} {...props}>
+    <p className={cn('mt-1 text-sm text-slate-300/80', className)} {...props}>
       {children}
     </p>
   )

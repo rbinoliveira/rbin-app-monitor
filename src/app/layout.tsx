@@ -1,17 +1,27 @@
 import '@/shared/styles/globals.css'
 
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Outfit, Space_Mono as SpaceMono } from 'next/font/google'
 
 import { AuthProvider } from '@/features/auth/contexts'
+import { AppShell, GlassBackground } from '@/shared/components/layout'
 import { ToastProvider } from '@/shared/components/ui/Toast'
 
-const inter = Inter({ subsets: ['latin'] })
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-outfit',
+})
+
+const spaceMono = SpaceMono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-space-mono',
+})
 
 export const metadata: Metadata = {
   title: 'RBIN App Monitor',
   description:
-    'Monitor your applications health, run Cypress tests and receive email notifications',
+    'Monitor application health, automate Playwright runs, and react to failures fast.',
 }
 
 export default function RootLayout({
@@ -21,9 +31,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={inter.className}>
+      <body className={`${outfit.variable} ${spaceMono.variable}`}>
         <AuthProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <GlassBackground />
+            <AppShell>{children}</AppShell>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

@@ -21,22 +21,26 @@ function settingsFromFirestore(data: MonitorSettingsDoc): MonitorSettings {
   return {
     healthCheckIntervalHours: data.healthCheckIntervalHours,
     cypressIntervalHours: data.cypressIntervalHours,
+    playwrightIntervalHours: data.playwrightIntervalHours,
     updatedAt: data.updatedAt.toDate(),
   }
 }
 
-function validateIntervalHours(
-  value: number,
-  field: string,
-): number {
-  const num = Number(value)
-  if (!Number.isInteger(num) || num < INTERVAL_HOURS.MIN || num > INTERVAL_HOURS.MAX) {
+function validateIntervalHours(value: number, field: string): number {
+  const parsed = Number(value)
+
+  if (
+    !Number.isInteger(parsed) ||
+    parsed < INTERVAL_HOURS.MIN ||
+    parsed > INTERVAL_HOURS.MAX
+  ) {
     throw new ApiError(
       `${field} must be between ${INTERVAL_HOURS.MIN} and ${INTERVAL_HOURS.MAX} hours`,
       HTTP_STATUS.BAD_REQUEST,
     )
   }
-  return num
+
+  return parsed
 }
 
 export async function getSettings(): Promise<MonitorSettings> {
@@ -50,12 +54,12 @@ export async function getSettings(): Promise<MonitorSettings> {
     return {
       healthCheckIntervalHours: DEFAULT_INTERVAL_HOURS.HEALTH_CHECK,
       cypressIntervalHours: DEFAULT_INTERVAL_HOURS.CYPRESS,
+      playwrightIntervalHours: DEFAULT_INTERVAL_HOURS.PLAYWRIGHT,
       updatedAt: now,
     }
   }
 
-  const data = docSnap.data() as MonitorSettingsDoc
-  return settingsFromFirestore(data)
+  return settingsFromFirestore(docSnap.data() as MonitorSettingsDoc)
 }
 
 export async function updateSettings(
@@ -79,6 +83,13 @@ export async function updateSettings(
     )
   }
 
+  if (input.playwrightIntervalHours !== undefined) {
+    updates.playwrightIntervalHours = validateIntervalHours(
+      input.playwrightIntervalHours,
+      'Playwright interval',
+    )
+  }
+
   if (Object.keys(updates).length <= 1) {
     return getSettings()
   }
@@ -86,17 +97,19 @@ export async function updateSettings(
   const docRef = getAdminDb()
     .collection(SETTINGS_COLLECTION)
     .doc(SETTINGS_DOC_ID)
-
   const docSnap = await docRef.get()
+
   if (!docSnap.exists) {
-    const now = new Date()
     const initial: MonitorSettingsDoc = {
       healthCheckIntervalHours:
         updates.healthCheckIntervalHours ?? DEFAULT_INTERVAL_HOURS.HEALTH_CHECK,
       cypressIntervalHours:
         updates.cypressIntervalHours ?? DEFAULT_INTERVAL_HOURS.CYPRESS,
-      updatedAt: Timestamp.fromDate(now),
+      playwrightIntervalHours:
+        updates.playwrightIntervalHours ?? DEFAULT_INTERVAL_HOURS.PLAYWRIGHT,
+      updatedAt: Timestamp.fromDate(new Date()),
     }
+
     await docRef.set(initial)
     return settingsFromFirestore(initial)
   }

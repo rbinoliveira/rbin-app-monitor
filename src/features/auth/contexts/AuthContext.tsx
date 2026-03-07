@@ -7,7 +7,7 @@ import {
   signOut as firebaseSignOut,
   type User,
 } from 'firebase/auth'
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 import {
   appPublicRoutes,
@@ -38,43 +38,41 @@ function firebaseUserToCookieUser(user: User) {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const hasRedirectedRef = useRef(false)
 
   useEffect(() => {
     const firebaseAuth = getFirebaseAuthOptional()
+
     if (!firebaseAuth) {
       setLoading(false)
       return
     }
 
     const unsubscribe = onAuthStateChanged(firebaseAuth, async (authUser) => {
-      if (authUser) {
-        const cookieUser = firebaseUserToCookieUser(authUser)
-        await addAuthCookies({ user: cookieUser })
-        setUser(authUser)
+      try {
+        if (authUser) {
+          await addAuthCookies({ user: firebaseUserToCookieUser(authUser) })
+          setUser(authUser)
 
-        if (
-          typeof window !== 'undefined' &&
-          !hasRedirectedRef.current &&
-          (appPublicRoutes.includes(window.location.pathname) ||
-            window.location.pathname === '/')
-        ) {
-          hasRedirectedRef.current = true
-          window.location.href = appRoutes.dashboard
-        }
-      } else {
-        await deleteAuthCookies()
-        setUser(null)
-        hasRedirectedRef.current = false
+          if (
+            typeof window !== 'undefined' &&
+            appPublicRoutes.includes(window.location.pathname)
+          ) {
+            window.location.replace(appRoutes.dashboard)
+          }
+        } else {
+          await deleteAuthCookies()
+          setUser(null)
 
-        if (
-          typeof window !== 'undefined' &&
-          window.location.pathname !== appRoutes.signIn
-        ) {
-          window.location.href = appRoutes.signIn
+          if (
+            typeof window !== 'undefined' &&
+            !appPublicRoutes.includes(window.location.pathname)
+          ) {
+            window.location.replace(appRoutes.signIn)
+          }
         }
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     })
 
     return () => unsubscribe()
@@ -82,19 +80,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     const auth = getFirebaseAuthOptional()
-    if (!auth) throw new Error('Firebase is not initialized')
+
+    if (!auth) {
+      throw new Error('Firebase is not initialized')
+    }
+
     const provider = new GoogleAuthProvider()
     await signInWithPopup(auth, provider)
   }
 
   const signOut = async () => {
     const auth = getFirebaseAuthOptional()
+
     if (auth) {
       await firebaseSignOut(auth)
     }
+
     await deleteAuthCookies()
     setUser(null)
-    hasRedirectedRef.current = false
+
+    if (typeof window !== 'undefined') {
+      window.location.replace(appRoutes.signIn)
+    }
   }
 
   return (
@@ -113,8 +120,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext)
+
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
+
   return context
 }

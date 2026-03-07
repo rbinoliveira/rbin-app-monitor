@@ -31,15 +31,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const addToast = useCallback((message: string, type: ToastType = 'info') => {
     const id = Math.random().toString(36).substring(2, 9)
-    setToasts((prev) => [...prev, { id, message, type }])
+    setToasts((previous) => [...previous, { id, message, type }])
 
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id))
+      setToasts((previous) => previous.filter((toast) => toast.id !== id))
     }, 5000)
   }, [])
 
   const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id))
+    setToasts((previous) => previous.filter((toast) => toast.id !== id))
   }, [])
 
   return (
@@ -52,9 +52,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 export function useToast() {
   const context = useContext(ToastContext)
+
   if (!context) {
     throw new Error('useToast must be used within a ToastProvider')
   }
+
   return context
 }
 
@@ -68,7 +70,7 @@ function ToastContainer({
   if (toasts.length === 0) return null
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+    <div className="fixed bottom-4 right-4 z-50 flex max-w-sm flex-col gap-3">
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
@@ -84,10 +86,10 @@ function ToastItem({
   onRemove: (id: string) => void
 }) {
   const styles = {
-    success: 'bg-success-50 border-success-500 text-success-600',
-    error: 'bg-danger-50 border-danger-500 text-danger-600',
-    warning: 'bg-warning-50 border-warning-500 text-warning-600',
-    info: 'bg-primary-50 border-primary-500 text-primary-600',
+    success: 'border-emerald-400/25 bg-emerald-500/12 text-emerald-100',
+    error: 'border-rose-400/25 bg-rose-500/12 text-rose-100',
+    warning: 'border-amber-300/25 bg-amber-400/12 text-amber-100',
+    info: 'border-cyan-400/25 bg-cyan-400/12 text-cyan-100',
   }
 
   const icons = {
@@ -156,15 +158,15 @@ function ToastItem({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-lg border px-4 py-3 shadow-lg',
+        'glass-surface flex items-center gap-3 rounded-[1.25rem] border px-4 py-3 shadow-[0_20px_50px_rgba(2,8,23,0.4)]',
         styles[toast.type],
       )}
     >
       {icons[toast.type]}
-      <span className="text-sm font-medium">{toast.message}</span>
+      <span className="flex-1 text-sm font-medium">{toast.message}</span>
       <button
         onClick={() => onRemove(toast.id)}
-        className="ml-2 hover:opacity-70"
+        className="rounded-full p-1 text-current/70 transition hover:bg-white/10 hover:text-current"
         aria-label="Close"
       >
         <svg

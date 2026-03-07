@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { useAuth } from '@/features/auth'
+import { ProtectedRoute, useAuth } from '@/features/auth'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import { Button } from '@/shared/components/ui/Button'
 import { Input } from '@/shared/components/ui/Input'
@@ -32,11 +32,19 @@ const STATUS: Record<
 > = {
   healthy: {
     label: 'Healthy',
-    dot: 'bg-emerald-500',
-    text: 'text-emerald-400',
+    dot: 'bg-emerald-400',
+    text: 'text-emerald-300',
   },
-  unhealthy: { label: 'Unhealthy', dot: 'bg-red-500', text: 'text-red-400' },
-  unknown: { label: 'Unknown', dot: 'bg-gray-500', text: 'text-gray-400' },
+  unhealthy: {
+    label: 'Unhealthy',
+    dot: 'bg-rose-400',
+    text: 'text-rose-300',
+  },
+  unknown: {
+    label: 'Unknown',
+    dot: 'bg-slate-500',
+    text: 'text-slate-300',
+  },
 }
 
 function isHealthCheckResult(
@@ -56,12 +64,15 @@ function formatExecutionLabel(item: ExecutionHistoryItem): string {
 function formatExecutionDetails(item: ExecutionHistoryItem): string {
   if (isHealthCheckResult(item)) {
     const parts = [`${item.responseTime}ms`]
+
     if (item.statusCode) {
       parts.unshift(`HTTP ${item.statusCode}`)
     }
+
     if (item.errorMessage) {
       parts.push(item.errorMessage)
     }
+
     return parts.join(' • ')
   }
 
@@ -83,38 +94,41 @@ function formatExecutionDetails(item: ExecutionHistoryItem): string {
 
 function SummaryCards({ projects }: { projects: Project[] }) {
   const total = projects.length
-  const healthy = projects.filter((p) => p.status === 'healthy').length
-  const unhealthy = projects.filter((p) => p.status === 'unhealthy').length
+  const healthy = projects.filter(
+    (project) => project.status === 'healthy',
+  ).length
+  const unhealthy = projects.filter(
+    (project) => project.status === 'unhealthy',
+  ).length
   const lastCheck = projects
-    .map((p) => p.lastCheckAt)
+    .map((project) => project.lastCheckAt)
     .filter(Boolean)
-    .sort((a, b) => (b! > a! ? 1 : -1))[0]
+    .sort((left, right) => (right! > left! ? 1 : -1))[0]
 
   const cards = [
-    { label: 'Total Projects', value: total, color: 'text-cyan-400' },
-    { label: 'Healthy', value: healthy, color: 'text-emerald-400' },
-    { label: 'Unhealthy', value: unhealthy, color: 'text-red-400' },
+    { label: 'Total Apps', value: total, accent: 'text-cyan-300' },
+    { label: 'Healthy', value: healthy, accent: 'text-emerald-300' },
+    { label: 'Failing', value: unhealthy, accent: 'text-rose-300' },
     {
       label: 'Last Check',
       value: lastCheck ? new Date(lastCheck).toLocaleTimeString() : '—',
-      color: 'text-violet-400',
-      small: true,
+      accent: 'text-violet-300',
+      compact: true,
     },
   ]
 
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
       {cards.map((card) => (
-        <div
-          key={card.label}
-          className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm"
-        >
-          <p className="text-xs font-medium text-white/50">{card.label}</p>
+        <div key={card.label} className="glass-surface rounded-[1.75rem] p-5">
+          <p className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-slate-400/80">
+            {card.label}
+          </p>
           <p
             className={cn(
-              'mt-2 font-semibold',
-              card.small ? 'text-xl' : 'text-3xl',
-              card.color,
+              'mt-3 font-semibold',
+              card.compact ? 'text-2xl md:text-3xl' : 'text-3xl md:text-4xl',
+              card.accent,
             )}
           >
             {card.value}
@@ -145,7 +159,7 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
   const setField =
     (field: keyof CreateProjectInput) =>
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setForm((prev) => ({ ...prev, [field]: event.target.value }))
+      setForm((previous) => ({ ...previous, [field]: event.target.value }))
     }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -194,7 +208,11 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
   return (
     <Modal open={open} onClose={onClose}>
       <ModalHeader>
-        <ModalTitle>Add Project</ModalTitle>
+        <ModalTitle>Add monitored application</ModalTitle>
+        <p className="mt-1 text-sm text-slate-300/80">
+          Register a frontend, backend, and optional remote test endpoints for
+          one project.
+        </p>
       </ModalHeader>
       <ModalContent>
         <form
@@ -203,38 +221,38 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
           className="space-y-4"
         >
           <Input
-            label="Project name *"
+            label="Project name"
             value={form.name}
             onChange={setField('name')}
-            placeholder="My App"
+            placeholder="Payments API"
             required
           />
           <Input
-            label="Front Health Check URL"
+            label="Frontend URL"
             value={form.frontHealthCheckUrl ?? ''}
             onChange={setField('frontHealthCheckUrl')}
-            placeholder="https://myapp.com"
+            placeholder="https://app.example.com"
             type="url"
           />
           <Input
-            label="Back Health Check URL"
+            label="Backend health URL"
             value={form.backHealthCheckUrl ?? ''}
             onChange={setField('backHealthCheckUrl')}
-            placeholder="https://api.myapp.com/health"
+            placeholder="https://api.example.com/health"
             type="url"
           />
           <Input
-            label="Cypress Run URL (remote)"
+            label="Legacy Cypress trigger"
             value={form.cypressRunUrl ?? ''}
             onChange={setField('cypressRunUrl')}
-            placeholder="https://ci.myapp.com/api/cypress/run"
+            placeholder="https://ci.example.com/api/cypress/run"
             type="url"
           />
           <Input
-            label="Playwright Run URL (remote)"
+            label="Playwright trigger"
             value={form.playwrightRunUrl ?? ''}
             onChange={setField('playwrightRunUrl')}
-            placeholder="https://ci.myapp.com/api/playwright/run"
+            placeholder="https://ci.example.com/api/playwright/run"
             type="url"
           />
         </form>
@@ -244,7 +262,7 @@ function AddProjectModal({ open, onClose, onSuccess }: AddProjectModalProps) {
           Cancel
         </Button>
         <Button type="submit" form="add-project-form" loading={loading}>
-          Create Project
+          Create project
         </Button>
       </ModalFooter>
     </Modal>
@@ -282,12 +300,11 @@ function ProjectRow({
       })
       const data = await response.json()
 
-      if (data.success) {
-        addToast(`${label} completed successfully`, 'success')
-      } else {
-        addToast(data.error || `${label} failed`, 'error')
+      if (!data.success) {
+        throw new Error(data.error || `${label} failed`)
       }
 
+      addToast(`${label} completed successfully`, 'success')
       await onRefresh()
     } catch (error) {
       addToast(
@@ -306,7 +323,6 @@ function ProjectRow({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: !project.isActive }),
       })
-
       const data = await response.json()
 
       if (!response.ok || !data.success) {
@@ -332,34 +348,102 @@ function ProjectRow({
   )
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-        <div className="flex min-w-0 flex-1 items-center gap-3">
-          <span
-            className={cn(
-              'mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full',
-              status.dot,
-            )}
-            title={status.label}
-          />
-          <div className="min-w-0">
-            <p className="truncate font-medium text-white">{project.name}</p>
-            <div className="mt-0.5 flex flex-wrap gap-2 text-xs text-white/40">
-              {project.frontHealthCheckUrl && <span>Front</span>}
-              {project.backHealthCheckUrl && <span>Back</span>}
-              {project.cypressRunUrl && <span>Cypress</span>}
-              {project.playwrightRunUrl && <span>Playwright</span>}
+    <div className="glass-surface rounded-[1.75rem] p-5">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start gap-3">
+            <span
+              className={cn('mt-1 h-2.5 w-2.5 rounded-full', status.dot)}
+              title={status.label}
+            />
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="truncate text-lg font-semibold text-white">
+                  {project.name}
+                </p>
+                <span
+                  className={cn(
+                    'rounded-full border border-white/10 px-2.5 py-1 text-xs',
+                    status.text,
+                  )}
+                >
+                  {status.label}
+                </span>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2 text-xs uppercase tracking-[0.18em] text-slate-400/80">
+                {project.frontHealthCheckUrl && <span>Front</span>}
+                {project.backHealthCheckUrl && <span>Back</span>}
+                {project.cypressRunUrl && <span>Cypress</span>}
+                {project.playwrightRunUrl && <span>Playwright</span>}
+              </div>
             </div>
+          </div>
+
+          <div className="mt-5 rounded-[1.25rem] border border-white/8 bg-slate-950/30 p-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="min-w-0">
+                <p className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-slate-400/80">
+                  Latest execution
+                </p>
+                <p className="mt-1 text-sm text-slate-100">
+                  {latestExecution
+                    ? `${formatExecutionLabel(latestExecution)} • ${
+                        latestExecution.success ? 'Success' : 'Failed'
+                      }`
+                    : historyLoading
+                      ? 'Loading execution history...'
+                      : 'No execution history yet'}
+                </p>
+                {latestExecution && (
+                  <p className="mt-1 truncate text-sm text-slate-400/80">
+                    {formatExecutionDetails(latestExecution)}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-3 text-xs text-slate-400/80">
+                {latestExecution && (
+                  <span>
+                    {new Date(latestExecution.timestamp).toLocaleString()}
+                  </span>
+                )}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setExpanded((current) => !current)}
+                  disabled={historyItems.length === 0}
+                >
+                  {expanded ? 'Hide history' : 'Show history'}
+                </Button>
+              </div>
+            </div>
+
+            {expanded && historyItems.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {historyItems.slice(0, 3).map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-[1rem] border border-white/8 bg-white/4 px-3 py-3"
+                  >
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm text-white">
+                        {formatExecutionLabel(item)} •{' '}
+                        {item.success ? 'Success' : 'Failed'}
+                      </p>
+                      <span className="text-xs text-slate-400/75">
+                        {new Date(item.timestamp).toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-400/80">
+                      {formatExecutionDetails(item)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="hidden text-right text-xs text-white/40 lg:block">
-          {project.lastCheckAt
-            ? new Date(project.lastCheckAt).toLocaleString()
-            : 'Never checked'}
-        </div>
-
-        <div className="flex shrink-0 flex-wrap gap-2">
+        <div className="flex shrink-0 flex-wrap gap-2 xl:max-w-[15rem] xl:justify-end">
           {hasHealthCheck && (
             <Button
               size="sm"
@@ -410,82 +494,17 @@ function ProjectRow({
             variant="ghost"
             onClick={handleToggle}
             disabled={isRunning}
-            className={cn(!project.isActive && 'opacity-50')}
           >
             {project.isActive ? 'Disable' : 'Enable'}
           </Button>
         </div>
       </div>
-
-      <div className="mt-4 border-t border-white/10 pt-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-              Latest execution
-            </p>
-            <p className="mt-1 text-sm text-white/80">
-              {latestExecution
-                ? `${formatExecutionLabel(latestExecution)} • ${
-                    latestExecution.success ? 'Success' : 'Failed'
-                  }`
-                : historyLoading
-                  ? 'Loading execution history...'
-                  : 'No execution history yet'}
-            </p>
-            {latestExecution && (
-              <p className="mt-1 truncate text-xs text-white/45">
-                {formatExecutionDetails(latestExecution)}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3 text-xs text-white/40">
-            {latestExecution && (
-              <span>
-                {new Date(latestExecution.timestamp).toLocaleString()}
-              </span>
-            )}
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setExpanded((current) => !current)}
-              disabled={historyItems.length === 0}
-            >
-              {expanded ? 'Hide history' : 'Show history'}
-            </Button>
-          </div>
-        </div>
-
-        {expanded && historyItems.length > 0 && (
-          <div className="mt-4 space-y-2">
-            {historyItems.slice(0, 3).map((item) => (
-              <div
-                key={item.id}
-                className="rounded-lg border border-white/8 bg-black/20 px-3 py-2"
-              >
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm text-white">
-                    {formatExecutionLabel(item)} •{' '}
-                    {item.success ? 'Success' : 'Failed'}
-                  </p>
-                  <span className="text-xs text-white/35">
-                    {new Date(item.timestamp).toLocaleString()}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-white/50">
-                  {formatExecutionDetails(item)}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   )
 }
 
-export default function DashboardPage() {
-  const { user, signOut } = useAuth()
+function DashboardScreen() {
+  const { user } = useAuth()
   const { projects, loading, error, refresh } = useProjects()
   const [addOpen, setAddOpen] = useState(false)
   const [historyByProject, setHistoryByProject] = useState<
@@ -543,49 +562,83 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080c14] px-4 py-8 sm:px-6 lg:px-8">
-      <header className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">RBIN App Monitor</h1>
-          <p className="mt-0.5 text-sm text-white/40">
-            {user?.email ?? 'Monitoring dashboard'}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button onClick={() => setAddOpen(true)} size="sm">
-            + New Project
-          </Button>
-          <Button variant="ghost" size="sm" onClick={signOut}>
-            Sign out
-          </Button>
-        </div>
-      </header>
+    <div className="mx-auto w-full max-w-7xl px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+      <section className="glass-surface-strong rounded-[2rem] px-6 py-7 sm:px-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="font-mono text-[0.72rem] uppercase tracking-[0.26em] text-cyan-300/80">
+              Monitoring cockpit
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Unified monitoring for health checks and remote test runs.
+            </h1>
+            <p className="mt-3 max-w-xl text-sm text-slate-300/80 sm:text-base">
+              One surface for manual triggers, latest execution context, and
+              active app status.
+            </p>
+          </div>
 
-      <SummaryCards projects={projects} />
+          <div className="glass-surface rounded-[1.5rem] px-4 py-3">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-400/75">
+              Signed in as
+            </p>
+            <p className="mt-1 text-sm font-medium text-white">
+              {user?.displayName || user?.email || 'Operator'}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-6">
+        <SummaryCards projects={projects} />
+      </section>
 
       <section className="mt-8">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/40">
-          Applications
-        </h2>
+        <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-white">Applications</h2>
+            <p className="mt-1 text-sm text-slate-400/80">
+              Trigger checks manually, inspect the latest execution, and keep
+              only active apps in rotation.
+            </p>
+          </div>
+
+          <Button onClick={() => setAddOpen(true)} size="lg">
+            Add application
+          </Button>
+        </div>
 
         {loading && (
-          <p className="text-sm text-white/40">Loading projects...</p>
+          <div className="glass-surface rounded-[1.75rem] p-8 text-center text-slate-300/80">
+            Loading monitored applications...
+          </div>
         )}
-        {error && <p className="text-sm text-red-400">{error}</p>}
+
+        {error && (
+          <div className="glass-surface rounded-[1.75rem] border-rose-400/25 p-5 text-rose-200">
+            {error}
+          </div>
+        )}
+
         {historyError && (
-          <p className="mb-3 text-sm text-red-400">{historyError}</p>
+          <div className="mb-4 glass-surface rounded-[1.75rem] border-rose-400/25 p-5 text-rose-200">
+            {historyError}
+          </div>
         )}
 
         {!loading && !error && projects.length === 0 && (
-          <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-sm">
-            <p className="text-white/50">No projects yet.</p>
-            <p className="mt-1 text-sm text-white/30">
-              Click &quot;+ New Project&quot; to start monitoring.
+          <div className="glass-surface rounded-[1.75rem] p-10 text-center">
+            <p className="text-lg font-medium text-white">
+              No applications registered yet.
+            </p>
+            <p className="mt-2 text-sm text-slate-400/80">
+              Add your first monitored app to start recording health and test
+              execution data.
             </p>
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {projects.map((project) => (
             <ProjectRow
               key={project.id}
@@ -604,5 +657,13 @@ export default function DashboardPage() {
         onSuccess={refreshAll}
       />
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardScreen />
+    </ProtectedRoute>
   )
 }
