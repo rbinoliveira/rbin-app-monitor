@@ -1,37 +1,49 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
-// Public routes that don't require authentication
-const publicRoutes = ['/login']
+import { parseUserCookie } from '@/features/auth/schemas/user-cookie.schema'
+import { appCookies } from '@/shared/constants/app-cookies.constant'
+import {
+  appPublicRoutes,
+  appRoutes,
+} from '@/shared/constants/app-routes.constant'
 
-// API routes that should be excluded from auth check
 const publicApiRoutes = ['/api/health', '/api/cron']
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Allow public API routes
   if (publicApiRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next()
   }
 
-  // Allow public routes
-  if (publicRoutes.includes(pathname)) {
+  const isStaticResource =
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/static') ||
+    /\.(jpg|jpeg|png|gif|svg|css|js)$/.test(pathname)
+
+  if (isStaticResource) {
     return NextResponse.next()
   }
 
-  // Get session cookie (Firebase sets this)
-  const session = request.cookies.get('__session')
+  const isPublicRoute = appPublicRoutes.includes(pathname)
+  const userCookie = request.cookies.get(appCookies.USER)?.value
 
-  // If no session and trying to access protected route, redirect to login
-  if (!session && !pathname.startsWith('/login')) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
+  let userIsAuthenticated = false
+  try {
+    if (userCookie) {
+      const user = parseUserCookie(JSON.parse(userCookie))
+      userIsAuthenticated = !!user
+    }
+  } catch {
+    userIsAuthenticated = false
   }
 
-  // If has session and trying to access login, redirect to home
-  if (session && pathname.startsWith('/login')) {
-    return NextResponse.redirect(new URL('/', request.url))
+  if (!isPublicRoute && !userIsAuthenticated) {
+    return NextResponse.redirect(new URL(appRoutes.signIn, request.url))
+  }
+
+  if (userIsAuthenticated && isPublicRoute) {
+    return NextResponse.redirect(new URL(appRoutes.dashboard, request.url))
   }
 
   return NextResponse.next()
@@ -39,13 +51,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (public directory)
-     */
+    '/',
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

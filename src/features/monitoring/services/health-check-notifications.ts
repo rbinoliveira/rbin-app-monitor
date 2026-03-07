@@ -4,16 +4,16 @@ import {
 } from '@/features/projects/services/projects'
 import type {
   HealthCheckResponse,
-  MonitoringType,
+  HealthCheckType,
   ProjectStatus,
 } from '@/shared/types'
 
 import { saveHealthCheckResult } from './health-check-results'
-import { sendNotification } from './telegram'
+import { sendNotification } from './email'
 
 export interface ProcessHealthCheckResultInput {
   projectId: string
-  type: MonitoringType
+  type: HealthCheckType
   url: string
   result: HealthCheckResponse
 }

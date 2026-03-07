@@ -10,7 +10,14 @@ import { Button } from '@/shared/components/ui/Button'
 import { Card } from '@/shared/components/ui/Card'
 import { Input } from '@/shared/components/ui/Input'
 import type { CypressResult, HealthCheckResult, Project } from '@/shared/types'
-import { MONITORING_TYPE_LABELS } from '@/shared/types'
+import { HEALTH_CHECK_TYPE_LABELS } from '@/shared/types'
+
+function getHealthCheckTypeLabel(type: string): string {
+  if (type === 'front' || type === 'back') return HEALTH_CHECK_TYPE_LABELS[type]
+  if (type === 'web' || type === 'wordpress') return 'Front'
+  if (type === 'rest') return 'Back'
+  return type
+}
 
 interface HistoryTableProps {
   items: HistoryItem[]
@@ -55,7 +62,7 @@ export function HistoryTable({
           return {
             ...item,
             itemType: 'health_check' as const,
-            displayName: `${MONITORING_TYPE_LABELS[item.type]} - ${item.projectName}`,
+            displayName: `${getHealthCheckTypeLabel(item.type)} - ${item.projectName}`,
           }
         }
         if (isCypressResult(item)) {
@@ -209,7 +216,7 @@ export function HistoryTable({
                     return (
                       <tr key={item.id}>
                         <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                          {MONITORING_TYPE_LABELS[item.type]}
+                          {getHealthCheckTypeLabel(item.type)}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                           {item.projectName}

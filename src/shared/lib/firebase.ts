@@ -51,11 +51,18 @@ export function getDb(): Firestore {
   return db
 }
 
-export function getFirebaseAuth(): Auth {
-  if (!auth) {
-    auth = getAuth(getFirebaseApp())
-  }
+export function getFirebaseAuthOptional(): Auth | null {
+  if (typeof window === 'undefined') return null
+  if (!app) app = initializeFirebaseApp()
+  if (!app) return null
+  if (!auth) auth = getAuth(app)
   return auth
+}
+
+export function getFirebaseAuth(): Auth {
+  const a = getFirebaseAuthOptional()
+  if (!a) throw new Error('Firebase is not initialized')
+  return a
 }
 
 export default getFirebaseApp

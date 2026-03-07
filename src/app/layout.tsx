@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'RBIN App Monitor',
   description:
-    'Monitor your applications health, run Cypress tests and receive Telegram notifications',
+    'Monitor your applications health, run Cypress tests and receive email notifications',
 }
 
 export default function RootLayout({

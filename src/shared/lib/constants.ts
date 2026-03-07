@@ -87,17 +87,20 @@ export const COLLECTION_NAMES = {
   HEALTH_CHECK_RESULTS: 'healthCheckResults',
   CYPRESS_RESULTS: 'cypressResults',
   LOCKS: 'locks',
+  SETTINGS: 'settings',
 } as const
 
-// ============================================
-// Monitoring Types
-// ============================================
+export const SETTINGS_DOC_ID = 'monitor' as const
 
-export const VALID_MONITORING_TYPES = [
-  'web',
-  'rest',
-  'wordpress',
-  'cypress',
-] as const
+export const DEFAULT_INTERVAL_HOURS = {
+  HEALTH_CHECK: 12,
+  CYPRESS: 12,
+} as const
+
+export const INTERVAL_HOURS = {
+  MIN: 1,
+  MAX: 168,
+} as const
+
 
 export const VALID_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE'] as const

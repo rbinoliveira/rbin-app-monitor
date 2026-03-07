@@ -15,13 +15,24 @@ import {
   CardTitle,
 } from '@/shared/components/ui/Card'
 import { Input } from '@/shared/components/ui/Input'
-import type { MonitoringType } from '@/shared/types'
-import { MONITORING_TYPE_LABELS } from '@/shared/types'
 
 interface FormErrors {
   name?: string
-  baseUrl?: string
-  monitoringTypes?: string
+  atLeastOne?: string
+  frontHealthCheckUrl?: string
+  backHealthCheckUrl?: string
+  cypressRunUrl?: string
+}
+
+function isValidUrl(value: string): boolean {
+  try {
+    const trimmed = value.trim()
+    if (!trimmed) return true
+    new URL(trimmed)
+    return true
+  } catch {
+    return false
+  }
 }
 
 export default function NewProjectPage() {
@@ -29,8 +40,9 @@ export default function NewProjectPage() {
   const { createProject, loading, error: hookError } = useCreateProject()
   const [formData, setFormData] = useState({
     name: '',
-    baseUrl: '',
-    monitoringTypes: [] as MonitoringType[],
+    frontHealthCheckUrl: '',
+    backHealthCheckUrl: '',
+    cypressRunUrl: '',
   })
   const [errors, setErrors] = useState<FormErrors>({})
 
@@ -43,22 +55,23 @@ export default function NewProjectPage() {
       newErrors.name = 'Project name must be at least 3 characters'
     }
 
-    if (!formData.baseUrl.trim()) {
-      newErrors.baseUrl = 'Base URL is required'
-    } else {
-      try {
-        const url = new URL(formData.baseUrl.trim())
-        if (!['http:', 'https:'].includes(url.protocol)) {
-          newErrors.baseUrl = 'URL must use HTTP or HTTPS protocol'
-        }
-      } catch {
-        newErrors.baseUrl =
-          'Please enter a valid URL (e.g., https://example.com)'
-      }
+    const front = formData.frontHealthCheckUrl.trim()
+    const back = formData.backHealthCheckUrl.trim()
+    const cypress = formData.cypressRunUrl.trim()
+
+    if (!front && !back && !cypress) {
+      newErrors.atLeastOne =
+        'Provide at least one URL: front health check, back health check, or Cypress run API'
     }
 
-    if (formData.monitoringTypes.length === 0) {
-      newErrors.monitoringTypes = 'Select at least one monitoring type'
+    if (front && !isValidUrl(formData.frontHealthCheckUrl)) {
+      newErrors.frontHealthCheckUrl = 'Enter a valid URL'
+    }
+    if (back && !isValidUrl(formData.backHealthCheckUrl)) {
+      newErrors.backHealthCheckUrl = 'Enter a valid URL'
+    }
+    if (cypress && !isValidUrl(formData.cypressRunUrl)) {
+      newErrors.cypressRunUrl = 'Enter a valid URL'
     }
 
     setErrors(newErrors)
@@ -75,39 +88,28 @@ export default function NewProjectPage() {
     try {
       await createProject({
         name: formData.name.trim(),
-        baseUrl: formData.baseUrl.trim(),
-        monitoringTypes: formData.monitoringTypes,
+        frontHealthCheckUrl: formData.frontHealthCheckUrl.trim() || null,
+        backHealthCheckUrl: formData.backHealthCheckUrl.trim() || null,
+        cypressRunUrl: formData.cypressRunUrl.trim() || null,
       })
     } catch (err) {
       console.error('Error creating project:', err)
     }
   }
 
-  const toggleMonitoringType = (type: MonitoringType) => {
-    setFormData((prev) => ({
-      ...prev,
-      monitoringTypes: prev.monitoringTypes.includes(type)
-        ? prev.monitoringTypes.filter((t) => t !== type)
-        : [...prev.monitoringTypes, type],
-    }))
-    if (errors.monitoringTypes) {
-      setErrors((prev) => ({ ...prev, monitoringTypes: undefined }))
-    }
-  }
-
-  const handleInputChange = (field: 'name' | 'baseUrl', value: string) => {
+  const handleInputChange = (
+    field: keyof typeof formData,
+    value: string,
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
+    if (errors[field] || errors.atLeastOne) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: undefined,
+        atLeastOne: undefined,
+      }))
     }
   }
-
-  const monitoringTypes: MonitoringType[] = [
-    'web',
-    'rest',
-    'wordpress',
-    'cypress',
-  ]
 
   return (
     <MainLayout>
@@ -115,7 +117,8 @@ export default function NewProjectPage() {
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">New Project</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Add a new project to monitor its health and run tests
+            Add a project to monitor front health, back health, and Cypress
+            tests. Provide at least one URL.
           </p>
         </div>
 
@@ -124,8 +127,8 @@ export default function NewProjectPage() {
             <CardHeader>
               <CardTitle>Project Information</CardTitle>
               <CardDescription>
-                Enter the basic information about the project you want to
-                monitor
+                Name the project and add one or more URLs. At least one URL is
+                required.
               </CardDescription>
             </CardHeader>
 
@@ -141,57 +144,49 @@ export default function NewProjectPage() {
                 required
               />
 
+              {errors.atLeastOne && (
+                <p className="text-sm text-danger-600">{errors.atLeastOne}</p>
+              )}
+
               <Input
-                label="Base URL"
+                label="Front health check URL (optional)"
                 type="url"
-                placeholder="https://example.com"
-                value={formData.baseUrl}
-                onChange={(e) => handleInputChange('baseUrl', e.target.value)}
-                error={errors.baseUrl}
-                hint="The base URL of your application (must include http:// or https://)"
-                required
+                placeholder="https://app.example.com"
+                value={formData.frontHealthCheckUrl}
+                onChange={(e) =>
+                  handleInputChange('frontHealthCheckUrl', e.target.value)
+                }
+                error={errors.frontHealthCheckUrl}
+                hint="URL of the front-end to check (GET request). Leave empty if not used."
               />
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Monitoring Types <span className="text-danger-600">*</span>
-                </label>
-                <div className="space-y-3">
-                  {monitoringTypes.map((type) => (
-                    <label
-                      key={type}
-                      className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.monitoringTypes.includes(type)}
-                        onChange={() => toggleMonitoringType(type)}
-                        className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                      />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900">
-                          {MONITORING_TYPE_LABELS[type]}
-                        </div>
-                        <div className="mt-0.5 text-xs text-gray-500">
-                          {type === 'web' && 'Monitor web page availability'}
-                          {type === 'rest' && 'Monitor REST API endpoints'}
-                          {type === 'wordpress' && 'Monitor WordPress REST API'}
-                          {type === 'cypress' && 'Run Cypress E2E tests'}
-                        </div>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-                {errors.monitoringTypes && (
-                  <p className="mt-1.5 text-sm text-danger-600">
-                    {errors.monitoringTypes}
-                  </p>
-                )}
-              </div>
+              <Input
+                label="Back health check URL (optional)"
+                type="url"
+                placeholder="https://api.example.com/health"
+                value={formData.backHealthCheckUrl}
+                onChange={(e) =>
+                  handleInputChange('backHealthCheckUrl', e.target.value)
+                }
+                error={errors.backHealthCheckUrl}
+                hint="URL of the back-end / API to check (GET request). Leave empty if not used."
+              />
+
+              <Input
+                label="Cypress run API URL (optional)"
+                type="url"
+                placeholder="https://app.example.com/api/cypress-run"
+                value={formData.cypressRunUrl}
+                onChange={(e) =>
+                  handleInputChange('cypressRunUrl', e.target.value)
+                }
+                error={errors.cypressRunUrl}
+                hint="URL that runs Cypress tests and returns JSON (success, passed, failed, totalTests, duration). Leave empty if not used."
+              />
 
               {hookError && (
-                <div className="border-danger-200 rounded-lg border bg-danger-50 p-4">
-                  <p className="text-danger-800 text-sm font-medium">Error</p>
+                <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
+                  <p className="text-sm font-medium text-danger-800">Error</p>
                   <p className="mt-1 text-sm text-danger-600">{hookError}</p>
                 </div>
               )}

@@ -1,6 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 import { useAuth } from '@/features/auth'
@@ -11,13 +10,12 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
-  const router = useRouter()
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/login')
+      window.location.href = '/'
     }
-  }, [user, loading, router])
+  }, [user, loading])
 
   // Show loading state while checking authentication
   if (loading) {

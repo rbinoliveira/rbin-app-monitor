@@ -1,15 +1,12 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
-import {
-  COLLECTION_NAMES,
-  VALID_MONITORING_TYPES,
-} from '@/shared/lib/constants'
+import { COLLECTION_NAMES } from '@/shared/lib/constants'
 import { getAdminDb } from '@/shared/lib/firebase-admin'
 import type {
   HealthCheckResponse,
   HealthCheckResult,
   HealthCheckResultDoc,
-  MonitoringType,
+  HealthCheckType,
 } from '@/shared/types'
 
 const HEALTH_CHECK_RESULTS_COLLECTION = COLLECTION_NAMES.HEALTH_CHECK_RESULTS
@@ -33,7 +30,7 @@ function healthCheckResultToFirestore(
 export interface SaveHealthCheckResultInput {
   projectId: string
   projectName: string
-  type: MonitoringType
+  type: HealthCheckType
   url: string
   result: HealthCheckResponse
 }
@@ -50,13 +47,13 @@ export async function saveHealthCheckResult(
   }
 
   if (!input.type || typeof input.type !== 'string') {
-    throw new Error('Monitoring type is required')
+    throw new Error('Health check type is required')
   }
 
-  const validTypes = VALID_MONITORING_TYPES as readonly string[]
+  const validTypes: HealthCheckType[] = ['front', 'back']
   if (!validTypes.includes(input.type)) {
     throw new Error(
-      `Invalid monitoring type. Must be one of: ${validTypes.join(', ')}`,
+      `Invalid health check type. Must be one of: ${validTypes.join(', ')}`,
     )
   }
 

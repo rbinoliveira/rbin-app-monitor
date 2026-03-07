@@ -4,7 +4,7 @@
 
 export type ProjectStatus = 'healthy' | 'unhealthy' | 'unknown'
 
-export type MonitoringType = 'web' | 'rest' | 'wordpress' | 'cypress'
+export type HealthCheckType = 'front' | 'back'
 
 // Firestore Timestamp type (compatible with both client and admin SDK)
 export type FirestoreTimestamp = {
@@ -12,11 +12,9 @@ export type FirestoreTimestamp = {
   toMillis(): number
 }
 
-export const MONITORING_TYPE_LABELS: Record<MonitoringType, string> = {
-  web: 'Web Page',
-  rest: 'REST API',
-  wordpress: 'WordPress',
-  cypress: 'Cypress Tests',
+export const HEALTH_CHECK_TYPE_LABELS: Record<HealthCheckType, string> = {
+  front: 'Front',
+  back: 'Back',
 }
 
 // ============================================
@@ -26,8 +24,9 @@ export const MONITORING_TYPE_LABELS: Record<MonitoringType, string> = {
 export interface Project {
   id: string
   name: string
-  baseUrl: string
-  monitoringTypes: MonitoringType[]
+  frontHealthCheckUrl: string | null
+  backHealthCheckUrl: string | null
+  cypressRunUrl: string | null
   status: ProjectStatus
   isActive: boolean
   lastCheckAt: Date | null
@@ -38,8 +37,9 @@ export interface Project {
 // Firestore document type (uses Timestamp instead of Date)
 export interface ProjectDoc {
   name: string
-  baseUrl: string
-  monitoringTypes: MonitoringType[]
+  frontHealthCheckUrl: string | null
+  backHealthCheckUrl: string | null
+  cypressRunUrl: string | null
   status: ProjectStatus
   isActive: boolean
   lastCheckAt: FirestoreTimestamp | null
@@ -50,14 +50,16 @@ export interface ProjectDoc {
 // Create/Update DTOs
 export interface CreateProjectInput {
   name: string
-  baseUrl: string
-  monitoringTypes: MonitoringType[]
+  frontHealthCheckUrl?: string | null
+  backHealthCheckUrl?: string | null
+  cypressRunUrl?: string | null
 }
 
 export interface UpdateProjectInput {
   name?: string
-  baseUrl?: string
-  monitoringTypes?: MonitoringType[]
+  frontHealthCheckUrl?: string | null
+  backHealthCheckUrl?: string | null
+  cypressRunUrl?: string | null
   isActive?: boolean
 }
 
@@ -69,7 +71,7 @@ export interface HealthCheckResult {
   id: string
   projectId: string
   projectName: string
-  type: MonitoringType
+  type: HealthCheckType
   url: string
   success: boolean
   statusCode?: number
@@ -82,7 +84,7 @@ export interface HealthCheckResult {
 export interface HealthCheckResultDoc {
   projectId: string
   projectName: string
-  type: MonitoringType
+  type: HealthCheckType
   url: string
   success: boolean
   statusCode?: number
@@ -146,12 +148,6 @@ export interface CypressResultDoc {
 // Notification Types
 // ============================================
 
-export interface TelegramMessage {
-  chatId: string
-  message: string
-  parseMode?: 'HTML' | 'Markdown'
-}
-
 export type NotificationType =
   | 'health_check_failed'
   | 'health_check_restored'
@@ -164,6 +160,27 @@ export interface NotificationPayload {
   projectName: string
   details: string
   timestamp: Date
+}
+
+// ============================================
+// Monitor Settings Types
+// ============================================
+
+export interface MonitorSettings {
+  healthCheckIntervalHours: number
+  cypressIntervalHours: number
+  updatedAt: Date
+}
+
+export interface MonitorSettingsDoc {
+  healthCheckIntervalHours: number
+  cypressIntervalHours: number
+  updatedAt: FirestoreTimestamp
+}
+
+export interface UpdateMonitorSettingsInput {
+  healthCheckIntervalHours?: number
+  cypressIntervalHours?: number
 }
 
 // ============================================

@@ -25,13 +25,21 @@ function timestampToDate(timestamp: FirestoreTimestamp | null): Date | null {
 // Project Converter
 // ============================================
 
+type LegacyProjectDoc = ProjectDoc & {
+  baseUrl?: string
+  projectType?: 'front' | 'back'
+  runCypressTests?: boolean
+  monitoringTypes?: string[]
+}
+
 export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
   toFirestore(project: WithFieldValue<Project>): WithFieldValue<ProjectDoc> {
     const p = project as Project
     return {
       name: p.name,
-      baseUrl: p.baseUrl,
-      monitoringTypes: p.monitoringTypes,
+      frontHealthCheckUrl: p.frontHealthCheckUrl,
+      backHealthCheckUrl: p.backHealthCheckUrl,
+      cypressRunUrl: p.cypressRunUrl,
       status: p.status,
       isActive: p.isActive,
       lastCheckAt: p.lastCheckAt ? Timestamp.fromDate(p.lastCheckAt) : null,
@@ -43,12 +51,37 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
     snapshot: QueryDocumentSnapshot<ProjectDoc>,
     options?: SnapshotOptions,
   ): Project {
-    const data = snapshot.data(options)
+    const data = snapshot.data(options) as LegacyProjectDoc
+    const hasNew =
+      data.frontHealthCheckUrl != null ||
+      data.backHealthCheckUrl != null ||
+      data.cypressRunUrl != null
+    let frontHealthCheckUrl = data.frontHealthCheckUrl ?? null
+    let backHealthCheckUrl = data.backHealthCheckUrl ?? null
+    let cypressRunUrl = data.cypressRunUrl ?? null
+    if (!hasNew && data.baseUrl) {
+      const baseUrl = data.baseUrl.trim()
+      const isBack =
+        data.projectType === 'back' || data.monitoringTypes?.includes('rest')
+      const isFront =
+        data.projectType === 'front' ||
+        data.monitoringTypes?.includes('web') ||
+        data.monitoringTypes?.includes('wordpress')
+      if (isFront) frontHealthCheckUrl = baseUrl
+      if (isBack) backHealthCheckUrl = baseUrl
+      if (
+        data.runCypressTests ||
+        data.monitoringTypes?.includes('cypress')
+      ) {
+        cypressRunUrl = baseUrl
+      }
+    }
     return {
       id: snapshot.id,
       name: data.name,
-      baseUrl: data.baseUrl,
-      monitoringTypes: data.monitoringTypes,
+      frontHealthCheckUrl,
+      backHealthCheckUrl,
+      cypressRunUrl,
       status: data.status,
       isActive: data.isActive ?? true,
       lastCheckAt: timestampToDate(data.lastCheckAt),

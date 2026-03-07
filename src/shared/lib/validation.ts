@@ -49,6 +49,24 @@ export function isValidUrl(value: string, fieldName: string): string {
 }
 
 /**
+ * Validate optional URL: empty/null/undefined -> null, otherwise valid URL (trimmed)
+ */
+export function optionalUrl(
+  value: string | null | undefined,
+  _fieldName: string,
+): string | null {
+  if (value === null || value === undefined) return null
+  const trimmed = String(value).trim()
+  if (trimmed === '') return null
+  try {
+    new URL(trimmed)
+    return trimmed
+  } catch {
+    throw new ValidationError('Must be a valid URL', _fieldName)
+  }
+}
+
+/**
  * Validate that an array is not empty
  */
 export function notEmptyArray<T>(value: T[], fieldName: string): T[] {

@@ -97,20 +97,4 @@ describe('Health Check E2E Tests', () => {
     })
   })
 
-  it('should execute WordPress health check', () => {
-    cy.request({
-      method: 'GET',
-      url: '/api/health-check/wordpress',
-      qs: {
-        url: 'https://example.com',
-      },
-      failOnStatusCode: false,
-    }).then((response) => {
-      expect(response.status).to.be.oneOf([200, 400, 500])
-      if (response.status === 200 && response.body.success) {
-        expect(response.body.data).to.have.property('success')
-        expect(response.body.data).to.have.property('endpoints')
-      }
-    })
-  })
 })

@@ -1,12 +1,12 @@
 # RBIN App Monitor
 
-Monitor your applications health, run Cypress tests and receive Telegram notifications.
+Monitor your applications health, run Cypress tests and receive email notifications.
 
 ## Features
 
-- 🏥 **Health Checks**: Monitor web pages, REST APIs, and WordPress sites
+- 🏥 **Health Checks**: Monitor front-end (page) and back-end (API) health
 - 🧪 **Cypress Integration**: Run E2E tests automatically or on-demand
-- 📱 **Telegram Notifications**: Get instant alerts when something goes wrong
+- 📧 **Email Notifications**: Get alerts when health checks fail or Cypress tests fail
 - 📊 **Dashboard**: View project status and execution history
 - ⚡ **Automated Monitoring**: Scheduled health checks and test runs
 
@@ -16,7 +16,7 @@ Monitor your applications health, run Cypress tests and receive Telegram notific
 
 - Node.js 18+ and npm/yarn/pnpm
 - Firebase project with Firestore enabled
-- Telegram Bot Token (get from [@BotFather](https://t.me/BotFather))
+- SMTP credentials for sending email (e.g. Gmail, SendGrid, Mailgun)
 
 ### Installation
 
@@ -104,18 +104,35 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY----
 **How to get these:**
 1. Same as Option 1, but extract individual fields from the JSON
 
-### Telegram Bot Configuration
+### Email Notifications
+
+Alerts (health check failed/restored, Cypress failed) are sent to `NOTIFICATION_EMAIL_TO`.
+
+**Option A – Resend (recommended, free tier: 100 emails/day, 3,000/month)**  
+Uses only an API key (no SMTP password). Sign up at [resend.com](https://resend.com), create an API key at [resend.com/api-keys](https://resend.com/api-keys).
 
 ```env
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
-TELEGRAM_CHAT_ID=your_telegram_chat_id_here
+RESEND_API_KEY=re_xxxxxxxxxxxx
+NOTIFICATION_EMAIL_TO=your@email.com
 ```
 
-**How to get these:**
-1. **Bot Token**: Message [@BotFather](https://t.me/BotFather) on Telegram and create a new bot
-2. **Chat ID**: 
-   - Message [@userinfobot](https://t.me/userinfobot) to get your user ID, or
-   - Send a message to your bot and check the webhook update
+For testing you can use the default sender `onboarding@resend.dev`. For production, add and verify your domain in Resend and set:
+
+```env
+RESEND_FROM=App Monitor <noreply@yourdomain.com>
+```
+
+**Option B – SMTP**  
+If you don’t set `RESEND_API_KEY`, the app uses SMTP (Gmail, SendGrid, Mailgun, etc.):
+
+```env
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_smtp_user
+SMTP_PASS=your_smtp_password
+NOTIFICATION_EMAIL_TO=alerts@example.com
+```
 
 ### API Security (Optional but Recommended)
 

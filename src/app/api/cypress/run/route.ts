@@ -4,8 +4,8 @@ import {
   acquireLock,
   releaseLock,
 } from '@/features/monitoring/services/cypress-lock'
+import { callRemoteCypressRun } from '@/features/monitoring/services/cypress-remote'
 import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
-import { runCypressTests } from '@/features/monitoring/services/cypress-runner'
 import { getProjectById } from '@/features/projects/services/projects'
 import type { ApiResponse } from '@/shared/types'
 
@@ -32,26 +32,38 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = (await request.json().catch(() => ({}))) as CypressRunRequest
-
     const projectId = body.projectId
-    const timeout = body.timeout || 10 * 60 * 1000
+    const timeout = body.timeout || 120000
 
-    const result = await runCypressTests(projectId, timeout)
-
-    if (projectId) {
-      try {
-        const project = await getProjectById(projectId)
-        if (project) {
-          await saveCypressResult({
-            projectId,
-            projectName: project.name,
-            result,
-          })
-        }
-      } catch (error) {
-        console.error('Error saving Cypress result:', error)
-      }
+    if (!projectId) {
+      return NextResponse.json<ApiResponse>(
+        {
+          success: false,
+          error: 'projectId is required',
+        },
+        { status: 400 },
+      )
     }
+
+    const project = await getProjectById(projectId)
+
+    if (!project.cypressRunUrl) {
+      return NextResponse.json<ApiResponse>(
+        {
+          success: false,
+          error: 'No Cypress run URL configured for this project',
+        },
+        { status: 400 },
+      )
+    }
+
+    const result = await callRemoteCypressRun(project.cypressRunUrl, { timeout })
+
+    await saveCypressResult({
+      projectId: project.id,
+      projectName: project.name,
+      result,
+    })
 
     return NextResponse.json<ApiResponse>({
       success: result.success,

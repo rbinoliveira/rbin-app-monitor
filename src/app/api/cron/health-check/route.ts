@@ -4,7 +4,6 @@ import { requireApiAuth, requireRateLimit } from '@/features/auth/lib/api-auth'
 import {
   checkRestEndpoint,
   checkWebPage,
-  checkWordPress,
 } from '@/features/monitoring/services/health-check'
 import { processHealthCheckResult } from '@/features/monitoring/services/health-check-notifications'
 import { getActiveProjects } from '@/features/projects/services/projects'
@@ -15,72 +14,67 @@ export const maxDuration = 300
 async function executeHealthCheckForProject(project: {
   id: string
   name: string
-  baseUrl: string
-  monitoringTypes: string[]
+  frontHealthCheckUrl: string | null
+  backHealthCheckUrl: string | null
 }) {
-  const results = []
+  const results: Array<{
+    type: 'front' | 'back'
+    success: boolean
+    responseTime?: number
+    error?: string
+  }> = []
 
-  for (const monitoringType of project.monitoringTypes) {
-    if (monitoringType === 'cypress') {
-      continue
-    }
-
+  if (project.frontHealthCheckUrl) {
     try {
-      let result
-
-      if (monitoringType === 'web') {
-        result = await checkWebPage(project.baseUrl)
-        await processHealthCheckResult({
-          projectId: project.id,
-          type: 'web',
-          url: project.baseUrl,
-          result,
-        })
-      } else if (monitoringType === 'rest') {
-        result = await checkRestEndpoint({
-          url: project.baseUrl,
-          method: 'GET',
-        })
-        await processHealthCheckResult({
-          projectId: project.id,
-          type: 'rest',
-          url: project.baseUrl,
-          result,
-        })
-      } else if (monitoringType === 'wordpress') {
-        const wpResult = await checkWordPress(project.baseUrl)
-        result = {
-          success: wpResult.success,
-          statusCode: wpResult.statusCode,
-          responseTime: wpResult.responseTime,
-          errorMessage: wpResult.errorMessage,
-        }
-        await processHealthCheckResult({
-          projectId: project.id,
-          type: 'wordpress',
-          url: project.baseUrl,
-          result,
-        })
-      } else {
-        continue
-      }
-
+      const result = await checkWebPage(project.frontHealthCheckUrl)
+      await processHealthCheckResult({
+        projectId: project.id,
+        type: 'front',
+        url: project.frontHealthCheckUrl,
+        result,
+      })
       results.push({
-        type: monitoringType,
+        type: 'front',
         success: result.success,
         responseTime: result.responseTime,
       })
-
-      console.log(
-        `Health check completed for project ${project.name} (${monitoringType}): ${result.success ? 'Success' : 'Failed'}`,
-      )
     } catch (error) {
       console.error(
-        `Error executing health check for project ${project.name} (${monitoringType}):`,
+        `Error executing front health check for project ${project.name}:`,
         error,
       )
       results.push({
-        type: monitoringType,
+        type: 'front',
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+  }
+
+  if (project.backHealthCheckUrl) {
+    try {
+      const result = await checkRestEndpoint({
+        url: project.backHealthCheckUrl,
+        method: 'GET',
+      })
+      await processHealthCheckResult({
+        projectId: project.id,
+        type: 'back',
+        url: project.backHealthCheckUrl,
+        result,
+      })
+      results.push({
+        type: 'back',
+        success: result.success,
+        responseTime: result.responseTime,
+      })
+    } catch (error) {
+      console.error(
+        `Error executing back health check for project ${project.name}:`,
+        error,
+      )
+      results.push({
+        type: 'back',
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       })
@@ -105,9 +99,12 @@ export async function GET(request: NextRequest) {
 
   try {
     const projects = await getActiveProjects()
+    const projectsWithHealth = projects.filter(
+      (p) => p.frontHealthCheckUrl || p.backHealthCheckUrl,
+    )
     const allResults = []
 
-    for (const project of projects) {
+    for (const project of projectsWithHealth) {
       try {
         console.log(`Running health checks for project: ${project.name}`)
         const projectResults = await executeHealthCheckForProject(project)
@@ -132,7 +129,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json<ApiResponse>({
       success: true,
       data: {
-        totalProjects: projects.length,
+        totalProjects: projectsWithHealth.length,
         results: allResults,
       },
     })

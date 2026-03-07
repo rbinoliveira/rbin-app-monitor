@@ -2,11 +2,9 @@
 # ────────────────────────────────
 # AI Assistants
 # ────────────────────────────────
-.claude/
+
 .gemini/
-.cursor/
-.task-flow/
-CLAUDE.md
+
 GEMINI.md
 
 # ────────────────────────────────
@@ -111,3 +109,10 @@ build/
 *.temp
 .cache/
 .temp/
+
+
+.claude/
+.cursor/
+.task-flow/
+CLAUDE.md
+AGENTS.md

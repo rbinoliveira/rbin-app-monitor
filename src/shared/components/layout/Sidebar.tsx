@@ -8,7 +8,7 @@ import { cn } from '@/shared/lib/utils'
 const navigation = [
   {
     name: 'Dashboard',
-    href: '/',
+    href: '/dashboard',
     icon: (
       <svg
         className="h-5 w-5"
@@ -96,7 +96,7 @@ export function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 z-30 flex h-full w-64 flex-col border-r border-gray-200 bg-white">
       <div className="flex h-16 items-center border-b border-gray-200 px-6">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600">
             <svg
               className="h-5 w-5 text-white"
@@ -122,7 +122,7 @@ export function Sidebar() {
         {navigation.map((item) => {
           const isActive =
             pathname === item.href ||
-            (item.href !== '/' && pathname.startsWith(item.href))
+            (item.href !== '/dashboard' && pathname.startsWith(item.href))
           return (
             <Link
               key={item.name}

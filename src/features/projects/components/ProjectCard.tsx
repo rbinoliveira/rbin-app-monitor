@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/shared/components/ui/Card'
 import { useToast } from '@/shared/components/ui/Toast'
 import { cn } from '@/shared/lib/utils'
 import type { Project, ProjectStatus } from '@/shared/types'
-import { MONITORING_TYPE_LABELS } from '@/shared/types'
 
 interface ProjectCardProps {
   project: Project
@@ -40,7 +39,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const { addToast } = useToast()
   const [isRunningTests, setIsRunningTests] = useState(false)
 
-  const hasCypressMonitoring = project.monitoringTypes.includes('cypress')
+  const hasCypress = Boolean(project.cypressRunUrl)
 
   const handleRunTests = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -110,22 +109,39 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   {status.label}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-gray-500">{project.baseUrl}</p>
+              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
+                {project.frontHealthCheckUrl && (
+                  <span title={project.frontHealthCheckUrl}>Front</span>
+                )}
+                {project.backHealthCheckUrl && (
+                  <span title={project.backHealthCheckUrl}>Back</span>
+                )}
+                {project.cypressRunUrl && (
+                  <span title={project.cypressRunUrl}>Cypress</span>
+                )}
+              </div>
             </div>
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            {project.monitoringTypes.map((type) => (
-              <span
-                key={type}
-                className="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700"
-              >
-                {MONITORING_TYPE_LABELS[type]}
+            {project.frontHealthCheckUrl && (
+              <span className="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
+                Front
               </span>
-            ))}
+            )}
+            {project.backHealthCheckUrl && (
+              <span className="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
+                Back
+              </span>
+            )}
+            {project.cypressRunUrl && (
+              <span className="inline-flex items-center rounded-md bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700">
+                Cypress
+              </span>
+            )}
           </div>
 
-          {hasCypressMonitoring && (
+          {hasCypress && (
             <div className="mt-4">
               <Button
                 size="sm"
