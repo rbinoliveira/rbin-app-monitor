@@ -20,6 +20,7 @@ function projectToFirestore(project: Project): ProjectDoc {
     frontHealthCheckUrl: project.frontHealthCheckUrl,
     backHealthCheckUrl: project.backHealthCheckUrl,
     cypressRunUrl: project.cypressRunUrl,
+    playwrightRunUrl: project.playwrightRunUrl,
     status: project.status,
     isActive: project.isActive,
     lastCheckAt: project.lastCheckAt
@@ -48,6 +49,7 @@ function projectFromFirestore(docId: string, data: ProjectDoc): Project {
   let frontHealthCheckUrl: string | null = doc.frontHealthCheckUrl ?? null
   let backHealthCheckUrl: string | null = doc.backHealthCheckUrl ?? null
   let cypressRunUrl: string | null = doc.cypressRunUrl ?? null
+  const playwrightRunUrl: string | null = doc.playwrightRunUrl ?? null
 
   if (!hasNewFields && doc.baseUrl) {
     const baseUrl = doc.baseUrl.trim()
@@ -68,6 +70,7 @@ function projectFromFirestore(docId: string, data: ProjectDoc): Project {
     frontHealthCheckUrl,
     backHealthCheckUrl,
     cypressRunUrl,
+    playwrightRunUrl,
     status: doc.status,
     isActive: doc.isActive ?? true,
     lastCheckAt: doc.lastCheckAt ? doc.lastCheckAt.toDate() : null,
@@ -91,9 +94,10 @@ function validateAtLeastOneUrl(input: CreateProjectInput): void {
   const front = (input.frontHealthCheckUrl ?? '').trim()
   const back = (input.backHealthCheckUrl ?? '').trim()
   const cypress = (input.cypressRunUrl ?? '').trim()
-  if (!front && !back && !cypress) {
+  const playwright = (input.playwrightRunUrl ?? '').trim()
+  if (!front && !back && !cypress && !playwright) {
     throw new ApiError(
-      'Provide at least one URL: front health check, back health check, or Cypress run API',
+      'Provide at least one URL: front health check, back health check, Cypress run, or Playwright run',
       HTTP_STATUS.BAD_REQUEST,
     )
   }
@@ -114,6 +118,7 @@ export async function createProject(
     'backHealthCheckUrl',
   )
   const cypressRunUrl = optionalUrl(input.cypressRunUrl, 'cypressRunUrl')
+  const playwrightRunUrl = optionalUrl(input.playwrightRunUrl, 'playwrightRunUrl')
 
   const now = new Date()
   const projectData: Project = {
@@ -122,6 +127,7 @@ export async function createProject(
     frontHealthCheckUrl,
     backHealthCheckUrl,
     cypressRunUrl,
+    playwrightRunUrl,
     status: 'unknown' as ProjectStatus,
     isActive: true,
     lastCheckAt: null,
@@ -204,6 +210,10 @@ export async function updateProject(
     updates.cypressRunUrl = optionalUrl(input.cypressRunUrl, 'cypressRunUrl')
   }
 
+  if (input.playwrightRunUrl !== undefined) {
+    updates.playwrightRunUrl = optionalUrl(input.playwrightRunUrl, 'playwrightRunUrl')
+  }
+
   if (input.isActive !== undefined) {
     updates.isActive = input.isActive
   }
@@ -213,10 +223,11 @@ export async function updateProject(
   const atLeastOne =
     updatedProject.frontHealthCheckUrl ||
     updatedProject.backHealthCheckUrl ||
-    updatedProject.cypressRunUrl
+    updatedProject.cypressRunUrl ||
+    updatedProject.playwrightRunUrl
   if (!atLeastOne) {
     throw new ApiError(
-      'Project must have at least one URL (front, back, or Cypress)',
+      'Project must have at least one URL (front, back, Cypress, or Playwright)',
       HTTP_STATUS.BAD_REQUEST,
     )
   }
@@ -232,6 +243,8 @@ export async function updateProject(
     updateData.backHealthCheckUrl = updatedProject.backHealthCheckUrl
   if (updates.cypressRunUrl !== undefined)
     updateData.cypressRunUrl = updatedProject.cypressRunUrl
+  if (updates.playwrightRunUrl !== undefined)
+    updateData.playwrightRunUrl = updatedProject.playwrightRunUrl
   if (updates.isActive !== undefined)
     updateData.isActive = updatedProject.isActive
 

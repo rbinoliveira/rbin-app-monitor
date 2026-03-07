@@ -1,13 +1,13 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
 import { getAdminDb } from '@/shared/lib/firebase-admin'
-import type { CypressResult, CypressResultDoc } from '@/shared/types'
+import type { PlaywrightResult, PlaywrightResultDoc } from '@/shared/types'
 
-import type { CypressRunResult } from './cypress-runner'
+import type { PlaywrightRunResult } from './playwright-runner'
 
-const CYPRESS_RESULTS_COLLECTION = 'cypressResults'
+const PLAYWRIGHT_RESULTS_COLLECTION = 'playwrightResults'
 
-function cypressResultToFirestore(result: CypressResult): CypressResultDoc {
+function playwrightResultToFirestore(result: PlaywrightResult): PlaywrightResultDoc {
   return {
     projectId: result.projectId,
     projectName: result.projectName,
@@ -23,15 +23,15 @@ function cypressResultToFirestore(result: CypressResult): CypressResultDoc {
   }
 }
 
-export interface SaveCypressResultInput {
+export interface SavePlaywrightResultInput {
   projectId: string
   projectName: string
-  result: CypressRunResult
+  result: PlaywrightRunResult
 }
 
-export async function saveCypressResult(
-  input: SaveCypressResultInput,
-): Promise<CypressResult> {
+export async function savePlaywrightResult(
+  input: SavePlaywrightResultInput,
+): Promise<PlaywrightResult> {
   if (!input.projectId || typeof input.projectId !== 'string') {
     throw new Error('Project ID is required')
   }
@@ -40,8 +40,12 @@ export async function saveCypressResult(
     throw new Error('Project name is required')
   }
 
+  if (!input.result || typeof input.result !== 'object') {
+    throw new Error('Playwright result is required')
+  }
+
   const now = new Date()
-  const cypressResult: CypressResult = {
+  const playwrightResult: PlaywrightResult = {
     id: '',
     projectId: input.projectId,
     projectName: input.projectName,
@@ -56,10 +60,13 @@ export async function saveCypressResult(
     timestamp: now,
   }
 
-  const docRef = getAdminDb().collection(CYPRESS_RESULTS_COLLECTION).doc()
+  const docRef = getAdminDb().collection(PLAYWRIGHT_RESULTS_COLLECTION).doc()
   await docRef.set(
-    cypressResultToFirestore({ ...cypressResult, id: docRef.id }),
+    playwrightResultToFirestore({ ...playwrightResult, id: docRef.id }),
   )
 
-  return { ...cypressResult, id: docRef.id }
+  return {
+    ...playwrightResult,
+    id: docRef.id,
+  }
 }

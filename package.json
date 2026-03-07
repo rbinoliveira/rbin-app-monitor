@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
     "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "playwright:open": "playwright test --ui",
+    "playwright:run": "playwright test"
   },
   "dependencies": {
     "clsx": "^2.1.0",
@@ -30,7 +30,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.17",
-    "cypress": "^15.9.0",
+    "@playwright/test": "^1.50.0",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.0"

@@ -27,6 +27,7 @@ export interface Project {
   frontHealthCheckUrl: string | null
   backHealthCheckUrl: string | null
   cypressRunUrl: string | null
+  playwrightRunUrl: string | null
   status: ProjectStatus
   isActive: boolean
   lastCheckAt: Date | null
@@ -40,6 +41,7 @@ export interface ProjectDoc {
   frontHealthCheckUrl: string | null
   backHealthCheckUrl: string | null
   cypressRunUrl: string | null
+  playwrightRunUrl: string | null
   status: ProjectStatus
   isActive: boolean
   lastCheckAt: FirestoreTimestamp | null
@@ -53,6 +55,7 @@ export interface CreateProjectInput {
   frontHealthCheckUrl?: string | null
   backHealthCheckUrl?: string | null
   cypressRunUrl?: string | null
+  playwrightRunUrl?: string | null
 }
 
 export interface UpdateProjectInput {
@@ -60,6 +63,7 @@ export interface UpdateProjectInput {
   frontHealthCheckUrl?: string | null
   backHealthCheckUrl?: string | null
   cypressRunUrl?: string | null
+  playwrightRunUrl?: string | null
   isActive?: boolean
 }
 
@@ -111,7 +115,7 @@ export interface HealthCheckResponse {
 }
 
 // ============================================
-// Cypress Test Types
+// Cypress Test Types (for monitored projects running Cypress)
 // ============================================
 
 export interface CypressResult {
@@ -145,6 +149,40 @@ export interface CypressResultDoc {
 }
 
 // ============================================
+// Playwright Test Types (for monitored projects running Playwright)
+// ============================================
+
+export interface PlaywrightResult {
+  id: string
+  projectId: string
+  projectName: string
+  success: boolean
+  totalTests: number
+  passed: number
+  failed: number
+  skipped: number
+  duration: number
+  specFiles: string[]
+  output: string
+  timestamp: Date
+}
+
+// Firestore document type
+export interface PlaywrightResultDoc {
+  projectId: string
+  projectName: string
+  success: boolean
+  totalTests: number
+  passed: number
+  failed: number
+  skipped: number
+  duration: number
+  specFiles: string[]
+  output: string
+  timestamp: FirestoreTimestamp
+}
+
+// ============================================
 // Notification Types
 // ============================================
 
@@ -153,6 +191,8 @@ export type NotificationType =
   | 'health_check_restored'
   | 'cypress_failed'
   | 'cypress_passed'
+  | 'playwright_failed'
+  | 'playwright_passed'
 
 export interface NotificationPayload {
   type: NotificationType
@@ -169,18 +209,21 @@ export interface NotificationPayload {
 export interface MonitorSettings {
   healthCheckIntervalHours: number
   cypressIntervalHours: number
+  playwrightIntervalHours: number
   updatedAt: Date
 }
 
 export interface MonitorSettingsDoc {
   healthCheckIntervalHours: number
   cypressIntervalHours: number
+  playwrightIntervalHours: number
   updatedAt: FirestoreTimestamp
 }
 
 export interface UpdateMonitorSettingsInput {
   healthCheckIntervalHours?: number
   cypressIntervalHours?: number
+  playwrightIntervalHours?: number
 }
 
 // ============================================

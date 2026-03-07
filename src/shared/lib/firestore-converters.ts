@@ -12,6 +12,8 @@ import type {
   FirestoreTimestamp,
   HealthCheckResult,
   HealthCheckResultDoc,
+  PlaywrightResult,
+  PlaywrightResultDoc,
   Project,
   ProjectDoc,
 } from '@/shared/types'
@@ -40,6 +42,7 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
       frontHealthCheckUrl: p.frontHealthCheckUrl,
       backHealthCheckUrl: p.backHealthCheckUrl,
       cypressRunUrl: p.cypressRunUrl,
+      playwrightRunUrl: p.playwrightRunUrl,
       status: p.status,
       isActive: p.isActive,
       lastCheckAt: p.lastCheckAt ? Timestamp.fromDate(p.lastCheckAt) : null,
@@ -59,6 +62,7 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
     let frontHealthCheckUrl = data.frontHealthCheckUrl ?? null
     let backHealthCheckUrl = data.backHealthCheckUrl ?? null
     let cypressRunUrl = data.cypressRunUrl ?? null
+    const playwrightRunUrl = data.playwrightRunUrl ?? null
     if (!hasNew && data.baseUrl) {
       const baseUrl = data.baseUrl.trim()
       const isBack =
@@ -82,6 +86,7 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
       frontHealthCheckUrl,
       backHealthCheckUrl,
       cypressRunUrl,
+      playwrightRunUrl,
       status: data.status,
       isActive: data.isActive ?? true,
       lastCheckAt: timestampToDate(data.lastCheckAt),
@@ -136,7 +141,7 @@ export const healthCheckResultConverter: FirestoreDataConverter<
 }
 
 // ============================================
-// Cypress Result Converter
+// Cypress Result Converter (monitored projects running Cypress)
 // ============================================
 
 export const cypressResultConverter: FirestoreDataConverter<
@@ -165,6 +170,54 @@ export const cypressResultConverter: FirestoreDataConverter<
     snapshot: QueryDocumentSnapshot<CypressResultDoc>,
     options?: SnapshotOptions,
   ): CypressResult {
+    const data = snapshot.data(options)
+    return {
+      id: snapshot.id,
+      projectId: data.projectId,
+      projectName: data.projectName,
+      success: data.success,
+      totalTests: data.totalTests,
+      passed: data.passed,
+      failed: data.failed,
+      skipped: data.skipped,
+      duration: data.duration,
+      specFiles: data.specFiles,
+      output: data.output,
+      timestamp: data.timestamp.toDate(),
+    }
+  },
+}
+
+// ============================================
+// Playwright Result Converter (monitored projects running Playwright)
+// ============================================
+
+export const playwrightResultConverter: FirestoreDataConverter<
+  PlaywrightResult,
+  PlaywrightResultDoc
+> = {
+  toFirestore(
+    result: WithFieldValue<PlaywrightResult>,
+  ): WithFieldValue<PlaywrightResultDoc> {
+    const r = result as PlaywrightResult
+    return {
+      projectId: r.projectId,
+      projectName: r.projectName,
+      success: r.success,
+      totalTests: r.totalTests,
+      passed: r.passed,
+      failed: r.failed,
+      skipped: r.skipped,
+      duration: r.duration,
+      specFiles: r.specFiles,
+      output: r.output,
+      timestamp: Timestamp.fromDate(r.timestamp),
+    }
+  },
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot<PlaywrightResultDoc>,
+    options?: SnapshotOptions,
+  ): PlaywrightResult {
     const data = snapshot.data(options)
     return {
       id: snapshot.id,

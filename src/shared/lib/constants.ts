@@ -9,6 +9,7 @@
 export const TIMEOUT = {
   HEALTH_CHECK: 30000, // 30 seconds
   CYPRESS_RUN: 600000, // 10 minutes
+  PLAYWRIGHT_RUN: 600000, // 10 minutes
   API_REQUEST: 60000, // 1 minute
 } as const
 
@@ -86,6 +87,7 @@ export const COLLECTION_NAMES = {
   PROJECTS: 'projects',
   HEALTH_CHECK_RESULTS: 'healthCheckResults',
   CYPRESS_RESULTS: 'cypressResults',
+  PLAYWRIGHT_RESULTS: 'playwrightResults',
   LOCKS: 'locks',
   SETTINGS: 'settings',
 } as const
@@ -95,6 +97,7 @@ export const SETTINGS_DOC_ID = 'monitor' as const
 export const DEFAULT_INTERVAL_HOURS = {
   HEALTH_CHECK: 12,
   CYPRESS: 12,
+  PLAYWRIGHT: 12,
 } as const
 
 export const INTERVAL_HOURS = {

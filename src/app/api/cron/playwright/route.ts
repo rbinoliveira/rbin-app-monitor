@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { requireApiAuth, requireRateLimit } from '@/features/auth/lib/api-auth'
-import { callRemoteCypressRun } from '@/features/monitoring/services/cypress-remote'
-import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
+import { callRemotePlaywrightRun } from '@/features/monitoring/services/playwright-remote'
+import { savePlaywrightResult } from '@/features/monitoring/services/playwright-results'
 import { sendNotification } from '@/features/monitoring/services/email'
 import { getActiveProjects } from '@/features/projects/services/projects'
 import type { ApiResponse } from '@/shared/types'
@@ -24,18 +24,20 @@ export async function GET(request: NextRequest) {
 
   try {
     const projects = await getActiveProjects()
-    const projectsWithCypress = projects.filter((p) => p.cypressRunUrl)
+    const projectsWithPlaywright = projects.filter(
+      (project) => project.playwrightRunUrl,
+    )
 
     const results = []
 
-    for (const project of projectsWithCypress) {
+    for (const project of projectsWithPlaywright) {
       try {
-        if (!project.cypressRunUrl) continue
+        if (!project.playwrightRunUrl) continue
 
-        console.log(`Calling Cypress run URL for project: ${project.name}`)
-        const result = await callRemoteCypressRun(project.cypressRunUrl)
+        console.log(`Calling Playwright run URL for project: ${project.name}`)
+        const result = await callRemotePlaywrightRun(project.playwrightRunUrl)
 
-        await saveCypressResult({
+        await savePlaywrightResult({
           projectId: project.id,
           projectName: project.name,
           result,
@@ -43,16 +45,19 @@ export async function GET(request: NextRequest) {
 
         if (!result.success) {
           try {
-            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+            const baseUrl =
+              process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
             const dashboardUrl = `${baseUrl}/dashboard`
+
             const failedTestsDetails =
               result.failed > 0
                 ? `\n<b>Failed Tests:</b> ${result.failed} out of ${result.totalTests}`
                 : ''
-            const details = `Cypress tests failed for project "${project.name}"${failedTestsDetails}\n\n<b>View Details:</b> <a href="${dashboardUrl}">${dashboardUrl}</a>`
+
+            const details = `Playwright tests failed for project "${project.name}"${failedTestsDetails}\n\n<b>View Details:</b> <a href="${dashboardUrl}">${dashboardUrl}</a>`
 
             await sendNotification({
-              type: 'cypress_failed',
+              type: 'playwright_failed',
               projectId: project.id,
               projectName: project.name,
               details,
@@ -74,8 +79,15 @@ export async function GET(request: NextRequest) {
           passed: result.passed,
           failed: result.failed,
         })
+
+        console.log(
+          `Completed Playwright for project: ${project.name} - Success: ${result.success}`,
+        )
       } catch (error) {
-        console.error(`Error running Cypress for project ${project.name}:`, error)
+        console.error(
+          `Error running Playwright for project ${project.name}:`,
+          error,
+        )
         results.push({
           projectId: project.id,
           projectName: project.name,
@@ -87,10 +99,13 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json<ApiResponse>({
       success: true,
-      data: { totalProjects: projectsWithCypress.length, results },
+      data: {
+        totalProjects: projectsWithPlaywright.length,
+        results,
+      },
     })
   } catch (error) {
-    console.error('Error in cron Cypress execution:', error)
+    console.error('Error in cron Playwright execution:', error)
     return NextResponse.json<ApiResponse>(
       {
         success: false,

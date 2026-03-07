@@ -1,8 +1,8 @@
-import type { CypressRunResult } from './cypress-runner'
+import type { PlaywrightRunResult } from './playwright-runner'
 
 const DEFAULT_TIMEOUT_MS = 120000
 
-interface RemoteCypressResponse {
+interface RemotePlaywrightResponse {
   success?: boolean
   passed?: number
   failed?: number
@@ -15,9 +15,9 @@ interface RemoteCypressResponse {
 }
 
 function normalizeRemoteResponse(
-  data: RemoteCypressResponse,
+  data: RemotePlaywrightResponse,
   success: boolean,
-): CypressRunResult {
+): PlaywrightRunResult {
   const passed = Number(data.passed) || 0
   const failed = Number(data.failed) || 0
   const skipped = Number(data.skipped) || 0
@@ -39,10 +39,10 @@ function normalizeRemoteResponse(
   }
 }
 
-export async function callRemoteCypressRun(
+export async function callRemotePlaywrightRun(
   url: string,
   options?: { timeout?: number },
-): Promise<CypressRunResult> {
+): Promise<PlaywrightRunResult> {
   const timeout = options?.timeout ?? DEFAULT_TIMEOUT_MS
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), timeout)
@@ -57,9 +57,9 @@ export async function callRemoteCypressRun(
     clearTimeout(timeoutId)
 
     const text = await response.text()
-    let data: RemoteCypressResponse = {}
+    let data: RemotePlaywrightResponse = {}
     try {
-      data = JSON.parse(text) as RemoteCypressResponse
+      data = JSON.parse(text) as RemotePlaywrightResponse
     } catch {
       return normalizeRemoteResponse(
         { success: false, error: 'Invalid JSON response' },
