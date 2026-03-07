@@ -1,3 +1,4 @@
+export { DataHandler, type DataHandlerProps } from '../data-handler'
 export { Button, type ButtonProps } from './Button'
 export {
   Card,

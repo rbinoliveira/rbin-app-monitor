@@ -1,38 +1,21 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 
+import { useGetHistoryService } from '@/features/monitoring/services/get-history.service'
 import type {
-  CypressResult,
-  HealthCheckResult,
-  PlaywrightResult,
-} from '@/shared/types'
+  HistoryItem,
+  UseHistoryFilters,
+} from '@/features/monitoring/use-cases/get-history.use-case'
 
-export type HistoryItem = HealthCheckResult | CypressResult | PlaywrightResult
-
-export interface UseHistoryFilters {
-  type?: 'health_check' | 'cypress' | 'playwright' | ''
-  projectId?: string
-  startDate?: string
-  endDate?: string
-}
+export type { HistoryItem, UseHistoryFilters }
 
 interface UseHistoryOptions {
   page?: number
   pageSize?: number
 }
 
-interface UseHistoryState {
-  items: HistoryItem[]
-  loading: boolean
-  error: string | null
-  total: number
-  page: number
-  pageSize: number
-  hasMore: boolean
-}
-
-interface UseHistoryReturn {
+export interface UseHistoryReturn {
   items: HistoryItem[]
   loading: boolean
   error: string | null
@@ -51,83 +34,24 @@ export function useHistory(
   options: UseHistoryOptions = {},
 ): UseHistoryReturn {
   const [filters, setFilters] = useState<UseHistoryFilters>(initialFilters)
-  const [page, setPage] = useState(options.page || 1)
-  const pageSize = options.pageSize || 20
+  const [page, setPage] = useState(options.page ?? 1)
+  const pageSize = options.pageSize ?? 20
 
-  const [state, setState] = useState<UseHistoryState>({
-    items: [],
-    loading: true,
-    error: null,
-    total: 0,
-    page: 1,
-    pageSize,
-    hasMore: false,
-  })
-
-  const fetchHistory = useCallback(async () => {
-    try {
-      setState((prev) => ({ ...prev, loading: true, error: null }))
-
-      const params = new URLSearchParams({
-        page: page.toString(),
-        pageSize: pageSize.toString(),
-      })
-
-      if (filters.type) {
-        params.append('type', filters.type)
-      }
-      if (filters.projectId) {
-        params.append('projectId', filters.projectId)
-      }
-      if (filters.startDate) {
-        params.append('startDate', filters.startDate)
-      }
-      if (filters.endDate) {
-        params.append('endDate', filters.endDate)
-      }
-
-      const response = await fetch(`/api/history?${params.toString()}`)
-      const result = await response.json()
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to fetch history')
-      }
-
-      setState({
-        items: result.data.items || [],
-        loading: false,
-        error: null,
-        total: result.data.total || 0,
-        page: result.data.page || 1,
-        pageSize: result.data.pageSize || pageSize,
-        hasMore: result.data.hasMore || false,
-      })
-    } catch (err) {
-      setState((prev) => ({
-        ...prev,
-        loading: false,
-        error:
-          err instanceof Error ? err.message : 'An unexpected error occurred',
-        items: [],
-      }))
-    }
-  }, [filters, page, pageSize])
-
-  useEffect(() => {
-    fetchHistory()
-  }, [fetchHistory])
+  const query = useGetHistoryService(filters, { page, pageSize })
 
   return {
-    items: state.items,
-    loading: state.loading,
-    error: state.error,
-    total: state.total,
-    page: state.page,
-    pageSize: state.pageSize,
-    hasMore: state.hasMore,
+    items: query.data?.items ?? [],
+    loading: query.isLoading,
+    error: query.error?.message ?? null,
+    total: query.data?.total ?? 0,
+    page: query.data?.page ?? page,
+    pageSize: query.data?.pageSize ?? pageSize,
+    hasMore: query.data?.hasMore ?? false,
     filters,
     setFilters,
     setPage,
-    refresh: fetchHistory,
+    refresh: async () => {
+      await query.refetch()
+    },
   }
 }

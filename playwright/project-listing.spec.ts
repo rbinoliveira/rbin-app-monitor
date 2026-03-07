@@ -118,7 +118,7 @@ test.describe('Project Listing E2E Tests', () => {
     page,
   }) => {
     await page.route('**/api/projects', async (route) => {
-      await new Promise((r) => setTimeout(r, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       await route.fulfill({
         status: 200,
         contentType: 'application/json',

@@ -59,7 +59,7 @@ export function optionalUrl(
   const trimmed = String(value).trim()
   if (trimmed === '') return null
   try {
-    new URL(trimmed)
+    const _ = new URL(trimmed)
     return trimmed
   } catch {
     throw new ValidationError('Must be a valid URL', _fieldName)

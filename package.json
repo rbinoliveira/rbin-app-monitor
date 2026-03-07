@@ -7,11 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
-    "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix",
+    "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix && echo \"✓ Lint fix concluído com sucesso\"",
     "playwright:open": "playwright test --ui",
     "playwright:run": "playwright test"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.9.1",
+    "@tanstack/react-query": "^5.62.0",
     "clsx": "^2.1.0",
     "cookies-next": "^6.1.1",
     "firebase": "^12.8.0",
@@ -20,8 +22,10 @@
     "nodemailer": "^8.0.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
+    "react-hook-form": "^7.54.0",
     "resend": "^6.9.2",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",

@@ -1,7 +1,6 @@
 'use client'
 
-import { useApi } from '@/shared/hooks'
-import { REFRESH_INTERVAL } from '@/shared/lib/constants'
+import { useGetProjectsService } from '@/features/projects/services/get-projects.service'
 import type { Project } from '@/shared/types'
 
 interface UseProjectsReturn {
@@ -12,15 +11,14 @@ interface UseProjectsReturn {
 }
 
 export function useProjects(): UseProjectsReturn {
-  const { data, loading, error, fetch } = useApi<Project[]>('/api/projects', {
-    autoFetch: true,
-    refreshInterval: REFRESH_INTERVAL.PROJECTS_LIST,
-  })
+  const { data, isLoading, error, refetch } = useGetProjectsService()
 
   return {
-    projects: data || [],
-    loading,
-    error,
-    refresh: fetch,
+    projects: data ?? [],
+    loading: isLoading,
+    error: error?.message ?? null,
+    refresh: async () => {
+      await refetch()
+    },
   }
 }

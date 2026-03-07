@@ -18,7 +18,7 @@ test.describe('Execution History E2E Tests', () => {
 
   test('should show loading state while fetching history', async ({ page }) => {
     await page.route('**/api/history*', async (route) => {
-      await new Promise((r) => setTimeout(r, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       await route.fulfill({
         status: 200,
         contentType: 'application/json',

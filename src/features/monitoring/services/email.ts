@@ -6,7 +6,7 @@ import type { NotificationPayload } from '@/shared/types'
 const MAX_RETRIES = 3
 const INITIAL_RETRY_DELAY = 1000
 
-function useResend(): boolean {
+function isResendEnabled(): boolean {
   return Boolean(process.env.RESEND_API_KEY)
 }
 
@@ -50,7 +50,7 @@ function getNotificationTo(): string {
 function getNotificationFrom(): string {
   const from = process.env.NOTIFICATION_EMAIL_FROM
   if (from) return from
-  if (useResend()) {
+  if (isResendEnabled()) {
     return process.env.RESEND_FROM || 'App Monitor <onboarding@resend.dev>'
   }
   return process.env.SMTP_USER || 'noreply@app-monitor.local'
@@ -192,7 +192,7 @@ export async function sendNotification(
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const result = useResend()
+      const result = isResendEnabled()
         ? await sendViaResend(to, from, subject, html, text)
         : await sendViaSmtp(to, from, subject, html, text)
 

@@ -3,9 +3,8 @@ import '@/shared/styles/globals.css'
 import type { Metadata } from 'next'
 import { Outfit, Space_Mono as SpaceMono } from 'next/font/google'
 
-import { AuthProvider } from '@/features/auth/contexts'
+import { AppProvidersClient } from '@/features/platform/providers'
 import { AppShell, GlassBackground } from '@/shared/components/layout'
-import { ToastProvider } from '@/shared/components/ui/Toast'
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -32,12 +31,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="dark">
       <body className={`${outfit.variable} ${spaceMono.variable}`}>
-        <AuthProvider>
-          <ToastProvider>
-            <GlassBackground />
-            <AppShell>{children}</AppShell>
-          </ToastProvider>
-        </AuthProvider>
+        <AppProvidersClient>
+          <GlassBackground />
+          <AppShell>{children}</AppShell>
+        </AppProvidersClient>
       </body>
     </html>
   )
