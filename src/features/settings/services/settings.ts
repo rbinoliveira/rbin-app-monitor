@@ -13,7 +13,7 @@ import type {
   MonitorSettings,
   MonitorSettingsDoc,
   UpdateMonitorSettingsInput,
-} from '@/shared/types'
+} from '@/shared/types/monitor-settings.type'
 
 const SETTINGS_COLLECTION = COLLECTION_NAMES.SETTINGS
 

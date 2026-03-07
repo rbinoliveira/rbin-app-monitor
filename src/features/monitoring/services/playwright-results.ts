@@ -2,7 +2,10 @@ import { Timestamp } from 'firebase-admin/firestore'
 
 import { COLLECTION_NAMES } from '@/shared/lib/constants'
 import { getAdminDb } from '@/shared/lib/firebase-admin'
-import type { PlaywrightResult, PlaywrightResultDoc } from '@/shared/types'
+import type {
+  PlaywrightResult,
+  PlaywrightResultDoc,
+} from '@/shared/types/playwright-result.type'
 
 import type { PlaywrightRunResult } from './playwright-runner'
 

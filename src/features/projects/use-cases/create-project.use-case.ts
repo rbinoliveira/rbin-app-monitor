@@ -1,4 +1,4 @@
-import type { CreateProjectInput, Project } from '@/shared/types'
+import type { CreateProjectInput, Project } from '@/shared/types/project.type'
 
 export async function createProjectUseCase(
   input: CreateProjectInput,

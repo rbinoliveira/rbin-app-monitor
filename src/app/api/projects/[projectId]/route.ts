@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server'
 import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
 import { updateProject } from '@/features/projects/services/projects'
 import { withErrorHandling } from '@/shared/lib/api-response'
-import type { Project, UpdateProjectInput } from '@/shared/types'
+import type { Project, UpdateProjectInput } from '@/shared/types/project.type'
 
 export async function PATCH(
   request: NextRequest,

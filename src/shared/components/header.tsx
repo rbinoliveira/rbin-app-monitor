@@ -3,8 +3,8 @@
 import Image from 'next/image'
 import { useState } from 'react'
 
-import { useAuth } from '@/features/auth'
-import { Button } from '@/shared/components/ui'
+import { useAuth } from '@/features/auth/contexts/AuthContext'
+import { Button } from '@/shared/components/button'
 
 export function Header() {
   const { user, signOut } = useAuth()

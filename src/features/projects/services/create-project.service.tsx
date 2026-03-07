@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getProjectsQueryKey } from '@/features/projects/services/get-projects.service'
 import { createProjectUseCase } from '@/features/projects/use-cases/create-project.use-case'
-import type { Project } from '@/shared/types'
+import type { Project } from '@/shared/types/project.type'
 
 export function useCreateProjectService(options?: {
   onSuccess?: (data: Project) => void

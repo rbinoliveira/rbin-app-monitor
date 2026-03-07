@@ -1,4 +1,4 @@
-import type { Project } from '@/shared/types'
+import type { Project } from '@/shared/types/project.type'
 
 export async function getProjectsUseCase(): Promise<Project[]> {
   const response = await fetch('/api/projects', { credentials: 'include' })

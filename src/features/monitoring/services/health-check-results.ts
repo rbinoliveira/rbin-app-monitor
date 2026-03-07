@@ -7,7 +7,7 @@ import type {
   HealthCheckResult,
   HealthCheckResultDoc,
   HealthCheckType,
-} from '@/shared/types'
+} from '@/shared/types/health-check.type'
 
 const HEALTH_CHECK_RESULTS_COLLECTION = COLLECTION_NAMES.HEALTH_CHECK_RESULTS
 

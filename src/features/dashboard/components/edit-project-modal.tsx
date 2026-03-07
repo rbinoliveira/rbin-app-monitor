@@ -9,17 +9,17 @@ import {
   projectFormSchema,
 } from '@/features/projects/schemas/project-form.schema'
 import { useUpdateProjectService } from '@/features/projects/services/update-project.service'
-import { Button } from '@/shared/components/ui/Button'
-import { Input } from '@/shared/components/ui/Input'
+import { Button } from '@/shared/components/button'
+import { InputText } from '@/shared/components/input-text'
 import {
   Modal,
   ModalContent,
   ModalFooter,
   ModalHeader,
   ModalTitle,
-} from '@/shared/components/ui/Modal'
-import { useToast } from '@/shared/components/ui/Toast'
-import type { Project } from '@/shared/types'
+} from '@/shared/components/modal'
+import { useToast } from '@/shared/components/toast'
+import type { Project } from '@/shared/types/project.type'
 
 export interface EditProjectModalProps {
   project: Project
@@ -56,12 +56,7 @@ export function EditProjectModal({
     ],
   )
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<ProjectFormSchema>({
+  const { control, handleSubmit, reset } = useForm<ProjectFormSchema>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: initialForm,
   })
@@ -102,32 +97,32 @@ export function EditProjectModal({
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-4"
         >
-          <Input
+          <InputText<ProjectFormSchema>
+            name="name"
+            control={control}
             label="Nome do projeto"
             placeholder="Ex.: API Pagamentos"
-            {...register('name')}
-            error={errors.name?.message}
           />
-          <Input
+          <InputText<ProjectFormSchema>
+            name="frontHealthCheckUrl"
+            control={control}
             label="URL do front"
             placeholder="https://app.exemplo.com"
             type="url"
-            {...register('frontHealthCheckUrl')}
-            error={errors.frontHealthCheckUrl?.message}
           />
-          <Input
+          <InputText<ProjectFormSchema>
+            name="backHealthCheckUrl"
+            control={control}
             label="URL de health do back"
             placeholder="https://api.exemplo.com/health"
             type="url"
-            {...register('backHealthCheckUrl')}
-            error={errors.backHealthCheckUrl?.message}
           />
-          <Input
+          <InputText<ProjectFormSchema>
+            name="playwrightRunUrl"
+            control={control}
             label="URL de disparo Playwright"
             placeholder="https://ci.exemplo.com/api/playwright/run"
             type="url"
-            {...register('playwrightRunUrl')}
-            error={errors.playwrightRunUrl?.message}
           />
         </form>
       </ModalContent>

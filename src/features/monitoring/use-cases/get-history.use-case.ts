@@ -1,8 +1,6 @@
-import type {
-  CypressResult,
-  HealthCheckResult,
-  PlaywrightResult,
-} from '@/shared/types'
+import type { CypressResult } from '@/shared/types/cypress-result.type'
+import type { HealthCheckResult } from '@/shared/types/health-check.type'
+import type { PlaywrightResult } from '@/shared/types/playwright-result.type'
 
 export type HistoryItem = HealthCheckResult | CypressResult | PlaywrightResult
 

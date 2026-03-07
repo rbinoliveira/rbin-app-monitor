@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getProjectsQueryKey } from '@/features/projects/services/get-projects.service'
 import { updateProjectUseCase } from '@/features/projects/use-cases/update-project.use-case'
-import type { Project, UpdateProjectInput } from '@/shared/types'
+import type { Project, UpdateProjectInput } from '@/shared/types/project.type'
 
 export function useUpdateProjectService(options?: {
   onSuccess?: (data: Project) => void

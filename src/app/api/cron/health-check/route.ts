@@ -7,7 +7,7 @@ import {
 } from '@/features/monitoring/services/health-check'
 import { processHealthCheckResult } from '@/features/monitoring/services/health-check-notifications'
 import { getActiveProjects } from '@/features/projects/services/projects'
-import type { ApiResponse } from '@/shared/types'
+import type { ApiResponse } from '@/shared/types/api-response.type'
 
 export const maxDuration = 300
 

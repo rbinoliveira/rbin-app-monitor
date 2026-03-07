@@ -4,15 +4,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
 import { COLLECTION_NAMES } from '@/shared/lib/constants'
 import { getAdminDb } from '@/shared/lib/firebase-admin'
+import type { ApiResponse } from '@/shared/types/api-response.type'
+import type { CypressResult, CypressResultDoc } from '@/shared/types/cypress-result.type'
 import type {
-  ApiResponse,
-  CypressResult,
-  CypressResultDoc,
   HealthCheckResult,
   HealthCheckResultDoc,
+} from '@/shared/types/health-check.type'
+import type {
   PlaywrightResult,
   PlaywrightResultDoc,
-} from '@/shared/types'
+} from '@/shared/types/playwright-result.type'
 
 export async function GET(request: NextRequest) {
   const authResponse = requireFirebaseAuth(request)

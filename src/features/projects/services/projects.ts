@@ -10,7 +10,7 @@ import type {
   ProjectDoc,
   ProjectStatus,
   UpdateProjectInput,
-} from '@/shared/types'
+} from '@/shared/types/project.type'
 
 const PROJECTS_COLLECTION = COLLECTION_NAMES.PROJECTS
 

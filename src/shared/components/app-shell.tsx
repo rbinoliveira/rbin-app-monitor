@@ -2,10 +2,10 @@
 
 import { usePathname } from 'next/navigation'
 
-import { useAuth } from '@/features/auth'
+import { useAuth } from '@/features/auth/contexts/AuthContext'
 import { appPublicRoutes } from '@/shared/constants/app-routes.constant'
 
-import { Button } from '../ui/Button'
+import { Button } from './button'
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()

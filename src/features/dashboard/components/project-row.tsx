@@ -2,16 +2,16 @@
 
 import { useState } from 'react'
 
-import { Button } from '@/shared/components/ui/Button'
-import { useToast } from '@/shared/components/ui/Toast'
+import { useRunHealthCheckService } from '@/features/monitoring/services/run-health-check.service'
+import { useRunPlaywrightService } from '@/features/monitoring/services/run-playwright.service'
+import { useUpdateProjectService } from '@/features/projects/services/update-project.service'
+import { Button } from '@/shared/components/button'
+import { useToast } from '@/shared/components/toast'
 import { cn } from '@/shared/lib/utils'
-import type {
-  CypressResult,
-  HealthCheckResult,
-  PlaywrightResult,
-  Project,
-  ProjectStatus,
-} from '@/shared/types'
+import type { CypressResult } from '@/shared/types/cypress-result.type'
+import type { HealthCheckResult } from '@/shared/types/health-check.type'
+import type { PlaywrightResult } from '@/shared/types/playwright-result.type'
+import type { Project, ProjectStatus } from '@/shared/types/project.type'
 
 export type ExecutionHistoryItem =
   | HealthCheckResult
@@ -86,61 +86,60 @@ export function ProjectRow({
   onEdit,
 }: ProjectRowProps) {
   const { addToast } = useToast()
-  const [runningAction, setRunningAction] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
   const status = STATUS[project.status]
   const latestExecution = historyItems[0]
 
-  const runAction = async (label: string, url: string, body: object) => {
-    setRunningAction(label)
-    addToast(`Executando ${label}...`, 'info')
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      const data = await response.json()
-      if (!data.success) throw new Error(data.error || `${label} falhou`)
-      addToast(`${label} concluído com sucesso`, 'success')
-      await onRefresh()
-    } catch (error) {
-      addToast(
-        error instanceof Error ? error.message : `${label} falhou`,
-        'error',
-      )
-    } finally {
-      setRunningAction(null)
-    }
-  }
+  const { mutateAsync: updateProject } = useUpdateProjectService({
+    onSuccess: () => onRefresh(),
+    onError: (err) => addToast(err.message, 'error'),
+  })
+
+  const { mutateAsync: runHealthCheck, isPending: healthCheckPending } =
+    useRunHealthCheckService({
+      onSuccess: () => {
+        addToast('Health Check concluído com sucesso', 'success')
+        onRefresh()
+      },
+      onError: (err) => addToast(err.message, 'error'),
+    })
+
+  const { mutateAsync: runPlaywright, isPending: playwrightPending } =
+    useRunPlaywrightService({
+      onSuccess: (data) => {
+        const durationSeconds = Math.round(data.duration / 1000)
+        if (data.failed > 0) {
+          addToast(
+            `Testes falharam: ${data.failed}/${data.totalTests} em ${durationSeconds}s`,
+            'error',
+          )
+        } else {
+          addToast(
+            `Playwright concluído: ${data.passed}/${data.totalTests} em ${durationSeconds}s`,
+            'success',
+          )
+        }
+        onRefresh()
+      },
+      onError: (err) => addToast(err.message, 'error'),
+    })
 
   const handleToggle = async () => {
     try {
-      const response = await fetch(`/api/projects/${project.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: !project.isActive }),
+      await updateProject({
+        projectId: project.id,
+        input: { isActive: !project.isActive },
       })
-      const data = await response.json()
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Falha ao ativar/desativar projeto')
-      }
       addToast(
         project.isActive ? 'Projeto desativado' : 'Projeto ativado',
         'success',
       )
-      await onRefresh()
-    } catch (error) {
-      addToast(
-        error instanceof Error
-          ? error.message
-          : 'Falha ao ativar/desativar projeto',
-        'error',
-      )
+    } catch {
+      // onError already shows toast
     }
   }
 
-  const isRunning = runningAction !== null
+  const isRunning = healthCheckPending || playwrightPending
   const hasHealthCheck = Boolean(
     project.frontHealthCheckUrl || project.backHealthCheckUrl,
   )
@@ -245,12 +244,8 @@ export function ProjectRow({
             <Button
               size="sm"
               variant="secondary"
-              onClick={() =>
-                runAction('Health Check', '/api/health-check', {
-                  projectId: project.id,
-                })
-              }
-              loading={runningAction === 'Health Check'}
+              onClick={() => runHealthCheck(project.id)}
+              loading={healthCheckPending}
               disabled={isRunning || !project.isActive}
             >
               Health Check
@@ -260,12 +255,8 @@ export function ProjectRow({
             <Button
               size="sm"
               variant="secondary"
-              onClick={() =>
-                runAction('Playwright', '/api/playwright/run', {
-                  projectId: project.id,
-                })
-              }
-              loading={runningAction === 'Playwright'}
+              onClick={() => runPlaywright(project.id)}
+              loading={playwrightPending}
               disabled={isRunning || !project.isActive}
             >
               Playwright

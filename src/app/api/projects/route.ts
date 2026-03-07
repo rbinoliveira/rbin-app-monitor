@@ -6,7 +6,7 @@ import {
   getAllProjects,
 } from '@/features/projects/services/projects'
 import { withErrorHandling } from '@/shared/lib/api-response'
-import type { CreateProjectInput, Project } from '@/shared/types'
+import type { CreateProjectInput, Project } from '@/shared/types/project.type'
 
 export async function GET(request: NextRequest) {
   const authResponse = requireFirebaseAuth(request)

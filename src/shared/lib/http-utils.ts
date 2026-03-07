@@ -2,7 +2,7 @@
  * HTTP utilities for health checks and API requests
  */
 
-import type { HealthCheckResponse } from '@/shared/types'
+import type { HealthCheckResponse } from '@/shared/types/health-check.type'
 
 export interface ValidatedUrl {
   url: string

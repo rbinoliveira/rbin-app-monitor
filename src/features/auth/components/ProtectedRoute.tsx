@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-import { useAuth } from '@/features/auth'
+import { useAuth } from '@/features/auth/contexts/AuthContext'
 import { appRoutes } from '@/shared/constants/app-routes.constant'
 
 interface ProtectedRouteProps {

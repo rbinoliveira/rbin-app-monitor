@@ -9,7 +9,7 @@ import { withErrorHandling } from '@/shared/lib/api-response'
 import type {
   MonitorSettings,
   UpdateMonitorSettingsInput,
-} from '@/shared/types'
+} from '@/shared/types/monitor-settings.type'
 
 export async function GET(request: NextRequest) {
   const authResponse = requireFirebaseAuth(request)

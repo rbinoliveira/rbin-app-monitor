@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer'
 import { Resend } from 'resend'
 
-import type { NotificationPayload } from '@/shared/types'
+import type { NotificationPayload } from '@/shared/types/notification.type'
 
 const MAX_RETRIES = 3
 const INITIAL_RETRY_DELAY = 1000

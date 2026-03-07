@@ -1,79 +1,58 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 
-import { ProtectedRoute, useAuth } from '@/features/auth'
-import {
-  AddProjectModal,
-  EditProjectModal,
-  ProjectRow,
-  SummaryCards,
-} from '@/features/dashboard/components'
+import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute'
+import { useAuth } from '@/features/auth/contexts/AuthContext'
+import { AddProjectModal } from '@/features/dashboard/components/add-project-modal'
+import { EditProjectModal } from '@/features/dashboard/components/edit-project-modal'
 import type { ExecutionHistoryItem } from '@/features/dashboard/components/project-row'
-import { useProjects } from '@/features/projects/hooks/useProjects'
-import { DataHandler } from '@/shared/components/ui'
-import { Button } from '@/shared/components/ui/Button'
-import type { Project } from '@/shared/types'
+import { ProjectRow } from '@/features/dashboard/components/project-row'
+import { SummaryCards } from '@/features/dashboard/components/summary-cards'
+import { useGetHistoryService } from '@/features/monitoring/services/get-history.service'
+import { useProjects } from '@/features/projects/hooks/use-projects.hook'
+import { DataHandler } from '@/shared/components/data-handler'
+import { Button } from '@/shared/components/button'
+import type { Project } from '@/shared/types/project.type'
 
 function DashboardScreen() {
   const { user } = useAuth()
   const { projects, loading, error, refresh } = useProjects()
   const [addOpen, setAddOpen] = useState(false)
   const [editProject, setEditProject] = useState<Project | null>(null)
-  const [historyByProject, setHistoryByProject] = useState<
-    Record<string, ExecutionHistoryItem[]>
-  >({})
-  const [historyLoading, setHistoryLoading] = useState(true)
-  const [historyError, setHistoryError] = useState<string | null>(null)
 
-  const fetchHistory = async () => {
-    setHistoryLoading(true)
-    setHistoryError(null)
+  const {
+    data: historyData,
+    isLoading: historyLoading,
+    isError: historyIsError,
+    error: historyError,
+    refetch: refetchHistory,
+  } = useGetHistoryService({}, { page: 1, pageSize: 100 })
 
-    try {
-      const response = await fetch('/api/history?page=1&pageSize=100')
-      const result = await response.json()
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.error || 'Falha ao carregar histórico de execuções',
+  const historyByProject = useMemo(() => {
+    const items = (historyData?.items ?? []) as ExecutionHistoryItem[]
+    return items.reduce<Record<string, ExecutionHistoryItem[]>>(
+      (accumulator, item) => {
+        const current = accumulator[item.projectId] ?? []
+        current.push(item)
+        accumulator[item.projectId] = current.sort(
+          (left, right) =>
+            new Date(right.timestamp).getTime() -
+            new Date(left.timestamp).getTime(),
         )
-      }
+        return accumulator
+      },
+      {},
+    )
+  }, [historyData?.items])
 
-      const items = (result.data?.items ?? []) as ExecutionHistoryItem[]
-      const grouped = items.reduce<Record<string, ExecutionHistoryItem[]>>(
-        (accumulator, item) => {
-          const current = accumulator[item.projectId] ?? []
-          current.push(item)
-          accumulator[item.projectId] = current.sort(
-            (left, right) =>
-              new Date(right.timestamp).getTime() -
-              new Date(left.timestamp).getTime(),
-          )
-          return accumulator
-        },
-        {},
-      )
-
-      setHistoryByProject(grouped)
-    } catch (error) {
-      setHistoryError(
-        error instanceof Error
-          ? error.message
-          : 'Falha ao carregar histórico de execuções',
-      )
-      setHistoryByProject({})
-    } finally {
-      setHistoryLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchHistory().catch(() => undefined)
-  }, [])
+  const historyErrorMessage =
+    historyIsError && historyError
+      ? historyError.message
+      : null
 
   const refreshAll = async () => {
-    await Promise.all([refresh(), fetchHistory()])
+    await Promise.all([refresh(), refetchHistory()])
   }
 
   return (
@@ -135,9 +114,9 @@ function DashboardScreen() {
             </div>
           }
         >
-          {historyError && (
+          {historyErrorMessage && (
             <div className="mb-4 glass-surface rounded-[1.75rem] border-rose-400/25 p-5 text-rose-200">
-              {historyError}
+              {historyErrorMessage}
             </div>
           )}
 

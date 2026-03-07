@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-import type { ApiResponse } from '@/shared/types'
+import type { ApiResponse } from '@/shared/types/api-response.type'
 
 /**
  * Custom API Error class for better error handling

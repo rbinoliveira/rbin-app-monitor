@@ -1,6 +1,6 @@
 import { VALID_HTTP_METHODS } from '@/shared/lib/constants'
 import { executeHttpRequest, validateHttpUrl } from '@/shared/lib/http-utils'
-import type { HealthCheckOptions, HealthCheckResponse } from '@/shared/types'
+import type { HealthCheckOptions, HealthCheckResponse } from '@/shared/types/health-check.type'
 
 export const DEFAULT_HEALTH_CHECK_TIMEOUT = 30000
 export const DEFAULT_EXPECTED_STATUS = 200

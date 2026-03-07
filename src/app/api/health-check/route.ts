@@ -10,7 +10,7 @@ import {
 } from '@/features/monitoring/services/health-check'
 import { processHealthCheckResult } from '@/features/monitoring/services/health-check-notifications'
 import { getProjectById } from '@/features/projects/services/projects'
-import type { ApiResponse } from '@/shared/types'
+import type { ApiResponse } from '@/shared/types/api-response.type'
 
 interface HealthCheckRequest {
   projectId?: string

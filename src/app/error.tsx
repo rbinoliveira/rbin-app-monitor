@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 
-import { Button } from '@/shared/components/ui/Button'
+import { Button } from '@/shared/components/button'
 
 export default function Error({
   error,

@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/shared/lib/utils'
-import type { Project } from '@/shared/types'
+import type { Project } from '@/shared/types/project.type'
 
 export interface SummaryCardsProps {
   projects: Project[]

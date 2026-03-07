@@ -1,13 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
 
-import { Button } from '@/shared/components/ui/Button'
-import { Card, CardContent } from '@/shared/components/ui/Card'
-import { useToast } from '@/shared/components/ui/Toast'
+import { useRunPlaywrightService } from '@/features/monitoring/services/run-playwright.service'
+import { Button } from '@/shared/components/button'
+import { Card, CardContent } from '@/shared/components/card'
+import { useToast } from '@/shared/components/toast'
 import { cn } from '@/shared/lib/utils'
-import type { Project, ProjectStatus } from '@/shared/types'
+import type { Project, ProjectStatus } from '@/shared/types/project.type'
 
 interface ProjectCardProps {
   project: Project
@@ -37,56 +37,33 @@ const statusConfig: Record<
 export function ProjectCard({ project }: ProjectCardProps) {
   const status = statusConfig[project.status]
   const { addToast } = useToast()
-  const [isRunningTests, setIsRunningTests] = useState(false)
 
-  const hasPlaywright = Boolean(project.playwrightRunUrl)
-
-  const handleRunTests = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    setIsRunningTests(true)
-    addToast('Executando testes Playwright...', 'info')
-
-    try {
-      const response = await fetch('/api/playwright/run', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          projectId: project.id,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (result.success && result.data) {
-        const { passed, failed, totalTests, duration } = result.data
-        const durationSeconds = Math.round(duration / 1000)
-
-        if (failed > 0) {
+  const { mutate: runPlaywright, isPending: isRunningTests } =
+    useRunPlaywrightService({
+      onSuccess: (data) => {
+        const durationSeconds = Math.round(data.duration / 1000)
+        if (data.failed > 0) {
           addToast(
-            `Testes falharam: ${failed}/${totalTests} em ${durationSeconds}s`,
+            `Testes falharam: ${data.failed}/${data.totalTests} em ${durationSeconds}s`,
             'error',
           )
         } else {
           addToast(
-            `Todos os testes passaram: ${passed}/${totalTests} em ${durationSeconds}s`,
+            `Todos os testes passaram: ${data.passed}/${data.totalTests} em ${durationSeconds}s`,
             'success',
           )
         }
-      } else {
-        addToast(result.error || 'Falha ao executar testes', 'error')
-      }
-    } catch (error) {
-      addToast(
-        error instanceof Error ? error.message : 'Falha ao executar testes',
-        'error',
-      )
-    } finally {
-      setIsRunningTests(false)
-    }
+      },
+      onError: (err) => addToast(err.message, 'error'),
+    })
+
+  const hasPlaywright = Boolean(project.playwrightRunUrl)
+
+  const handleRunTests = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    addToast('Executando testes Playwright...', 'info')
+    runPlaywright(project.id)
   }
 
   return (

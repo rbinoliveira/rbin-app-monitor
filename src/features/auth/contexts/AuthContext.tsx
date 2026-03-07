@@ -13,8 +13,8 @@ import {
   appPublicRoutes,
   appRoutes,
 } from '@/shared/constants/app-routes.constant'
-import { addAuthCookies } from '@/shared/helpers/add-auth-cookies.helper'
-import { deleteAuthCookies } from '@/shared/helpers/delete-auth-cookies.helper'
+import { addAuthCookies } from '@/shared/utils/add-auth-cookies.util'
+import { deleteAuthCookies } from '@/shared/utils/delete-auth-cookies.util'
 import { getFirebaseAuthOptional } from '@/shared/lib/firebase'
 
 interface AuthContextValue {

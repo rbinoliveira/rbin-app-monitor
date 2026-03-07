@@ -4,7 +4,7 @@ import { requireFirebaseAuth } from '@/features/auth/lib/api-auth'
 import { checkWebPage } from '@/features/monitoring/services/health-check'
 import { withErrorHandling } from '@/shared/lib/api-response'
 import { inRange, isValidUrl, required } from '@/shared/lib/validation'
-import type { HealthCheckResponse } from '@/shared/types'
+import type { HealthCheckResponse } from '@/shared/types/health-check.type'
 
 export async function GET(request: NextRequest) {
   const authResponse = requireFirebaseAuth(request)

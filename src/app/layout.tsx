@@ -3,8 +3,10 @@ import '@/shared/styles/globals.css'
 import type { Metadata } from 'next'
 import { Outfit, Space_Mono as SpaceMono } from 'next/font/google'
 
-import { AppProvidersClient } from '@/features/platform/providers'
-import { AppShell, GlassBackground } from '@/shared/components/layout'
+import { AppProvidersClient } from '@/features/platform/providers/app-providers-client'
+import { AppShell } from '@/shared/components/app-shell'
+import { GlassBackground } from '@/shared/components/glass-background'
+import { cn } from '@/shared/lib/utils'
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -30,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className="dark">
-      <body className={`${outfit.variable} ${spaceMono.variable}`}>
+      <body className={cn(outfit.variable, spaceMono.variable)}>
         <AppProvidersClient>
           <GlassBackground />
           <AppShell>{children}</AppShell>

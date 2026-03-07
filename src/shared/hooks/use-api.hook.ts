@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { ApiResponse } from '@/shared/types'
+import type { ApiResponse } from '@/shared/types/api-response.type'
 
 interface UseApiOptions {
   autoFetch?: boolean
@@ -25,9 +25,6 @@ interface UseApiReturn<T> {
   reset: () => void
 }
 
-/**
- * Generic hook for API calls with automatic error handling and optional polling
- */
 export function useApi<T = unknown>(
   url: string,
   options: UseApiOptions = {},

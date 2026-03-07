@@ -8,7 +8,7 @@ import {
 import { callRemotePlaywrightRun } from '@/features/monitoring/services/playwright-remote'
 import { savePlaywrightResult } from '@/features/monitoring/services/playwright-results'
 import { getProjectById } from '@/features/projects/services/projects'
-import type { ApiResponse } from '@/shared/types'
+import type { ApiResponse } from '@/shared/types/api-response.type'
 
 export const maxDuration = 300
 

@@ -6,17 +6,17 @@ import {
   type WithFieldValue,
 } from 'firebase/firestore'
 
+import type { CypressResult, CypressResultDoc } from '@/shared/types/cypress-result.type'
+import type { FirestoreTimestamp } from '@/shared/types/firestore.type'
 import type {
-  CypressResult,
-  CypressResultDoc,
-  FirestoreTimestamp,
   HealthCheckResult,
   HealthCheckResultDoc,
+} from '@/shared/types/health-check.type'
+import type {
   PlaywrightResult,
   PlaywrightResultDoc,
-  Project,
-  ProjectDoc,
-} from '@/shared/types'
+} from '@/shared/types/playwright-result.type'
+import type { Project, ProjectDoc } from '@/shared/types/project.type'
 
 // Helper to convert Firestore Timestamp to Date
 function timestampToDate(timestamp: FirestoreTimestamp | null): Date | null {

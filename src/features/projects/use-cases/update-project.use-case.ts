@@ -1,4 +1,4 @@
-import type { Project, UpdateProjectInput } from '@/shared/types'
+import type { Project, UpdateProjectInput } from '@/shared/types/project.type'
 
 export async function updateProjectUseCase(
   projectId: string,

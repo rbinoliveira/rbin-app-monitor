@@ -3,14 +3,14 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-import { useAuth } from '@/features/auth'
-import { Button } from '@/shared/components/ui/Button'
+import { useAuth } from '@/features/auth/contexts/AuthContext'
+import { Button } from '@/shared/components/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardTitle,
-} from '@/shared/components/ui/Card'
+} from '@/shared/components/card'
 import { appRoutes } from '@/shared/constants/app-routes.constant'
 
 function GoogleMark() {
