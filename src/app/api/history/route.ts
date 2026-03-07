@@ -5,7 +5,10 @@ import { requireFirebaseAuth } from '@/features/auth/libs/api-auth'
 import { COLLECTION_NAMES } from '@/shared/libs/constants'
 import { getAdminDb } from '@/shared/libs/firebase-admin'
 import type { ApiResponse } from '@/shared/types/api-response.type'
-import type { CypressResult, CypressResultDoc } from '@/shared/types/cypress-result.type'
+import type {
+  CypressResult,
+  CypressResultDoc,
+} from '@/shared/types/cypress-result.type'
 import type {
   HealthCheckResult,
   HealthCheckResultDoc,

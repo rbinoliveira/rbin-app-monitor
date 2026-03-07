@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-import { ValidationError } from '@/shared/validations/validation-error.validation'
 import { notEmpty } from '@/shared/validations/required-string.validation'
+import { ValidationError } from '@/shared/validations/validation-error.validation'
 
 const urlSchema = z.string().url()
 

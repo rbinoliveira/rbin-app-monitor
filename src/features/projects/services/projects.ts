@@ -3,9 +3,6 @@ import { Timestamp } from 'firebase-admin/firestore'
 import { ApiError } from '@/shared/libs/api-response'
 import { COLLECTION_NAMES, HTTP_STATUS } from '@/shared/libs/constants'
 import { getAdminDb } from '@/shared/libs/firebase-admin'
-import { notEmpty } from '@/shared/validations/required-string.validation'
-import { optionalUrl } from '@/shared/validations/optional-url.validation'
-import { oneOf } from '@/shared/validations/one-of.validation'
 import type {
   CreateProjectInput,
   Project,
@@ -13,6 +10,9 @@ import type {
   ProjectStatus,
   UpdateProjectInput,
 } from '@/shared/types/project.type'
+import { oneOf } from '@/shared/validations/one-of.validation'
+import { optionalUrl } from '@/shared/validations/optional-url.validation'
+import { notEmpty } from '@/shared/validations/required-string.validation'
 
 const PROJECTS_COLLECTION = COLLECTION_NAMES.PROJECTS
 
@@ -22,6 +22,7 @@ function projectToFirestore(project: Project): ProjectDoc {
     frontHealthCheckUrl: project.frontHealthCheckUrl,
     backHealthCheckUrl: project.backHealthCheckUrl,
     playwrightRunUrl: project.playwrightRunUrl,
+    cypressRunUrl: project.cypressRunUrl,
     status: project.status,
     isActive: project.isActive,
     lastCheckAt: project.lastCheckAt
@@ -35,7 +36,6 @@ function projectToFirestore(project: Project): ProjectDoc {
 type LegacyProjectDoc = ProjectDoc & {
   baseUrl?: string
   projectType?: 'front' | 'back'
-  cypressRunUrl?: string | null
   runCypressTests?: boolean
   monitoringTypes?: string[]
 }
@@ -46,11 +46,13 @@ function projectFromFirestore(docId: string, data: ProjectDoc): Project {
   const hasNewFields =
     doc.frontHealthCheckUrl != null ||
     doc.backHealthCheckUrl != null ||
-    doc.playwrightRunUrl != null
+    doc.playwrightRunUrl != null ||
+    doc.cypressRunUrl != null
 
   let frontHealthCheckUrl: string | null = doc.frontHealthCheckUrl ?? null
   let backHealthCheckUrl: string | null = doc.backHealthCheckUrl ?? null
-  let playwrightRunUrl: string | null = doc.playwrightRunUrl ?? null
+  const playwrightRunUrl: string | null = doc.playwrightRunUrl ?? null
+  let cypressRunUrl: string | null = doc.cypressRunUrl ?? null
 
   if (!hasNewFields && doc.baseUrl) {
     const baseUrl = doc.baseUrl.trim()
@@ -63,7 +65,7 @@ function projectFromFirestore(docId: string, data: ProjectDoc): Project {
     if (isFront) frontHealthCheckUrl = baseUrl
     if (isBack) backHealthCheckUrl = baseUrl
     if (doc.runCypressTests || doc.monitoringTypes?.includes('cypress')) {
-      playwrightRunUrl = doc.cypressRunUrl ?? baseUrl
+      cypressRunUrl = baseUrl
     }
   }
 
@@ -73,6 +75,7 @@ function projectFromFirestore(docId: string, data: ProjectDoc): Project {
     frontHealthCheckUrl,
     backHealthCheckUrl,
     playwrightRunUrl,
+    cypressRunUrl,
     status: doc.status,
     isActive: doc.isActive ?? true,
     lastCheckAt: doc.lastCheckAt ? doc.lastCheckAt.toDate() : null,
@@ -96,9 +99,10 @@ function validateAtLeastOneUrl(input: CreateProjectInput): void {
   const front = (input.frontHealthCheckUrl ?? '').trim()
   const back = (input.backHealthCheckUrl ?? '').trim()
   const playwright = (input.playwrightRunUrl ?? '').trim()
-  if (!front && !back && !playwright) {
+  const cypress = (input.cypressRunUrl ?? '').trim()
+  if (!front && !back && !playwright && !cypress) {
     throw new ApiError(
-      'Provide at least one URL: front health check, back health check, or Playwright run',
+      'Provide at least one URL: front health check, back health check, Playwright run, or Cypress run',
       HTTP_STATUS.BAD_REQUEST,
     )
   }
@@ -122,6 +126,7 @@ export async function createProject(
     input.playwrightRunUrl,
     'playwrightRunUrl',
   )
+  const cypressRunUrl = optionalUrl(input.cypressRunUrl, 'cypressRunUrl')
 
   const now = new Date()
   const projectData: Project = {
@@ -130,6 +135,7 @@ export async function createProject(
     frontHealthCheckUrl,
     backHealthCheckUrl,
     playwrightRunUrl,
+    cypressRunUrl,
     status: 'unknown' as ProjectStatus,
     isActive: true,
     lastCheckAt: null,
@@ -215,6 +221,10 @@ export async function updateProject(
     )
   }
 
+  if (input.cypressRunUrl !== undefined) {
+    updates.cypressRunUrl = optionalUrl(input.cypressRunUrl, 'cypressRunUrl')
+  }
+
   if (input.isActive !== undefined) {
     updates.isActive = input.isActive
   }
@@ -224,10 +234,11 @@ export async function updateProject(
   const atLeastOne =
     updatedProject.frontHealthCheckUrl ||
     updatedProject.backHealthCheckUrl ||
-    updatedProject.playwrightRunUrl
+    updatedProject.playwrightRunUrl ||
+    updatedProject.cypressRunUrl
   if (!atLeastOne) {
     throw new ApiError(
-      'Project must have at least one URL (front, back, or Playwright)',
+      'Project must have at least one URL (front, back, Playwright, or Cypress)',
       HTTP_STATUS.BAD_REQUEST,
     )
   }
@@ -243,6 +254,8 @@ export async function updateProject(
     updateData.backHealthCheckUrl = updatedProject.backHealthCheckUrl
   if (updates.playwrightRunUrl !== undefined)
     updateData.playwrightRunUrl = updatedProject.playwrightRunUrl
+  if (updates.cypressRunUrl !== undefined)
+    updateData.cypressRunUrl = updatedProject.cypressRunUrl
   if (updates.isActive !== undefined)
     updateData.isActive = updatedProject.isActive
 

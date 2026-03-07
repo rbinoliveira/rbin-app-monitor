@@ -6,7 +6,10 @@ import {
   type WithFieldValue,
 } from 'firebase/firestore'
 
-import type { CypressResult, CypressResultDoc } from '@/shared/types/cypress-result.type'
+import type {
+  CypressResult,
+  CypressResultDoc,
+} from '@/shared/types/cypress-result.type'
 import type { FirestoreTimestamp } from '@/shared/types/firestore.type'
 import type {
   HealthCheckResult,
@@ -30,7 +33,6 @@ function timestampToDate(timestamp: FirestoreTimestamp | null): Date | null {
 type LegacyProjectDoc = ProjectDoc & {
   baseUrl?: string
   projectType?: 'front' | 'back'
-  cypressRunUrl?: string | null
   runCypressTests?: boolean
   monitoringTypes?: string[]
 }
@@ -43,6 +45,7 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
       frontHealthCheckUrl: p.frontHealthCheckUrl,
       backHealthCheckUrl: p.backHealthCheckUrl,
       playwrightRunUrl: p.playwrightRunUrl,
+      cypressRunUrl: p.cypressRunUrl,
       status: p.status,
       isActive: p.isActive,
       lastCheckAt: p.lastCheckAt ? Timestamp.fromDate(p.lastCheckAt) : null,
@@ -58,10 +61,12 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
     const hasNew =
       data.frontHealthCheckUrl != null ||
       data.backHealthCheckUrl != null ||
-      data.playwrightRunUrl != null
+      data.playwrightRunUrl != null ||
+      data.cypressRunUrl != null
     let frontHealthCheckUrl = data.frontHealthCheckUrl ?? null
     let backHealthCheckUrl = data.backHealthCheckUrl ?? null
-    let playwrightRunUrl = data.playwrightRunUrl ?? data.cypressRunUrl ?? null
+    const playwrightRunUrl = data.playwrightRunUrl ?? null
+    let cypressRunUrl = data.cypressRunUrl ?? null
     if (!hasNew && data.baseUrl) {
       const baseUrl = data.baseUrl.trim()
       const isBack =
@@ -73,7 +78,7 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
       if (isFront) frontHealthCheckUrl = baseUrl
       if (isBack) backHealthCheckUrl = baseUrl
       if (data.runCypressTests || data.monitoringTypes?.includes('cypress')) {
-        playwrightRunUrl = data.cypressRunUrl ?? baseUrl
+        cypressRunUrl = baseUrl
       }
     }
     return {
@@ -82,6 +87,7 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
       frontHealthCheckUrl,
       backHealthCheckUrl,
       playwrightRunUrl,
+      cypressRunUrl,
       status: data.status,
       isActive: data.isActive ?? true,
       lastCheckAt: timestampToDate(data.lastCheckAt),

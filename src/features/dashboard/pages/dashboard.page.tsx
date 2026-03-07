@@ -46,9 +46,7 @@ function DashboardScreen() {
   }, [historyData?.items])
 
   const historyErrorMessage =
-    historyIsError && historyError
-      ? historyError.message
-      : null
+    historyIsError && historyError ? historyError.message : null
 
   const refreshAll = async () => {
     await Promise.all([refresh(), refetchHistory()])

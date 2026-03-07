@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 
+import { useRunCypressService } from '@/features/monitoring/services/run-cypress.service'
 import { useRunHealthCheckService } from '@/features/monitoring/services/run-health-check.service'
 import { useRunPlaywrightService } from '@/features/monitoring/services/run-playwright.service'
 import { useUpdateProjectService } from '@/features/projects/services/update-project.service'
@@ -124,6 +125,26 @@ export function ProjectRow({
       onError: (err) => addToast(err.message, 'error'),
     })
 
+  const { mutateAsync: runCypress, isPending: cypressPending } =
+    useRunCypressService({
+      onSuccess: (data) => {
+        const durationSeconds = Math.round(data.duration / 1000)
+        if (data.failed > 0) {
+          addToast(
+            `Testes falharam: ${data.failed}/${data.totalTests} em ${durationSeconds}s`,
+            'error',
+          )
+        } else {
+          addToast(
+            `Cypress concluído: ${data.passed}/${data.totalTests} em ${durationSeconds}s`,
+            'success',
+          )
+        }
+        onRefresh()
+      },
+      onError: (err) => addToast(err.message, 'error'),
+    })
+
   const handleToggle = async () => {
     try {
       await updateProject({
@@ -139,7 +160,7 @@ export function ProjectRow({
     }
   }
 
-  const isRunning = healthCheckPending || playwrightPending
+  const isRunning = healthCheckPending || playwrightPending || cypressPending
   const hasHealthCheck = Boolean(
     project.frontHealthCheckUrl || project.backHealthCheckUrl,
   )
@@ -171,6 +192,7 @@ export function ProjectRow({
                 {project.frontHealthCheckUrl && <span>Frente</span>}
                 {project.backHealthCheckUrl && <span>API</span>}
                 {project.playwrightRunUrl && <span>Playwright</span>}
+                {project.cypressRunUrl && <span>Cypress</span>}
               </div>
             </div>
           </div>
@@ -260,6 +282,17 @@ export function ProjectRow({
               disabled={isRunning || !project.isActive}
             >
               Playwright
+            </Button>
+          )}
+          {project.cypressRunUrl && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => runCypress(project.id)}
+              loading={cypressPending}
+              disabled={isRunning || !project.isActive}
+            >
+              Cypress
             </Button>
           )}
           <Button

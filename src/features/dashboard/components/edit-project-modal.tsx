@@ -47,12 +47,14 @@ export function EditProjectModal({
       frontHealthCheckUrl: project.frontHealthCheckUrl ?? '',
       backHealthCheckUrl: project.backHealthCheckUrl ?? '',
       playwrightRunUrl: project.playwrightRunUrl ?? '',
+      cypressRunUrl: project.cypressRunUrl ?? '',
     }),
     [
       project.name,
       project.frontHealthCheckUrl,
       project.backHealthCheckUrl,
       project.playwrightRunUrl,
+      project.cypressRunUrl,
     ],
   )
 
@@ -74,6 +76,7 @@ export function EditProjectModal({
           frontHealthCheckUrl: data.frontHealthCheckUrl ?? null,
           backHealthCheckUrl: data.backHealthCheckUrl ?? null,
           playwrightRunUrl: data.playwrightRunUrl ?? null,
+          cypressRunUrl: data.cypressRunUrl ?? null,
         },
       })
       onClose()
@@ -122,6 +125,13 @@ export function EditProjectModal({
             control={control}
             label="URL de disparo Playwright"
             placeholder="https://ci.exemplo.com/api/playwright/run"
+            type="url"
+          />
+          <InputText<ProjectFormSchema>
+            name="cypressRunUrl"
+            control={control}
+            label="URL de disparo Cypress"
+            placeholder="https://ci.exemplo.com/api/cypress/run"
             type="url"
           />
         </form>

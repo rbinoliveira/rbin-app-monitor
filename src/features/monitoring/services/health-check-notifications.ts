@@ -2,7 +2,10 @@ import {
   getProjectById,
   updateProjectStatus,
 } from '@/features/projects/services/projects'
-import type { HealthCheckType, HealthCheckResponse } from '@/shared/types/health-check.type'
+import type {
+  HealthCheckResponse,
+  HealthCheckType,
+} from '@/shared/types/health-check.type'
 import type { ProjectStatus } from '@/shared/types/project.type'
 
 import { sendNotification } from './email'

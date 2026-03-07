@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-import { ValidationError } from '@/shared/validations/validation-error.validation'
 import { required } from '@/shared/validations/required-string.validation'
+import { ValidationError } from '@/shared/validations/validation-error.validation'
 
 export function inRange(
   value: number,

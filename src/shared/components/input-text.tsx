@@ -32,8 +32,10 @@ export function InputText<T extends FieldValues>({
   className,
 }: InputTextProps<T>) {
   const inputId =
-    label?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') ??
-    String(name)
+    label
+      ?.toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '') ?? String(name)
 
   return (
     <Controller

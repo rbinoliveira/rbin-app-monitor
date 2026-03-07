@@ -3,10 +3,10 @@ import { NextRequest } from 'next/server'
 import { requireFirebaseAuth } from '@/features/auth/libs/api-auth'
 import { checkWebPage } from '@/features/monitoring/services/health-check'
 import { withErrorHandling } from '@/shared/libs/api-response'
+import type { HealthCheckResponse } from '@/shared/types/health-check.type'
 import { inRange } from '@/shared/validations/in-range.validation'
 import { required } from '@/shared/validations/required-string.validation'
 import { isValidUrl } from '@/shared/validations/required-url.validation'
-import type { HealthCheckResponse } from '@/shared/types/health-check.type'
 
 export async function GET(request: NextRequest) {
   const authResponse = requireFirebaseAuth(request)

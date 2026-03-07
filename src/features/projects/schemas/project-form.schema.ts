@@ -10,6 +10,7 @@ export const projectFormSchema = z.object({
   frontHealthCheckUrl: optionalUrl,
   backHealthCheckUrl: optionalUrl,
   playwrightRunUrl: optionalUrl,
+  cypressRunUrl: optionalUrl,
 })
 
 export type ProjectFormSchema = z.infer<typeof projectFormSchema>

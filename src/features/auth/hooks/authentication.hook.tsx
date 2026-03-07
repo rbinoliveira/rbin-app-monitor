@@ -13,9 +13,9 @@ import {
   appPublicRoutes,
   appRoutes,
 } from '@/shared/constants/app-routes.constants'
+import { getFirebaseAuthOptional } from '@/shared/libs/firebase'
 import { addAuthCookies } from '@/shared/utils/add-auth-cookies.util'
 import { deleteAuthCookies } from '@/shared/utils/delete-auth-cookies.util'
-import { getFirebaseAuthOptional } from '@/shared/libs/firebase'
 
 interface AuthContextValue {
   user: User | null

@@ -1,7 +1,10 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
 import { getAdminDb } from '@/shared/libs/firebase-admin'
-import type { CypressResult, CypressResultDoc } from '@/shared/types/cypress-result.type'
+import type {
+  CypressResult,
+  CypressResultDoc,
+} from '@/shared/types/cypress-result.type'
 
 import type { CypressRunResult } from './cypress-runner'
 

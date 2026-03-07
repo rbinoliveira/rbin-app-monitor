@@ -8,6 +8,7 @@ export interface Project {
   frontHealthCheckUrl: string | null
   backHealthCheckUrl: string | null
   playwrightRunUrl: string | null
+  cypressRunUrl: string | null
   status: ProjectStatus
   isActive: boolean
   lastCheckAt: Date | null
@@ -20,6 +21,7 @@ export interface ProjectDoc {
   frontHealthCheckUrl: string | null
   backHealthCheckUrl: string | null
   playwrightRunUrl: string | null
+  cypressRunUrl: string | null
   status: ProjectStatus
   isActive: boolean
   lastCheckAt: FirestoreTimestamp | null
@@ -32,6 +34,7 @@ export interface CreateProjectInput {
   frontHealthCheckUrl?: string | null
   backHealthCheckUrl?: string | null
   playwrightRunUrl?: string | null
+  cypressRunUrl?: string | null
 }
 
 export interface UpdateProjectInput {
@@ -39,5 +42,6 @@ export interface UpdateProjectInput {
   frontHealthCheckUrl?: string | null
   backHealthCheckUrl?: string | null
   playwrightRunUrl?: string | null
+  cypressRunUrl?: string | null
   isActive?: boolean
 }

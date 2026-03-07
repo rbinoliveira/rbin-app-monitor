@@ -2,8 +2,8 @@
 
 import type { ExecutionHistoryItem } from '@/features/dashboard/components/project-row'
 import { ProjectRow } from '@/features/dashboard/components/project-row'
-import type { Project } from '@/shared/types/project.type'
 import { DataHandler } from '@/shared/components/data-handler'
+import type { Project } from '@/shared/types/project.type'
 
 interface DashboardProjectListProps {
   projects: Project[]
