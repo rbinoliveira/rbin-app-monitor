@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
+import { useCypressStatusService } from '@/features/monitoring/services/cypress-status.service'
 import { useRunCypressService } from '@/features/monitoring/services/run-cypress.service'
 import { useUpdateProjectService } from '@/features/projects/services/update-project.service'
 import { Button } from '@/shared/components/button'
@@ -39,6 +40,8 @@ export function ProjectRow({
 }: ProjectRowProps) {
   const { addToast } = useToast()
   const [expanded, setExpanded] = useState(false)
+  const [historyPage, setHistoryPage] = useState(0)
+  const PAGE_SIZE = 3
   const latestExecution = historyItems[0]
 
   const { mutateAsync: updateProject } = useUpdateProjectService({
@@ -46,7 +49,7 @@ export function ProjectRow({
     onError: (err) => addToast(err.message, 'error'),
   })
 
-  const { mutateAsync: runCypress, isPending: cypressPending } =
+  const { mutateAsync: runCypress, isPending: cypressMutating } =
     useRunCypressService({
       onSuccess: (data) => {
         const durationSeconds = Math.round(data.duration / 1000)
@@ -65,6 +68,18 @@ export function ProjectRow({
       },
       onError: (err) => addToast(err.message, 'error'),
     })
+
+  const hasCypress = Boolean(project.cypressGithubRepo)
+  const { data: cypressRunning } = useCypressStatusService(project.id, hasCypress && !cypressMutating)
+  const cypressPending = cypressMutating || Boolean(cypressRunning)
+
+  const prevRunning = useRef<boolean | undefined>(undefined)
+  useEffect(() => {
+    if (prevRunning.current === true && cypressRunning === false) {
+      onRefresh()
+    }
+    prevRunning.current = cypressRunning
+  }, [cypressRunning, onRefresh])
 
   const handleToggle = async () => {
     try {
@@ -113,12 +128,22 @@ export function ProjectRow({
                 <p className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-slate-400/80">
                   Última execução
                 </p>
-                <p className="mt-1 text-sm text-slate-100">
+                <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-100">
                   {latestExecution
-                    ? `Execução Cypress • ${latestExecution.success ? 'Sucesso' : 'Falha'}`
+                    ? `Cypress • ${latestExecution.success ? 'Sucesso' : 'Falha'}`
                     : historyLoading
                       ? 'Carregando histórico...'
                       : 'Nenhuma execução ainda'}
+                  {latestExecution?.trigger && (
+                    <span className={cn(
+                      'rounded-full px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide',
+                      latestExecution.trigger === 'cron'
+                        ? 'bg-violet-500/20 text-violet-300'
+                        : 'bg-cyan-500/20 text-cyan-300',
+                    )}>
+                      {latestExecution.trigger === 'cron' ? 'Cron' : 'Manual'}
+                    </span>
+                  )}
                 </p>
                 {latestExecution && (
                   <p className="mt-1 truncate text-sm text-slate-400/80">
@@ -135,7 +160,7 @@ export function ProjectRow({
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => setExpanded((c) => !c)}
+                  onClick={() => { setExpanded((c) => !c); setHistoryPage(0) }}
                   disabled={historyItems.length === 0}
                 >
                   {expanded ? 'Ocultar histórico' : 'Ver histórico'}
@@ -145,14 +170,24 @@ export function ProjectRow({
 
             {expanded && historyItems.length > 0 && (
               <div className="mt-4 space-y-2">
-                {historyItems.slice(0, 3).map((item) => (
+                {historyItems.slice(historyPage * PAGE_SIZE, (historyPage + 1) * PAGE_SIZE).map((item) => (
                   <div
                     key={item.id}
                     className="rounded-[1rem] border border-white/8 bg-white/4 px-3 py-3"
                   >
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                      <p className="text-sm text-white">
-                        Execução Cypress • {item.success ? 'Sucesso' : 'Falha'}
+                      <p className="flex items-center gap-2 text-sm text-white">
+                        Cypress • {item.success ? 'Sucesso' : 'Falha'}
+                        {item.trigger && (
+                          <span className={cn(
+                            'rounded-full px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide',
+                            item.trigger === 'cron'
+                              ? 'bg-violet-500/20 text-violet-300'
+                              : 'bg-cyan-500/20 text-cyan-300',
+                          )}>
+                            {item.trigger === 'cron' ? 'Cron' : 'Manual'}
+                          </span>
+                        )}
                       </p>
                       <span className="text-xs text-slate-400/75">
                         {new Date(item.timestamp).toLocaleString()}
@@ -163,6 +198,32 @@ export function ProjectRow({
                     </p>
                   </div>
                 ))}
+
+                {historyItems.length > PAGE_SIZE && (
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-xs text-slate-400/60">
+                      {historyPage * PAGE_SIZE + 1}–{Math.min((historyPage + 1) * PAGE_SIZE, historyItems.length)} de {historyItems.length}
+                    </span>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setHistoryPage((p) => p - 1)}
+                        disabled={historyPage === 0}
+                      >
+                        ← Anterior
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setHistoryPage((p) => p + 1)}
+                        disabled={(historyPage + 1) * PAGE_SIZE >= historyItems.length}
+                      >
+                        Próxima →
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

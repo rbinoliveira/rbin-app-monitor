@@ -1,8 +1,11 @@
 import type { FirestoreTimestamp } from '@/shared/types/firestore.type'
 
+export type CypressTrigger = 'manual' | 'cron'
+
 export interface CypressResult {
   id: string
   runner: 'cypress'
+  trigger?: CypressTrigger
   projectId: string
   projectName: string
   success: boolean
@@ -18,6 +21,7 @@ export interface CypressResult {
 
 export interface CypressResultDoc {
   runner: 'cypress'
+  trigger?: CypressTrigger
   projectId: string
   projectName: string
   success: boolean

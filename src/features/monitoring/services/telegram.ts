@@ -31,7 +31,7 @@ export async function sendTelegramNotification(
   const chatId = process.env.TELEGRAM_CHAT_ID
 
   try {
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -40,6 +40,10 @@ export async function sendTelegramNotification(
         parse_mode: 'HTML',
       }),
     })
+    if (!res.ok) {
+      const body = await res.text()
+      console.error(`Telegram API error ${res.status}: ${body}`)
+    }
   } catch (error) {
     console.error('Failed to send Telegram notification:', error)
   }

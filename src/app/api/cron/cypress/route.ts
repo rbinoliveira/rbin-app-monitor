@@ -5,9 +5,8 @@ import {
   callGitHubActionsCypressRun,
   parseGithubRepo,
 } from '@/features/monitoring/services/cypress-github-actions'
+import { sendCypressNotifications } from '@/features/monitoring/services/cypress-notify'
 import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
-import { sendNotification } from '@/features/monitoring/services/email'
-import { sendTelegramNotification } from '@/features/monitoring/services/telegram'
 import { getActiveProjects } from '@/features/projects/services/projects'
 import type { ApiResponse } from '@/shared/types/api-response.type'
 
@@ -57,45 +56,16 @@ export async function GET(request: NextRequest) {
           projectId: project.id,
           projectName: project.name,
           result,
+          trigger: 'cron',
         })
 
         try {
-          const baseUrl =
-            process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-          const dashboardUrl = `${baseUrl}/dashboard`
-
-          if (result.success) {
-            await sendTelegramNotification({
-              type: 'cypress_passed',
-              projectId: project.id,
-              projectName: project.name,
-              details: `All Cypress tests passed.`,
-              timestamp: new Date(),
-            })
-          } else {
-            const failedTestsDetails =
-              result.failed > 0
-                ? `\n<b>Failed Tests:</b> ${result.failed} out of ${result.totalTests}`
-                : ''
-            const details = `Cypress tests failed for project "${project.name}"${failedTestsDetails}\n\n<b>View Details:</b> <a href="${dashboardUrl}">${dashboardUrl}</a>`
-
-            await Promise.all([
-              sendNotification({
-                type: 'cypress_failed',
-                projectId: project.id,
-                projectName: project.name,
-                details,
-                timestamp: new Date(),
-              }),
-              sendTelegramNotification({
-                type: 'cypress_failed',
-                projectId: project.id,
-                projectName: project.name,
-                details,
-                timestamp: new Date(),
-              }),
-            ])
-          }
+          await sendCypressNotifications({
+            result,
+            projectId: project.id,
+            projectName: project.name,
+            trigger: 'cron',
+          })
         } catch (notificationError) {
           console.error(
             `Error sending notification for project ${project.name}:`,

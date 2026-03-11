@@ -4,6 +4,7 @@ import { getAdminDb } from '@/shared/libs/firebase-admin'
 import type {
   CypressResult,
   CypressResultDoc,
+  CypressTrigger,
 } from '@/shared/types/cypress-result.type'
 
 import type { CypressRunResult } from './cypress-runner'
@@ -13,6 +14,7 @@ const CYPRESS_RESULTS_COLLECTION = 'cypressResults'
 function cypressResultToFirestore(result: CypressResult): CypressResultDoc {
   return {
     runner: 'cypress',
+    trigger: result.trigger,
     projectId: result.projectId,
     projectName: result.projectName,
     success: result.success,
@@ -31,6 +33,7 @@ export interface SaveCypressResultInput {
   projectId: string
   projectName: string
   result: CypressRunResult
+  trigger?: CypressTrigger
 }
 
 export async function saveCypressResult(
@@ -48,6 +51,7 @@ export async function saveCypressResult(
   const cypressResult: CypressResult = {
     id: '',
     runner: 'cypress',
+    trigger: input.trigger,
     projectId: input.projectId,
     projectName: input.projectName,
     success: input.result.success,

@@ -52,6 +52,19 @@ export async function releaseLock(lockId: string): Promise<void> {
   }
 }
 
+export async function isLockActive(lockId: string): Promise<boolean> {
+  try {
+    const lockRef = getAdminDb().collection(LOCKS_COLLECTION).doc(lockId)
+    const lockDoc = await lockRef.get()
+    if (!lockDoc.exists) return false
+    const lockData = lockDoc.data() as LockDocument
+    return new Date() < lockData.expiresAt.toDate()
+  } catch (error) {
+    console.error(`Error checking lock ${lockId}:`, error)
+    return false
+  }
+}
+
 export async function cleanupExpiredLocks(): Promise<number> {
   try {
     const now = Timestamp.fromDate(new Date())

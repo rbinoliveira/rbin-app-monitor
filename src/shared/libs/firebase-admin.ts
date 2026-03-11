@@ -17,7 +17,11 @@ function getFirebaseAdmin(): App {
   // Check for service account (base64-encoded JSON)
   if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_KEY, 'base64').toString('utf-8')
-    const serviceAccount = JSON.parse(decoded)
+    // Replace literal newlines inside JSON string values (common in private_key) before parsing
+    const sanitized = decoded.replace(/("private_key"\s*:\s*")([\s\S]*?)("(?:\s*,|\s*\}))/g, (_, prefix, key, suffix) =>
+      prefix + key.replace(/\n/g, '\\n') + suffix,
+    )
+    const serviceAccount = JSON.parse(sanitized)
     adminApp = initializeApp({
       credential: cert(serviceAccount),
       projectId: serviceAccount.project_id,

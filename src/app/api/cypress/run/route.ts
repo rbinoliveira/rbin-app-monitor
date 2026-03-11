@@ -9,6 +9,7 @@ import {
   callGitHubActionsCypressRun,
   parseGithubRepo,
 } from '@/features/monitoring/services/cypress-github-actions'
+import { sendCypressNotifications } from '@/features/monitoring/services/cypress-notify'
 import { callRemoteCypressRun } from '@/features/monitoring/services/cypress-remote'
 import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
 import { getProjectById } from '@/features/projects/services/projects'
@@ -25,7 +26,17 @@ export async function POST(request: NextRequest) {
   const authResponse = requireFirebaseAuth(request)
   if (authResponse) return authResponse
 
-  const lockId = `cypress-run-${Date.now()}`
+  const body = (await request.json().catch(() => ({}))) as CypressRunRequest
+  const projectId = body.projectId
+
+  if (!projectId) {
+    return NextResponse.json<ApiResponse>(
+      { success: false, error: 'projectId is required' },
+      { status: 400 },
+    )
+  }
+
+  const lockId = `cypress-run-${projectId}`
   const lockAcquired = await acquireLock(lockId)
 
   if (!lockAcquired) {
@@ -39,16 +50,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = (await request.json().catch(() => ({}))) as CypressRunRequest
-    const projectId = body.projectId
     const timeout = body.timeout || 120000
-
-    if (!projectId) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: 'projectId is required' },
-        { status: 400 },
-      )
-    }
 
     const project = await getProjectById(projectId)
 
@@ -83,7 +85,15 @@ export async function POST(request: NextRequest) {
       projectId: project.id,
       projectName: project.name,
       result,
+      trigger: 'manual',
     })
+
+    sendCypressNotifications({
+      result,
+      projectId: project.id,
+      projectName: project.name,
+      trigger: 'manual',
+    }).catch((err) => console.error('Error sending notifications:', err))
 
     return NextResponse.json<ApiResponse>({
       success: result.success,
