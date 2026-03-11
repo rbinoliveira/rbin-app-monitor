@@ -1,10 +1,4 @@
-export type NotificationType =
-  | 'health_check_failed'
-  | 'health_check_restored'
-  | 'cypress_failed'
-  | 'cypress_passed'
-  | 'playwright_failed'
-  | 'playwright_passed'
+export type NotificationType = 'cypress_failed' | 'cypress_passed'
 
 export interface NotificationPayload {
   type: NotificationType

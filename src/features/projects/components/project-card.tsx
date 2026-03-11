@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 
-import { useRunPlaywrightService } from '@/features/monitoring/services/run-playwright.service'
 import { Button } from '@/shared/components/button'
 import { Card, CardContent } from '@/shared/components/card'
 import { useToast } from '@/shared/components/toast'
 import { cn } from '@/shared/libs/tw-merge'
 import type { Project, ProjectStatus } from '@/shared/types/project.type'
+
+import { useRunCypressService } from '@/features/monitoring/services/run-cypress.service'
 
 interface ProjectCardProps {
   project: Project
@@ -38,8 +39,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const status = statusConfig[project.status]
   const { addToast } = useToast()
 
-  const { mutate: runPlaywright, isPending: isRunningTests } =
-    useRunPlaywrightService({
+  const { mutate: runCypress, isPending: isRunningTests } = useRunCypressService(
+    {
       onSuccess: (data) => {
         const durationSeconds = Math.round(data.duration / 1000)
         if (data.failed > 0) {
@@ -55,15 +56,16 @@ export function ProjectCard({ project }: ProjectCardProps) {
         }
       },
       onError: (err) => addToast(err.message, 'error'),
-    })
+    },
+  )
 
-  const hasPlaywright = Boolean(project.playwrightRunUrl)
+  const hasCypress = Boolean(project.cypressRunUrl || project.cypressGithubRepo)
 
   const handleRunTests = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    addToast('Executando testes Playwright...', 'info')
-    runPlaywright(project.id)
+    addToast('Executando testes Cypress...', 'info')
+    runCypress(project.id)
   }
 
   return (
@@ -93,32 +95,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 {project.backHealthCheckUrl && (
                   <span title={project.backHealthCheckUrl}>Back</span>
                 )}
-                {project.playwrightRunUrl && (
-                  <span title={project.playwrightRunUrl}>Playwright</span>
-                )}
+                {hasCypress && <span>Cypress</span>}
               </div>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {project.frontHealthCheckUrl && (
-              <span className="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
-                Front
-              </span>
-            )}
-            {project.backHealthCheckUrl && (
-              <span className="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
-                Back
-              </span>
-            )}
-            {project.playwrightRunUrl && (
-              <span className="inline-flex items-center rounded-md bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700">
-                Playwright
-              </span>
-            )}
-          </div>
-
-          {hasPlaywright && (
+          {hasCypress && (
             <div className="mt-4">
               <Button
                 size="sm"
@@ -127,7 +109,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 onClick={handleRunTests}
                 disabled={!project.isActive}
               >
-                {isRunningTests ? 'Running Tests...' : 'Run Tests'}
+                {isRunningTests ? 'Executando...' : 'Run Tests'}
               </Button>
             </div>
           )}

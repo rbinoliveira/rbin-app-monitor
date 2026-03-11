@@ -41,10 +41,7 @@ export function AddProjectModal({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
       name: '',
-      frontHealthCheckUrl: '',
-      backHealthCheckUrl: '',
-      playwrightRunUrl: '',
-      cypressRunUrl: '',
+      cypressGithubRepo: '',
     },
   })
 
@@ -52,10 +49,7 @@ export function AddProjectModal({
     try {
       await createProject({
         name: data.name,
-        frontHealthCheckUrl: data.frontHealthCheckUrl ?? null,
-        backHealthCheckUrl: data.backHealthCheckUrl ?? null,
-        playwrightRunUrl: data.playwrightRunUrl ?? null,
-        cypressRunUrl: data.cypressRunUrl ?? null,
+        cypressGithubRepo: data.cypressGithubRepo ?? null,
       })
       reset()
       onClose()
@@ -70,8 +64,7 @@ export function AddProjectModal({
       <ModalHeader>
         <ModalTitle>Adicionar aplicação monitorada</ModalTitle>
         <p className="mt-1 text-sm text-slate-300/80">
-          Cadastre front, back e, se quiser, a URL de disparo remoto de testes
-          para um projeto.
+          Cadastre o repositório GitHub para os testes Cypress.
         </p>
       </ModalHeader>
       <ModalContent>
@@ -84,35 +77,13 @@ export function AddProjectModal({
             name="name"
             control={control}
             label="Nome do projeto"
-            placeholder="Ex.: API Pagamentos"
+            placeholder="Ex.: Minha Aplicação"
           />
           <InputText<ProjectFormSchema>
-            name="frontHealthCheckUrl"
+            name="cypressGithubRepo"
             control={control}
-            label="URL do front"
-            placeholder="https://app.exemplo.com"
-            type="url"
-          />
-          <InputText<ProjectFormSchema>
-            name="backHealthCheckUrl"
-            control={control}
-            label="URL de health do back"
-            placeholder="https://api.exemplo.com/health"
-            type="url"
-          />
-          <InputText<ProjectFormSchema>
-            name="playwrightRunUrl"
-            control={control}
-            label="URL de disparo Playwright"
-            placeholder="https://ci.exemplo.com/api/playwright/run"
-            type="url"
-          />
-          <InputText<ProjectFormSchema>
-            name="cypressRunUrl"
-            control={control}
-            label="URL de disparo Cypress"
-            placeholder="https://ci.exemplo.com/api/cypress/run"
-            type="url"
+            label="Repositório GitHub (Cypress)"
+            placeholder="owner/repo — ex: minha-org/meu-repo"
           />
         </form>
       </ModalContent>

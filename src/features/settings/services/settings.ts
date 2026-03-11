@@ -21,7 +21,6 @@ function settingsFromFirestore(data: MonitorSettingsDoc): MonitorSettings {
   return {
     healthCheckIntervalHours: data.healthCheckIntervalHours,
     cypressIntervalHours: data.cypressIntervalHours,
-    playwrightIntervalHours: data.playwrightIntervalHours,
     updatedAt: data.updatedAt.toDate(),
   }
 }
@@ -54,7 +53,6 @@ export async function getSettings(): Promise<MonitorSettings> {
     return {
       healthCheckIntervalHours: DEFAULT_INTERVAL_HOURS.HEALTH_CHECK,
       cypressIntervalHours: DEFAULT_INTERVAL_HOURS.CYPRESS,
-      playwrightIntervalHours: DEFAULT_INTERVAL_HOURS.PLAYWRIGHT,
       updatedAt: now,
     }
   }
@@ -83,13 +81,6 @@ export async function updateSettings(
     )
   }
 
-  if (input.playwrightIntervalHours !== undefined) {
-    updates.playwrightIntervalHours = validateIntervalHours(
-      input.playwrightIntervalHours,
-      'Playwright interval',
-    )
-  }
-
   if (Object.keys(updates).length <= 1) {
     return getSettings()
   }
@@ -105,8 +96,6 @@ export async function updateSettings(
         updates.healthCheckIntervalHours ?? DEFAULT_INTERVAL_HOURS.HEALTH_CHECK,
       cypressIntervalHours:
         updates.cypressIntervalHours ?? DEFAULT_INTERVAL_HOURS.CYPRESS,
-      playwrightIntervalHours:
-        updates.playwrightIntervalHours ?? DEFAULT_INTERVAL_HOURS.PLAYWRIGHT,
       updatedAt: Timestamp.fromDate(new Date()),
     }
 

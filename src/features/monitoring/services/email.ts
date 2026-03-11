@@ -70,10 +70,6 @@ function formatTimestamp(date: Date): string {
 function formatSubject(payload: NotificationPayload): string {
   const time = formatTimestamp(payload.timestamp)
   switch (payload.type) {
-    case 'health_check_failed':
-      return `[App Monitor] Health check failed: ${payload.projectName} - ${time}`
-    case 'health_check_restored':
-      return `[App Monitor] Health check restored: ${payload.projectName} - ${time}`
     case 'cypress_failed':
       return `[App Monitor] Cypress tests failed: ${payload.projectName} - ${time}`
     case 'cypress_passed':
@@ -88,16 +84,6 @@ function formatHtml(payload: NotificationPayload): string {
   const detailsSafe = escapeHtml(payload.details).replace(/\n/g, '<br>')
 
   switch (payload.type) {
-    case 'health_check_failed':
-      return `<h2>Health check failed</h2>
-<p><strong>Project:</strong> ${escapeHtml(payload.projectName)}<br>
-<strong>Time:</strong> ${time}</p>
-<p>${detailsSafe}</p>`
-    case 'health_check_restored':
-      return `<h2>Health check restored</h2>
-<p><strong>Project:</strong> ${escapeHtml(payload.projectName)}<br>
-<strong>Time:</strong> ${time}</p>
-<p>Service is now operational.</p>`
     case 'cypress_failed':
       return `<h2>Cypress tests failed</h2>
 <p><strong>Project:</strong> ${escapeHtml(payload.projectName)}<br>

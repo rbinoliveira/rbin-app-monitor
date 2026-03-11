@@ -84,7 +84,7 @@ export function LoginPage() {
             </h1>
             <p className="mt-4 max-w-2xl text-base text-slate-300/80 sm:text-lg">
               Centralize disponibilidade do front, saúde do back e execução
-              remota do Playwright em um único painel.
+              remota do Cypress em um único painel.
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -101,7 +101,7 @@ export function LoginPage() {
                   Execuções
                 </p>
                 <p className="mt-2 text-lg font-semibold text-white">
-                  Playwright em primeiro
+                  Cypress em primeiro
                 </p>
               </div>
               <div className="glass-surface rounded-[1.5rem] p-4">

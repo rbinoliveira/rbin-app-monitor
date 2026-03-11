@@ -1,11 +1,10 @@
 import type { CypressResult } from '@/shared/types/cypress-result.type'
 import type { HealthCheckResult } from '@/shared/types/health-check.type'
-import type { PlaywrightResult } from '@/shared/types/playwright-result.type'
 
-export type HistoryItem = HealthCheckResult | CypressResult | PlaywrightResult
+export type HistoryItem = HealthCheckResult | CypressResult
 
 export interface UseHistoryFilters {
-  type?: 'health_check' | 'cypress' | 'playwright' | ''
+  type?: 'health_check' | 'cypress' | ''
   projectId?: string
   startDate?: string
   endDate?: string

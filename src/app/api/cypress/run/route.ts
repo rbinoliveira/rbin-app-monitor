@@ -5,6 +5,10 @@ import {
   acquireLock,
   releaseLock,
 } from '@/features/monitoring/services/cypress-lock'
+import {
+  callGitHubActionsCypressRun,
+  parseGithubRepo,
+} from '@/features/monitoring/services/cypress-github-actions'
 import { callRemoteCypressRun } from '@/features/monitoring/services/cypress-remote'
 import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
 import { getProjectById } from '@/features/projects/services/projects'
@@ -48,19 +52,32 @@ export async function POST(request: NextRequest) {
 
     const project = await getProjectById(projectId)
 
-    if (!project.cypressRunUrl) {
+    if (!project.cypressGithubRepo && !project.cypressRunUrl) {
       return NextResponse.json<ApiResponse>(
         {
           success: false,
-          error: 'No Cypress run URL configured for this project',
+          error: 'No Cypress configuration for this project',
         },
         { status: 400 },
       )
     }
 
-    const result = await callRemoteCypressRun(project.cypressRunUrl, {
-      timeout,
-    })
+    let result
+    if (project.cypressGithubRepo) {
+      const parsed = parseGithubRepo(project.cypressGithubRepo)
+      if (!parsed) {
+        return NextResponse.json<ApiResponse>(
+          {
+            success: false,
+            error: `Invalid cypressGithubRepo format: ${project.cypressGithubRepo}`,
+          },
+          { status: 400 },
+        )
+      }
+      result = await callGitHubActionsCypressRun(parsed.owner, parsed.repo)
+    } else {
+      result = await callRemoteCypressRun(project.cypressRunUrl!, { timeout })
+    }
 
     await saveCypressResult({
       projectId: project.id,

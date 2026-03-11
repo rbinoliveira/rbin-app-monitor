@@ -50,8 +50,8 @@ export function DashboardProjectList({
             Nenhuma aplicação cadastrada ainda.
           </p>
           <p className="mt-2 text-sm text-slate-400/80">
-            Adicione a primeira aplicação para começar a registrar health checks
-            e execuções de testes.
+            Adicione a primeira aplicação para começar a registrar execuções de
+            testes Cypress.
           </p>
         </div>
       ) : (

@@ -22,7 +22,7 @@ const spaceMono = SpaceMono({
 export const metadata: Metadata = {
   title: 'RBIN App Monitor',
   description:
-    'Monitor application health, automate Playwright runs, and react to failures fast.',
+    'Monitor application health, automate Cypress runs, and react to failures fast.',
 }
 
 export default function RootLayout({
@@ -32,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className="dark">
-      <body className={cn(outfit.variable, spaceMono.variable)}>
+      <body className={cn(outfit.variable, spaceMono.variable)} suppressHydrationWarning>
         <AppProvidersClient>
           <GlassBackground />
           <AppShell>{children}</AppShell>

@@ -45,17 +45,9 @@ export function EditProjectModal({
     () => ({
       name: project.name,
       frontHealthCheckUrl: project.frontHealthCheckUrl ?? '',
-      backHealthCheckUrl: project.backHealthCheckUrl ?? '',
-      playwrightRunUrl: project.playwrightRunUrl ?? '',
-      cypressRunUrl: project.cypressRunUrl ?? '',
+      cypressGithubRepo: project.cypressGithubRepo ?? '',
     }),
-    [
-      project.name,
-      project.frontHealthCheckUrl,
-      project.backHealthCheckUrl,
-      project.playwrightRunUrl,
-      project.cypressRunUrl,
-    ],
+    [project.name, project.frontHealthCheckUrl, project.cypressGithubRepo],
   )
 
   const { control, handleSubmit, reset } = useForm<ProjectFormSchema>({
@@ -74,9 +66,7 @@ export function EditProjectModal({
         input: {
           name: data.name,
           frontHealthCheckUrl: data.frontHealthCheckUrl ?? null,
-          backHealthCheckUrl: data.backHealthCheckUrl ?? null,
-          playwrightRunUrl: data.playwrightRunUrl ?? null,
-          cypressRunUrl: data.cypressRunUrl ?? null,
+          cypressGithubRepo: data.cypressGithubRepo ?? null,
         },
       })
       onClose()
@@ -104,7 +94,7 @@ export function EditProjectModal({
             name="name"
             control={control}
             label="Nome do projeto"
-            placeholder="Ex.: API Pagamentos"
+            placeholder="Ex.: Minha Aplicação"
           />
           <InputText<ProjectFormSchema>
             name="frontHealthCheckUrl"
@@ -114,25 +104,10 @@ export function EditProjectModal({
             type="url"
           />
           <InputText<ProjectFormSchema>
-            name="backHealthCheckUrl"
+            name="cypressGithubRepo"
             control={control}
-            label="URL de health do back"
-            placeholder="https://api.exemplo.com/health"
-            type="url"
-          />
-          <InputText<ProjectFormSchema>
-            name="playwrightRunUrl"
-            control={control}
-            label="URL de disparo Playwright"
-            placeholder="https://ci.exemplo.com/api/playwright/run"
-            type="url"
-          />
-          <InputText<ProjectFormSchema>
-            name="cypressRunUrl"
-            control={control}
-            label="URL de disparo Cypress"
-            placeholder="https://ci.exemplo.com/api/cypress/run"
-            type="url"
+            label="Repositório GitHub (Cypress)"
+            placeholder="owner/repo — ex: minha-org/meu-repo"
           />
         </form>
       </ModalContent>

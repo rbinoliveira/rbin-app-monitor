@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { requireApiAuth, requireRateLimit } from '@/features/auth/libs/api-auth'
-import { callRemoteCypressRun } from '@/features/monitoring/services/cypress-remote'
+import {
+  callGitHubActionsCypressRun,
+  parseGithubRepo,
+} from '@/features/monitoring/services/cypress-github-actions'
 import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
 import { sendNotification } from '@/features/monitoring/services/email'
+import { sendTelegramNotification } from '@/features/monitoring/services/telegram'
 import { getActiveProjects } from '@/features/projects/services/projects'
 import type { ApiResponse } from '@/shared/types/api-response.type'
 
@@ -24,16 +28,30 @@ export async function GET(request: NextRequest) {
 
   try {
     const projects = await getActiveProjects()
-    const projectsWithCypress = projects.filter((p) => p.cypressRunUrl)
+    const projectsWithCypress = projects.filter((p) => p.cypressGithubRepo)
 
     const results = []
 
     for (const project of projectsWithCypress) {
       try {
-        if (!project.cypressRunUrl) continue
+        const parsed = parseGithubRepo(project.cypressGithubRepo!)
+        if (!parsed) {
+          results.push({
+            projectId: project.id,
+            projectName: project.name,
+            success: false,
+            error: `Invalid cypressGithubRepo format: ${project.cypressGithubRepo}`,
+          })
+          continue
+        }
 
-        console.log(`Calling Cypress run URL for project: ${project.name}`)
-        const result = await callRemoteCypressRun(project.cypressRunUrl)
+        console.log(
+          `Dispatching GitHub Actions Cypress for project: ${project.name}`,
+        )
+        const result = await callGitHubActionsCypressRun(
+          parsed.owner,
+          parsed.repo,
+        )
 
         await saveCypressResult({
           projectId: project.id,
@@ -41,30 +59,48 @@ export async function GET(request: NextRequest) {
           result,
         })
 
-        if (!result.success) {
-          try {
-            const baseUrl =
-              process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-            const dashboardUrl = `${baseUrl}/dashboard`
+        try {
+          const baseUrl =
+            process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+          const dashboardUrl = `${baseUrl}/dashboard`
+
+          if (result.success) {
+            await sendTelegramNotification({
+              type: 'cypress_passed',
+              projectId: project.id,
+              projectName: project.name,
+              details: `All Cypress tests passed.`,
+              timestamp: new Date(),
+            })
+          } else {
             const failedTestsDetails =
               result.failed > 0
                 ? `\n<b>Failed Tests:</b> ${result.failed} out of ${result.totalTests}`
                 : ''
             const details = `Cypress tests failed for project "${project.name}"${failedTestsDetails}\n\n<b>View Details:</b> <a href="${dashboardUrl}">${dashboardUrl}</a>`
 
-            await sendNotification({
-              type: 'playwright_failed',
-              projectId: project.id,
-              projectName: project.name,
-              details,
-              timestamp: new Date(),
-            })
-          } catch (notificationError) {
-            console.error(
-              `Error sending notification for project ${project.name}:`,
-              notificationError,
-            )
+            await Promise.all([
+              sendNotification({
+                type: 'cypress_failed',
+                projectId: project.id,
+                projectName: project.name,
+                details,
+                timestamp: new Date(),
+              }),
+              sendTelegramNotification({
+                type: 'cypress_failed',
+                projectId: project.id,
+                projectName: project.name,
+                details,
+                timestamp: new Date(),
+              }),
+            ])
           }
+        } catch (notificationError) {
+          console.error(
+            `Error sending notification for project ${project.name}:`,
+            notificationError,
+          )
         }
 
         results.push({

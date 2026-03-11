@@ -14,9 +14,10 @@ function getFirebaseAdmin(): App {
     return adminApp
   }
 
-  // Check for service account JSON (for production with Vercel)
+  // Check for service account (base64-encoded JSON)
   if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
+    const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_KEY, 'base64').toString('utf-8')
+    const serviceAccount = JSON.parse(decoded)
     adminApp = initializeApp({
       credential: cert(serviceAccount),
       projectId: serviceAccount.project_id,
