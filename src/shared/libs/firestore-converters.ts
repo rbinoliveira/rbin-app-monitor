@@ -20,6 +20,7 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
   toFirestore(project: WithFieldValue<Project>): WithFieldValue<ProjectDoc> {
     const p = project as Project
     return {
+      userId: p.userId,
       name: p.name,
       cypressGithubRepo: p.cypressGithubRepo,
       isActive: p.isActive,
@@ -34,6 +35,7 @@ export const projectConverter: FirestoreDataConverter<Project, ProjectDoc> = {
     const data = snapshot.data(options)
     return {
       id: snapshot.id,
+      userId: data.userId,
       name: data.name,
       cypressGithubRepo: data.cypressGithubRepo ?? null,
       isActive: data.isActive ?? true,

@@ -2,6 +2,7 @@ import type { FirestoreTimestamp } from '@/shared/types/firestore.type'
 
 export interface Project {
   id: string
+  userId: string
   name: string
   cypressGithubRepo: string | null
   isActive: boolean
@@ -10,6 +11,7 @@ export interface Project {
 }
 
 export interface ProjectDoc {
+  userId: string
   name: string
   cypressGithubRepo: string | null
   isActive: boolean

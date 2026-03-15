@@ -15,6 +15,7 @@ const PROJECTS_COLLECTION = COLLECTION_NAMES.PROJECTS
 
 function projectToFirestore(project: Project): ProjectDoc {
   return {
+    userId: project.userId,
     name: project.name,
     cypressGithubRepo: project.cypressGithubRepo,
     isActive: project.isActive,
@@ -26,6 +27,7 @@ function projectToFirestore(project: Project): ProjectDoc {
 function projectFromFirestore(docId: string, data: ProjectDoc): Project {
   return {
     id: docId,
+    userId: data.userId,
     name: data.name,
     cypressGithubRepo: data.cypressGithubRepo ?? null,
     isActive: data.isActive ?? true,
@@ -47,6 +49,7 @@ function validateProjectName(name: string): string {
 
 export async function createProject(
   input: CreateProjectInput,
+  userId: string,
 ): Promise<Project> {
   const name = validateProjectName(input.name)
   const cypressGithubRepo = (input.cypressGithubRepo ?? '').trim() || null
@@ -54,6 +57,7 @@ export async function createProject(
   const now = new Date()
   const projectData: Project = {
     id: '',
+    userId,
     name,
     cypressGithubRepo,
     isActive: true,
@@ -64,10 +68,7 @@ export async function createProject(
   const docRef = getAdminDb().collection(PROJECTS_COLLECTION).doc()
   await docRef.set(projectToFirestore({ ...projectData, id: docRef.id }))
 
-  return {
-    ...projectData,
-    id: docRef.id,
-  }
+  return { ...projectData, id: docRef.id }
 }
 
 export async function getProjectById(projectId: string): Promise<Project> {
@@ -83,8 +84,24 @@ export async function getProjectById(projectId: string): Promise<Project> {
   return projectFromFirestore(docSnap.id, data)
 }
 
-export async function getAllProjects(): Promise<Project[]> {
-  const snapshot = await getAdminDb().collection(PROJECTS_COLLECTION).get()
+export async function getProjectByIdForUser(
+  projectId: string,
+  userId: string,
+): Promise<Project> {
+  const project = await getProjectById(projectId)
+
+  if (project.userId !== userId) {
+    throw new ApiError('Project not found', HTTP_STATUS.NOT_FOUND)
+  }
+
+  return project
+}
+
+export async function getAllProjects(userId: string): Promise<Project[]> {
+  const snapshot = await getAdminDb()
+    .collection(PROJECTS_COLLECTION)
+    .where('userId', '==', userId)
+    .get()
 
   return snapshot.docs.map((doc) => {
     const data = doc.data() as ProjectDoc
@@ -107,8 +124,9 @@ export async function getActiveProjects(): Promise<Project[]> {
 export async function updateProject(
   projectId: string,
   input: UpdateProjectInput,
+  userId: string,
 ): Promise<Project> {
-  const project = await getProjectById(projectId)
+  const project = await getProjectByIdForUser(projectId, userId)
 
   const updates: Partial<Project> = {
     updatedAt: new Date(),
@@ -147,7 +165,10 @@ export async function updateProject(
   return updatedProject
 }
 
-export async function deleteProject(projectId: string): Promise<void> {
-  await getProjectById(projectId)
+export async function deleteProject(
+  projectId: string,
+  userId: string,
+): Promise<void> {
+  await getProjectByIdForUser(projectId, userId)
   await getAdminDb().collection(PROJECTS_COLLECTION).doc(projectId).delete()
 }

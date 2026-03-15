@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { requireFirebaseAuth } from '@/features/auth/libs/api-auth'
+import {
+  getAuthenticatedUser,
+  requireFirebaseAuth,
+} from '@/features/auth/libs/api-auth'
 import {
   acquireLock,
   releaseLock,
@@ -11,7 +14,7 @@ import {
 } from '@/features/monitoring/services/cypress-github-actions'
 import { sendCypressNotifications } from '@/features/monitoring/services/cypress-notify'
 import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
-import { getProjectById } from '@/features/projects/services/projects'
+import { getProjectByIdForUser } from '@/features/projects/services/projects'
 import type { ApiResponse } from '@/shared/types/api-response.type'
 
 export const maxDuration = 300
@@ -25,6 +28,7 @@ export async function POST(request: NextRequest) {
   const authResponse = requireFirebaseAuth(request)
   if (authResponse) return authResponse
 
+  const user = getAuthenticatedUser(request)!
   const body = (await request.json().catch(() => ({}))) as CypressRunRequest
   const projectId = body.projectId
 
@@ -49,7 +53,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const project = await getProjectById(projectId)
+    const project = await getProjectByIdForUser(projectId, user.id)
 
     if (!project.cypressGithubRepo) {
       return NextResponse.json<ApiResponse>(
