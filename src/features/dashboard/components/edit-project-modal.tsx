@@ -44,10 +44,9 @@ export function EditProjectModal({
   const initialForm = useMemo<ProjectFormSchema>(
     () => ({
       name: project.name,
-      frontHealthCheckUrl: project.frontHealthCheckUrl ?? '',
       cypressGithubRepo: project.cypressGithubRepo ?? '',
     }),
-    [project.name, project.frontHealthCheckUrl, project.cypressGithubRepo],
+    [project.name, project.cypressGithubRepo],
   )
 
   const { control, handleSubmit, reset } = useForm<ProjectFormSchema>({
@@ -65,7 +64,6 @@ export function EditProjectModal({
         projectId: project.id,
         input: {
           name: data.name,
-          frontHealthCheckUrl: data.frontHealthCheckUrl ?? null,
           cypressGithubRepo: data.cypressGithubRepo ?? null,
         },
       })
@@ -96,13 +94,6 @@ export function EditProjectModal({
             control={control}
             label="Nome do projeto"
             placeholder="Ex.: Minha Aplicação"
-          />
-          <InputText<ProjectFormSchema>
-            name="frontHealthCheckUrl"
-            control={control}
-            label="URL do front"
-            placeholder="https://app.exemplo.com"
-            type="url"
           />
           <InputText<ProjectFormSchema>
             name="cypressGithubRepo"

@@ -10,7 +10,6 @@ import {
   parseGithubRepo,
 } from '@/features/monitoring/services/cypress-github-actions'
 import { sendCypressNotifications } from '@/features/monitoring/services/cypress-notify'
-import { callRemoteCypressRun } from '@/features/monitoring/services/cypress-remote'
 import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
 import { getProjectById } from '@/features/projects/services/projects'
 import type { ApiResponse } from '@/shared/types/api-response.type'
@@ -50,11 +49,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const timeout = body.timeout || 120000
-
     const project = await getProjectById(projectId)
 
-    if (!project.cypressGithubRepo && !project.cypressRunUrl) {
+    if (!project.cypressGithubRepo) {
       return NextResponse.json<ApiResponse>(
         {
           success: false,
@@ -64,22 +61,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    let result
-    if (project.cypressGithubRepo) {
-      const parsed = parseGithubRepo(project.cypressGithubRepo)
-      if (!parsed) {
-        return NextResponse.json<ApiResponse>(
-          {
-            success: false,
-            error: `Invalid cypressGithubRepo format: ${project.cypressGithubRepo}`,
-          },
-          { status: 400 },
-        )
-      }
-      result = await callGitHubActionsCypressRun(parsed.owner, parsed.repo)
-    } else {
-      result = await callRemoteCypressRun(project.cypressRunUrl!, { timeout })
+    const parsed = parseGithubRepo(project.cypressGithubRepo)
+    if (!parsed) {
+      return NextResponse.json<ApiResponse>(
+        {
+          success: false,
+          error: `Invalid cypressGithubRepo format: ${project.cypressGithubRepo}`,
+        },
+        { status: 400 },
+      )
     }
+
+    const result = await callGitHubActionsCypressRun(parsed.owner, parsed.repo)
 
     await saveCypressResult({
       projectId: project.id,

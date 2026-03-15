@@ -1,7 +1,6 @@
 import type { CypressResult } from '@/shared/types/cypress-result.type'
-import type { HealthCheckResult } from '@/shared/types/health-check.type'
 
-export type HistoryItem = HealthCheckResult | CypressResult
+export type HistoryItem = CypressResult
 
 export interface UseHistoryFilters {
   type?: 'health_check' | 'cypress' | ''
