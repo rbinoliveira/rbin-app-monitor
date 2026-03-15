@@ -10,6 +10,7 @@ function formatMessage(payload: NotificationPayload): string {
   const time = new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
     timeStyle: 'medium',
+    timeZone: 'America/Sao_Paulo',
   }).format(payload.timestamp)
 
   switch (payload.type) {
