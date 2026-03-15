@@ -1,12 +1,12 @@
 # RBIN App Monitor
 
-Monitore a saúde das suas aplicações, execute testes Playwright e receba notificações por e-mail.
+Monitore a saúde das suas aplicações, execute testes Cypress remotos e receba notificações por e-mail.
 
 ## Funcionalidades
 
 - 🏥 **Health checks**: monitore a saúde do front (página) e do back (API)
-- 🧪 **Integração Playwright**: execute testes E2E automaticamente ou sob demanda
-- 📧 **Notificações por e-mail**: alertas quando health checks ou testes Playwright falharem
+- 🧪 **Integração Cypress**: execute testes E2E automaticamente ou sob demanda
+- 📧 **Notificações por e-mail**: alertas quando health checks ou testes Cypress falharem
 - 📊 **Dashboard**: visualize o status dos projetos e o histórico de execuções
 - ⚡ **Monitoramento automatizado**: health checks e execuções de testes agendados
 
@@ -92,7 +92,7 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY----
 
 ### Notificações por e-mail
 
-Os alertas (health check falhou/restaurado, Playwright falhou) são enviados para `NOTIFICATION_EMAIL_TO`.
+Os alertas (health check falhou/restaurado, Cypress falhou) são enviados para `NOTIFICATION_EMAIL_TO`.
 
 **Opção A – Resend (recomendado)**  
 Apenas API key. Cadastro em [resend.com](https://resend.com), criar API key em [resend.com/api-keys](https://resend.com/api-keys).
@@ -139,7 +139,7 @@ src/
 ├── app/                    # Rotas do App Router e APIs
 │   ├── api/               # Rotas de API
 │   │   ├── health-check/  # Health check
-│   │   ├── playwright/    # Execução de testes Playwright
+│   │   ├── cypress/       # Execução de testes Cypress
 │   │   └── notify/        # Notificações
 │   ├── projects/          # Páginas de projetos
 │   └── history/           # Histórico de execuções
@@ -156,6 +156,19 @@ src/
 - `npm run start` – Servidor de produção
 - `npm run lint` – ESLint
 - `npm run format` – Prettier
+
+## Contrato dos projetos monitorados
+
+Para que um repositório funcione bem com o App Monitor usando GitHub Actions, o ideal é padronizar um contrato mínimo:
+
+- ter um workflow em `.github/workflows/cypress-e2e.yml`
+- esse workflow aceitar `workflow_dispatch`
+- o workflow subir a aplicação por conta própria no CI
+- o workflow rodar `pnpm test`
+- o repositório expor `pnpm test` para Cypress headless
+- opcionalmente expor `pnpm test:browser` para uso local
+
+O App Monitor hoje dispara o workflow remoto por nome de arquivo e faz polling da execução no GitHub. Quanto mais autossuficiente for esse workflow, menor o acoplamento por projeto.
 
 ### Estilo de código
 

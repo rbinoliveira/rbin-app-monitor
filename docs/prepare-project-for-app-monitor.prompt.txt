@@ -1,0 +1,53 @@
+Quero que você ajuste este projeto para ser compatível com o RBIN App Monitor.
+
+Objetivo:
+- o esforço maior deve ficar no app-monitor
+- o projeto destino deve seguir um contrato mínimo e padronizado
+
+Contrato obrigatório no projeto destino:
+- ter script `pnpm test` para rodar Cypress em modo headless
+- ter script `pnpm test:browser` para abrir Cypress em modo interativo
+- não usar scripts de teste que subam o servidor automaticamente
+- ter workflow em `.github/workflows/cypress-e2e.yml`
+- esse workflow deve aceitar `workflow_dispatch`
+- esse workflow deve ser autossuficiente no GitHub Actions:
+  1. instalar dependências
+  2. buildar a aplicação
+  3. subir a aplicação localmente no CI
+  4. esperar a URL local responder
+  5. rodar `pnpm test`
+- evitar depender de `baseUrl` manual ou variáveis específicas só para o monitor
+
+Upload de resultados (obrigatório para o RBIN App Monitor exibir contadores de testes):
+- após rodar os testes, o workflow deve gerar um JSON com os resultados
+- usar `cypress-mochawesome-reporter` ou qualquer reporter que gere JSON compatível
+- fazer upload do arquivo como artifact do GitHub Actions com o nome exato `cypress-results`
+- exemplo de passo no workflow:
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: cypress-results
+        path: cypress/reports/output.json
+- o JSON deve conter ao menos: totalTests (ou total), passes (ou passed), failures (ou failed), duration
+
+Regras da adaptação:
+- preserve a arquitetura existente do projeto
+- faça o menor número de mudanças possível fora da área de testes/CI
+- se já existir Cypress, reaproveite a estrutura atual
+- se houver animações que deixem o e2e instável, estabilize os testes
+- garanta que `pnpm lint`, `pnpm build` e `pnpm test` fiquem funcionando
+- se houver health check, prefira uma rota simples como `/health`
+
+Entregáveis esperados:
+- ajustes em `package.json`
+- ajustes em `cypress.config.*` se necessário
+- criação ou correção de `.github/workflows/cypress-e2e.yml`
+- atualização de `.gitignore` se necessário
+- breve resumo final com os comandos disponíveis
+
+No fim, me diga explicitamente:
+- qual é o comando headless
+- qual é o comando browser
+- se o workflow remoto está autossuficiente para o RBIN App Monitor
+- qual é o caminho exato do artifact JSON gerado

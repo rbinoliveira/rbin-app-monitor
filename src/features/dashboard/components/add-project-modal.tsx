@@ -64,7 +64,8 @@ export function AddProjectModal({
       <ModalHeader>
         <ModalTitle>Adicionar aplicação monitorada</ModalTitle>
         <p className="mt-1 text-sm text-slate-300/80">
-          Cadastre o repositório GitHub para os testes Cypress.
+          Cadastre o repositório GitHub preparado para o workflow
+          `cypress-e2e.yml` e o comando `pnpm test`.
         </p>
       </ModalHeader>
       <ModalContent>

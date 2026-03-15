@@ -1,11 +1,13 @@
 'use client'
 
+import { ChevronDown, ChevronUp, Pencil, Play, Power } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { useCypressStatusService } from '@/features/monitoring/services/cypress-status.service'
 import { useRunCypressService } from '@/features/monitoring/services/run-cypress.service'
 import { useUpdateProjectService } from '@/features/projects/services/update-project.service'
 import { Button } from '@/shared/components/button'
+import { Tooltip } from '@/shared/components/tooltip'
 import { useToast } from '@/shared/components/toast'
 import { cn } from '@/shared/libs/tw-merge'
 import type { CypressResult } from '@/shared/types/cypress-result.type'
@@ -157,14 +159,20 @@ export function ProjectRow({
                     {new Date(latestExecution.timestamp).toLocaleString()}
                   </span>
                 )}
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => { setExpanded((c) => !c); setHistoryPage(0) }}
-                  disabled={historyItems.length === 0}
-                >
-                  {expanded ? 'Ocultar histórico' : 'Ver histórico'}
-                </Button>
+                <Tooltip label={expanded ? 'Ocultar histórico' : 'Ver histórico'}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => { setExpanded((c) => !c); setHistoryPage(0) }}
+                    disabled={historyItems.length === 0}
+                    className="w-9 px-0"
+                  >
+                    {expanded
+                      ? <ChevronUp className="h-4 w-4" />
+                      : <ChevronDown className="h-4 w-4" />
+                    }
+                  </Button>
+                </Tooltip>
               </div>
             </div>
 
@@ -231,32 +239,41 @@ export function ProjectRow({
 
         <div className="flex shrink-0 flex-wrap gap-2 xl:max-w-[15rem] xl:justify-end">
           {project.cypressGithubRepo && (
+            <Tooltip label="Executar testes Cypress">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => runCypress(project.id)}
+                loading={cypressPending}
+                disabled={cypressPending || !project.isActive}
+                className="w-9 px-0"
+              >
+                {!cypressPending && <Play className="h-4 w-4" />}
+              </Button>
+            </Tooltip>
+          )}
+          <Tooltip label="Editar projeto">
             <Button
               size="sm"
-              variant="secondary"
-              onClick={() => runCypress(project.id)}
-              loading={cypressPending}
-              disabled={cypressPending || !project.isActive}
+              variant="ghost"
+              onClick={() => onEdit(project)}
+              disabled={cypressPending}
+              className="w-9 px-0"
             >
-              Cypress
+              <Pencil className="h-4 w-4" />
             </Button>
-          )}
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onEdit(project)}
-            disabled={cypressPending}
-          >
-            Editar
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handleToggle}
-            disabled={cypressPending}
-          >
-            {project.isActive ? 'Desativar' : 'Ativar'}
-          </Button>
+          </Tooltip>
+          <Tooltip label={project.isActive ? 'Desativar projeto' : 'Ativar projeto'}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleToggle}
+              disabled={cypressPending}
+              className={cn('w-9 px-0', project.isActive ? 'text-rose-400 hover:text-rose-300' : 'text-emerald-400 hover:text-emerald-300')}
+            >
+              <Power className="h-4 w-4" />
+            </Button>
+          </Tooltip>
         </div>
       </div>
     </div>

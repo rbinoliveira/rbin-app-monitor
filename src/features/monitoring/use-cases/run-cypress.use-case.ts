@@ -22,13 +22,13 @@ export async function runCypressUseCase(
 
   const result = await response.json()
 
-  if (!response.ok || !result.success) {
+  if (!response.ok) {
     throw new Error(result.error ?? 'Falha ao executar Cypress')
   }
 
   const data = result.data ?? {}
   return {
-    success: data.success ?? result.success,
+    success: data.success ?? false,
     totalTests: data.totalTests ?? 0,
     passed: data.passed ?? 0,
     failed: data.failed ?? 0,

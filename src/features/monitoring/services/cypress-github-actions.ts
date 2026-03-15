@@ -1,3 +1,5 @@
+import AdmZip from 'adm-zip'
+
 import type { CypressRunResult } from './cypress-runner'
 
 const GITHUB_API_BASE = 'https://api.github.com'
@@ -16,6 +18,35 @@ interface GitHubWorkflowRun {
 
 interface GitHubWorkflowRunsResponse {
   workflow_runs: GitHubWorkflowRun[]
+}
+
+interface GitHubArtifact {
+  id: number
+  name: string
+  expired: boolean
+}
+
+interface GitHubArtifactsResponse {
+  artifacts: GitHubArtifact[]
+}
+
+interface CypressResultsJson {
+  // flat format (custom script)
+  totalTests?: number
+  total?: number
+  passes?: number
+  passed?: number
+  failures?: number
+  failed?: number
+  duration?: number
+  // mochawesome nested format
+  stats?: {
+    tests?: number
+    passes?: number
+    failures?: number
+    pending?: number
+    duration?: number
+  }
 }
 
 function makeHeaders(token: string) {
@@ -90,6 +121,52 @@ async function pollForCompletedRun(
   throw new Error('GitHub Actions workflow timed out after 9 minutes')
 }
 
+async function downloadArtifactResults(
+  owner: string,
+  repo: string,
+  runId: number,
+  token: string,
+): Promise<Pick<CypressRunResult, 'totalTests' | 'passed' | 'failed' | 'skipped' | 'duration'> | null> {
+  try {
+    // 1. List artifacts for the run
+    const artifactsUrl = `${GITHUB_API_BASE}/repos/${owner}/${repo}/actions/runs/${runId}/artifacts`
+    const artifactsRes = await fetch(artifactsUrl, { headers: makeHeaders(token) })
+    if (!artifactsRes.ok) return null
+
+    const artifactsData = (await artifactsRes.json()) as GitHubArtifactsResponse
+    const artifact = artifactsData.artifacts.find(
+      (a) => a.name === 'cypress-results' && !a.expired,
+    )
+    if (!artifact) return null
+
+    // 2. Download the ZIP (GitHub redirects to S3 — fetch follows automatically)
+    const downloadUrl = `${GITHUB_API_BASE}/repos/${owner}/${repo}/actions/artifacts/${artifact.id}/zip`
+    const zipRes = await fetch(downloadUrl, { headers: makeHeaders(token) })
+    if (!zipRes.ok) return null
+
+    const zipBuffer = Buffer.from(await zipRes.arrayBuffer())
+
+    // 3. Extract output.json from ZIP
+    const zip = new AdmZip(zipBuffer)
+    const entry = zip.getEntry('output.json')
+    if (!entry) return null
+
+    const json = JSON.parse(entry.getData().toString('utf-8')) as CypressResultsJson
+
+    // 4. Normalize — support flat format and mochawesome nested format
+    const stats = json.stats
+    const totalTests = json.totalTests ?? json.total ?? stats?.tests ?? 0
+    const passed = json.passes ?? json.passed ?? stats?.passes ?? 0
+    const failed = json.failures ?? json.failed ?? stats?.failures ?? 0
+    const skipped = stats?.pending ?? 0
+    const duration = json.duration ?? stats?.duration ?? 0
+
+    return { totalTests, passed, failed, skipped, duration }
+  } catch {
+    return null
+  }
+}
+
 function getTokenForOwner(owner: string): string | null {
   const single = process.env.GITHUB_ACTIONS_TOKEN
   const map = process.env.GITHUB_ACTIONS_TOKENS
@@ -136,13 +213,15 @@ export async function callGitHubActionsCypressRun(
       : new Date(run.created_at)
     const duration = new Date(run.updated_at).getTime() - startedAt.getTime()
 
+    const artifactResults = await downloadArtifactResults(owner, repo, run.id, token)
+
     return {
       success,
-      totalTests: 0,
-      passed: 0,
-      failed: 0,
-      skipped: 0,
-      duration,
+      totalTests: artifactResults?.totalTests ?? 0,
+      passed: artifactResults?.passed ?? 0,
+      failed: artifactResults?.failed ?? 0,
+      skipped: artifactResults?.skipped ?? 0,
+      duration: artifactResults?.duration ?? duration,
       specFiles: [],
       output: run.html_url,
       error: success ? undefined : `Workflow concluded: ${run.conclusion}`,

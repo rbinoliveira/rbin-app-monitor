@@ -81,7 +81,8 @@ export function EditProjectModal({
       <ModalHeader>
         <ModalTitle>Editar aplicação</ModalTitle>
         <p className="mt-1 text-sm text-slate-300/80">
-          Atualize nome e URLs desta aplicação monitorada.
+          Atualize nome, health check e o repositório GitHub preparado para o
+          workflow `cypress-e2e.yml`.
         </p>
       </ModalHeader>
       <ModalContent>
