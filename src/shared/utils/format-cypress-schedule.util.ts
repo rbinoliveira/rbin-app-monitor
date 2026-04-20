@@ -19,5 +19,5 @@ export function formatCypressSchedule(timeZone?: string): string {
     timeZone,
   }).format(scheduleDate)
 
-  return `Todos os dias às ${localTime} (local) • ${String(MONITORING_SCHEDULE.CYPRESS_UTC_HOUR).padStart(2, '0')}:${String(MONITORING_SCHEDULE.CYPRESS_UTC_MINUTE).padStart(2, '0')} UTC`
+  return `Todos os dias às ${localTime}`
 }
