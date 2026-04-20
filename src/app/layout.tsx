@@ -32,7 +32,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className="dark">
-      <body className={cn(outfit.variable, spaceMono.variable)} suppressHydrationWarning>
+      <body
+        className={cn(outfit.variable, spaceMono.variable)}
+        suppressHydrationWarning
+      >
         <AppProvidersClient>
           <GlassBackground />
           <AppShell>{children}</AppShell>

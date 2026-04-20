@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
-    "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix && echo \"✓ Lint fix concluído com sucesso\"",
+    "lint": "NODE_OPTIONS='--no-warnings' ESLINT_USE_FLAT_CONFIG=false node node_modules/.pnpm/eslint@*/node_modules/eslint/bin/eslint.js . && echo '✅ Lint concluído com sucesso!'",
+    "lint:fix": "NODE_OPTIONS='--no-warnings' ESLINT_USE_FLAT_CONFIG=false node node_modules/.pnpm/eslint@*/node_modules/eslint/bin/eslint.js . --fix && echo '✅ Lint:fix concluído com sucesso!'",
     "test": "cypress run",
     "test:open": "cypress open"
   },

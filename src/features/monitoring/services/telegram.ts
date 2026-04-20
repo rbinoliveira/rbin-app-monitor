@@ -1,9 +1,7 @@
 import type { NotificationPayload } from '@/shared/types/notification.type'
 
 function isTelegramEnabled(): boolean {
-  return Boolean(
-    process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID,
-  )
+  return Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID)
 }
 
 function formatMessage(payload: NotificationPayload): string {
@@ -32,15 +30,18 @@ export async function sendTelegramNotification(
   const chatId = process.env.TELEGRAM_CHAT_ID
 
   try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: formatMessage(payload),
-        parse_mode: 'HTML',
-      }),
-    })
+    const res = await fetch(
+      `https://api.telegram.org/bot${token}/sendMessage`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: formatMessage(payload),
+          parse_mode: 'HTML',
+        }),
+      },
+    )
     if (!res.ok) {
       const body = await res.text()
       console.error(`Telegram API error ${res.status}: ${body}`)

@@ -137,8 +137,7 @@ export async function updateProject(
   }
 
   if (input.cypressGithubRepo !== undefined) {
-    updates.cypressGithubRepo =
-      (input.cypressGithubRepo ?? '').trim() || null
+    updates.cypressGithubRepo = (input.cypressGithubRepo ?? '').trim() || null
   }
 
   if (input.isActive !== undefined) {

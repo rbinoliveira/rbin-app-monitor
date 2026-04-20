@@ -126,11 +126,16 @@ async function downloadArtifactResults(
   repo: string,
   runId: number,
   token: string,
-): Promise<Pick<CypressRunResult, 'totalTests' | 'passed' | 'failed' | 'skipped' | 'duration'> | null> {
+): Promise<Pick<
+  CypressRunResult,
+  'totalTests' | 'passed' | 'failed' | 'skipped' | 'duration'
+> | null> {
   try {
     // 1. List artifacts for the run
     const artifactsUrl = `${GITHUB_API_BASE}/repos/${owner}/${repo}/actions/runs/${runId}/artifacts`
-    const artifactsRes = await fetch(artifactsUrl, { headers: makeHeaders(token) })
+    const artifactsRes = await fetch(artifactsUrl, {
+      headers: makeHeaders(token),
+    })
     if (!artifactsRes.ok) return null
 
     const artifactsData = (await artifactsRes.json()) as GitHubArtifactsResponse
@@ -151,7 +156,9 @@ async function downloadArtifactResults(
     const entry = zip.getEntry('output.json')
     if (!entry) return null
 
-    const json = JSON.parse(entry.getData().toString('utf-8')) as CypressResultsJson
+    const json = JSON.parse(
+      entry.getData().toString('utf-8'),
+    ) as CypressResultsJson
 
     // 4. Normalize — support flat format and mochawesome nested format
     const stats = json.stats
@@ -213,7 +220,12 @@ export async function callGitHubActionsCypressRun(
       : new Date(run.created_at)
     const duration = new Date(run.updated_at).getTime() - startedAt.getTime()
 
-    const artifactResults = await downloadArtifactResults(owner, repo, run.id, token)
+    const artifactResults = await downloadArtifactResults(
+      owner,
+      repo,
+      run.id,
+      token,
+    )
 
     return {
       success,

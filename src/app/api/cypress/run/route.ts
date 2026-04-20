@@ -5,13 +5,13 @@ import {
   requireFirebaseAuth,
 } from '@/features/auth/libs/api-auth'
 import {
-  acquireLock,
-  releaseLock,
-} from '@/features/monitoring/services/cypress-lock'
-import {
   callGitHubActionsCypressRun,
   parseGithubRepo,
 } from '@/features/monitoring/services/cypress-github-actions'
+import {
+  acquireLock,
+  releaseLock,
+} from '@/features/monitoring/services/cypress-lock'
 import { sendCypressNotifications } from '@/features/monitoring/services/cypress-notify'
 import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
 import { getProjectByIdForUser } from '@/features/projects/services/projects'

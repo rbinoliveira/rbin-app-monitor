@@ -97,6 +97,12 @@ export const DEFAULT_INTERVAL_HOURS = {
   CYPRESS: 12,
 } as const
 
+export const MONITORING_SCHEDULE = {
+  CYPRESS_CRON: '0 8 * * *',
+  CYPRESS_UTC_HOUR: 8,
+  CYPRESS_UTC_MINUTE: 0,
+} as const
+
 export const INTERVAL_HOURS = {
   MIN: 1,
   MAX: 168,

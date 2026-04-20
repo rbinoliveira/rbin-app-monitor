@@ -29,71 +29,70 @@ export async function GET(request: NextRequest) {
     const projects = await getActiveProjects()
     const projectsWithCypress = projects.filter((p) => p.cypressGithubRepo)
 
-    const results = []
+    const results = await Promise.all(
+      projectsWithCypress.map(async (project) => {
+        try {
+          const parsed = parseGithubRepo(project.cypressGithubRepo!)
+          if (!parsed) {
+            return {
+              projectId: project.id,
+              projectName: project.name,
+              success: false,
+              error: `Invalid cypressGithubRepo format: ${project.cypressGithubRepo}`,
+            }
+          }
 
-    for (const project of projectsWithCypress) {
-      try {
-        const parsed = parseGithubRepo(project.cypressGithubRepo!)
-        if (!parsed) {
-          results.push({
+          console.log(
+            `Dispatching GitHub Actions Cypress for project: ${project.name}`,
+          )
+          const result = await callGitHubActionsCypressRun(
+            parsed.owner,
+            parsed.repo,
+          )
+
+          await saveCypressResult({
+            projectId: project.id,
+            projectName: project.name,
+            result,
+            trigger: 'cron',
+          })
+
+          try {
+            await sendCypressNotifications({
+              result,
+              projectId: project.id,
+              projectName: project.name,
+              trigger: 'cron',
+            })
+          } catch (notificationError) {
+            console.error(
+              `Error sending notification for project ${project.name}:`,
+              notificationError,
+            )
+          }
+
+          return {
+            projectId: project.id,
+            projectName: project.name,
+            success: result.success,
+            totalTests: result.totalTests,
+            passed: result.passed,
+            failed: result.failed,
+          }
+        } catch (error) {
+          console.error(
+            `Error running Cypress for project ${project.name}:`,
+            error,
+          )
+          return {
             projectId: project.id,
             projectName: project.name,
             success: false,
-            error: `Invalid cypressGithubRepo format: ${project.cypressGithubRepo}`,
-          })
-          continue
+            error: error instanceof Error ? error.message : 'Unknown error',
+          }
         }
-
-        console.log(
-          `Dispatching GitHub Actions Cypress for project: ${project.name}`,
-        )
-        const result = await callGitHubActionsCypressRun(
-          parsed.owner,
-          parsed.repo,
-        )
-
-        await saveCypressResult({
-          projectId: project.id,
-          projectName: project.name,
-          result,
-          trigger: 'cron',
-        })
-
-        try {
-          await sendCypressNotifications({
-            result,
-            projectId: project.id,
-            projectName: project.name,
-            trigger: 'cron',
-          })
-        } catch (notificationError) {
-          console.error(
-            `Error sending notification for project ${project.name}:`,
-            notificationError,
-          )
-        }
-
-        results.push({
-          projectId: project.id,
-          projectName: project.name,
-          success: result.success,
-          totalTests: result.totalTests,
-          passed: result.passed,
-          failed: result.failed,
-        })
-      } catch (error) {
-        console.error(
-          `Error running Cypress for project ${project.name}:`,
-          error,
-        )
-        results.push({
-          projectId: project.id,
-          projectName: project.name,
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      }
-    }
+      }),
+    )
 
     return NextResponse.json<ApiResponse>({
       success: true,

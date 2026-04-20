@@ -1,6 +1,6 @@
+import type { CypressRunResult } from '@/features/monitoring/services/cypress-runner'
 import { sendNotification } from '@/features/monitoring/services/email'
 import { sendTelegramNotification } from '@/features/monitoring/services/telegram'
-import type { CypressRunResult } from '@/features/monitoring/services/cypress-runner'
 
 interface NotifyOptions {
   result: CypressRunResult
@@ -40,7 +40,10 @@ export async function sendCypressNotifications({
         sendTelegramNotification(payload),
       ])
       if (!emailResult.success) {
-        console.error(`[notify] Email (success) failed for "${projectName}":`, emailResult.error)
+        console.error(
+          `[notify] Email (success) failed for "${projectName}":`,
+          emailResult.error,
+        )
       }
     } else {
       // cron: telegram only on success
@@ -66,7 +69,10 @@ export async function sendCypressNotifications({
       sendTelegramNotification(payload),
     ])
     if (!emailResult.success) {
-      console.error(`[notify] Email (failure) failed for "${projectName}":`, emailResult.error)
+      console.error(
+        `[notify] Email (failure) failed for "${projectName}":`,
+        emailResult.error,
+      )
     }
   }
 }
