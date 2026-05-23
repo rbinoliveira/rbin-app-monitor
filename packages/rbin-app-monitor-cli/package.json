@@ -6,7 +6,7 @@
   "author": "Rubens Oliveira",
   "type": "module",
   "bin": {
-    "rbin-app-monitor": "./bin/rbin-app-monitor.js"
+    "rbin-app-monitor": "bin/rbin-app-monitor.js"
   },
   "files": [
     "bin",
