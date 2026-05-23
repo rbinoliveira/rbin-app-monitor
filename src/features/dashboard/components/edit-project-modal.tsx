@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
+import { ProjectSetupInstructions } from '@/features/dashboard/components/project-setup-instructions'
 import {
   type ProjectFormSchema,
   projectFormSchema,
@@ -83,7 +84,8 @@ export function EditProjectModal({
           workflow `cypress-e2e.yml`.
         </p>
       </ModalHeader>
-      <ModalContent>
+      <ModalContent className="space-y-4">
+        <ProjectSetupInstructions />
         <form
           id="edit-project-form"
           onSubmit={handleSubmit(onSubmit)}

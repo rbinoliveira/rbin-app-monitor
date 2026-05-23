@@ -8,7 +8,7 @@ const ROOT = cwd()
 const WORKFLOW_PATH = '.github/workflows/cypress-e2e.yml'
 const NORMALIZER_PATH = 'scripts/rbin-app-monitor/normalize-cypress-json.mjs'
 const RUNNER_PATH = 'scripts/rbin-app-monitor/run-cypress-headless.mjs'
-const VERSION = '1.0.4'
+const VERSION = '1.0.5'
 
 function main() {
   const args = process.argv.slice(2)
@@ -164,6 +164,12 @@ function workflowTemplate({ packageManager, buildScript, startScript }) {
     npm: 'npm run',
   }[packageManager]
 
+  const cypress = {
+    pnpm: 'pnpm exec cypress',
+    yarn: 'yarn cypress',
+    npm: 'npx cypress',
+  }[packageManager]
+
   const setupPackageManager =
     packageManager === 'pnpm'
       ? `
@@ -208,6 +214,11 @@ jobs:
       - name: Install dependencies
         run: ${install}${buildStep}
 
+      - name: Install Cypress binary
+        run: |
+          ${cypress} install
+          ${cypress} verify
+
       - name: Start application
         run: |
           if [ -n "$RBIN_EXTERNAL_BASE_URL" ]; then
@@ -241,6 +252,15 @@ jobs:
         with:
           name: cypress-results
           path: cypress/reports/output.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload Cypress raw output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-raw-output
+          path: cypress/reports/output.raw.json
           if-no-files-found: ignore
           retention-days: 7
 

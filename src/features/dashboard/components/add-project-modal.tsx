@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
+import { ProjectSetupInstructions } from '@/features/dashboard/components/project-setup-instructions'
 import {
   type ProjectFormSchema,
   projectFormSchema,
@@ -68,7 +69,8 @@ export function AddProjectModal({
           `cypress-e2e.yml` e o comando `pnpm test`.
         </p>
       </ModalHeader>
-      <ModalContent>
+      <ModalContent className="space-y-4">
+        <ProjectSetupInstructions />
         <form
           id="add-project-form"
           onSubmit={handleSubmit(onSubmit)}
