@@ -88,6 +88,8 @@ export const COLLECTION_NAMES = {
   CYPRESS_RESULTS: 'cypressResults',
   LOCKS: 'locks',
   SETTINGS: 'settings',
+  USER_CREDENTIALS: 'userCredentials',
+  USER_TELEGRAM_CREDENTIALS: 'userTelegramCredentials',
 } as const
 
 export const SETTINGS_DOC_ID = 'monitor' as const

@@ -170,6 +170,24 @@ Para que um repositório funcione bem com o App Monitor usando GitHub Actions, o
 
 O App Monitor hoje dispara o workflow remoto por nome de arquivo e faz polling da execução no GitHub. Quanto mais autossuficiente for esse workflow, menor o acoplamento por projeto.
 
+### CLI de configuração
+
+Este repositório também contém o pacote `rbin-app-monitor`, que expõe o comando `rbin-app-monitor`.
+
+Em um projeto que já usa Cypress, rode:
+
+```bash
+npx rbin-app-monitor configure
+```
+
+O comando cria ou ajusta:
+
+- `.github/workflows/cypress-e2e.yml`
+- `scripts/rbin-app-monitor/normalize-cypress-json.mjs`
+- scripts `test` e `test:browser`, quando ausentes
+
+Use `rbin-app-monitor configure --dry-run` para ver as mudanças sem escrever arquivos. Por padrão, o comando sobrescreve os arquivos de integração gerados pelo CLI.
+
 ### Estilo de código
 
 - **ESLint** para lint

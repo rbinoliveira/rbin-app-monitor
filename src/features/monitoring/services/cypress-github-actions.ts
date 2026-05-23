@@ -4,7 +4,7 @@ import type { CypressRunResult } from './cypress-runner'
 
 const GITHUB_API_BASE = 'https://api.github.com'
 const POLL_INTERVAL_MS = 30_000
-const MAX_POLL_DURATION_MS = 9 * 60 * 1000 // 9 minutes
+const MAX_POLL_DURATION_MS = 9 * 60 * 1000
 
 interface GitHubWorkflowRun {
   id: number
@@ -31,7 +31,6 @@ interface GitHubArtifactsResponse {
 }
 
 interface CypressResultsJson {
-  // flat format (custom script)
   totalTests?: number
   total?: number
   passes?: number
@@ -39,7 +38,6 @@ interface CypressResultsJson {
   failures?: number
   failed?: number
   duration?: number
-  // mochawesome nested format
   stats?: {
     tests?: number
     passes?: number
@@ -131,7 +129,6 @@ async function downloadArtifactResults(
   'totalTests' | 'passed' | 'failed' | 'skipped' | 'duration'
 > | null> {
   try {
-    // 1. List artifacts for the run
     const artifactsUrl = `${GITHUB_API_BASE}/repos/${owner}/${repo}/actions/runs/${runId}/artifacts`
     const artifactsRes = await fetch(artifactsUrl, {
       headers: makeHeaders(token),
@@ -144,14 +141,12 @@ async function downloadArtifactResults(
     )
     if (!artifact) return null
 
-    // 2. Download the ZIP (GitHub redirects to S3 — fetch follows automatically)
     const downloadUrl = `${GITHUB_API_BASE}/repos/${owner}/${repo}/actions/artifacts/${artifact.id}/zip`
     const zipRes = await fetch(downloadUrl, { headers: makeHeaders(token) })
     if (!zipRes.ok) return null
 
     const zipBuffer = Buffer.from(await zipRes.arrayBuffer())
 
-    // 3. Extract output.json from ZIP
     const zip = new AdmZip(zipBuffer)
     const entry = zip.getEntry('output.json')
     if (!entry) return null
@@ -160,7 +155,6 @@ async function downloadArtifactResults(
       entry.getData().toString('utf-8'),
     ) as CypressResultsJson
 
-    // 4. Normalize — support flat format and mochawesome nested format
     const stats = json.stats
     const totalTests = json.totalTests ?? json.total ?? stats?.tests ?? 0
     const passed = json.passes ?? json.passed ?? stats?.passes ?? 0
@@ -174,31 +168,15 @@ async function downloadArtifactResults(
   }
 }
 
-function getTokenForOwner(owner: string): string | null {
-  const single = process.env.GITHUB_ACTIONS_TOKEN
-  const map = process.env.GITHUB_ACTIONS_TOKENS
-
-  if (map) {
-    try {
-      const tokens = JSON.parse(map) as Record<string, string>
-      if (tokens[owner]) return tokens[owner]
-    } catch {
-      // fall through to single token
-    }
-  }
-
-  return single ?? null
-}
-
 export async function callGitHubActionsCypressRun(
   owner: string,
   repo: string,
+  token: string,
   workflow = 'cypress-e2e.yml',
 ): Promise<CypressRunResult> {
-  const token = getTokenForOwner(owner)
   if (!token) {
     return makeErrorResult(
-      `No GitHub token configured for owner "${owner}". Set GITHUB_ACTIONS_TOKEN or GITHUB_ACTIONS_TOKENS.`,
+      'No GitHub token provided. Configure GitHub integration in user settings.',
     )
   }
 

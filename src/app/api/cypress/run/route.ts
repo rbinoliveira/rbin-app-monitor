@@ -15,6 +15,7 @@ import {
 import { sendCypressNotifications } from '@/features/monitoring/services/cypress-notify'
 import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
 import { getProjectByIdForUser } from '@/features/projects/services/projects'
+import { getUserGithubToken } from '@/features/settings/services/user-github-credential'
 import type { ApiResponse } from '@/shared/types/api-response.type'
 
 export const maxDuration = 300
@@ -76,7 +77,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await callGitHubActionsCypressRun(parsed.owner, parsed.repo)
+    const credential = await getUserGithubToken(user.id)
+    if (!credential) {
+      return NextResponse.json<ApiResponse>(
+        {
+          success: false,
+          error:
+            'GitHub integration not configured. Add your token in user settings.',
+        },
+        { status: 400 },
+      )
+    }
+
+    const result = await callGitHubActionsCypressRun(
+      parsed.owner,
+      parsed.repo,
+      credential.token,
+    )
 
     await saveCypressResult({
       projectId: project.id,
@@ -90,6 +107,7 @@ export async function POST(request: NextRequest) {
       projectId: project.id,
       projectName: project.name,
       trigger: 'manual',
+      userId: user.id,
     }).catch((err) => console.error('Error sending notifications:', err))
 
     return NextResponse.json<ApiResponse>({

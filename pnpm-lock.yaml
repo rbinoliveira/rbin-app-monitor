@@ -91,6 +91,8 @@ importers:
         specifier: ^5.3.0
         version: 5.9.3
 
+  packages/rbin-app-monitor-cli: {}
+
 packages:
 
   '@alloc/quick-lru@5.2.0':

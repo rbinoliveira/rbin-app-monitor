@@ -1,28 +1,27 @@
 import type { CypressRunResult } from '@/features/monitoring/services/cypress-runner'
 import { sendNotification } from '@/features/monitoring/services/email'
 import { sendTelegramNotification } from '@/features/monitoring/services/telegram'
+import { getUserTelegramCredentials } from '@/features/settings/services/user-telegram-credential'
 
 interface NotifyOptions {
   result: CypressRunResult
   projectId: string
   projectName: string
   trigger: 'manual' | 'cron'
+  userId: string
 }
 
-/**
- * Business rules:
- * - Manual: email + telegram on success AND failure
- * - Cron:   email only on failure; telegram on success AND failure
- */
 export async function sendCypressNotifications({
   result,
   projectId,
   projectName,
   trigger,
+  userId,
 }: NotifyOptions): Promise<void> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
   const dashboardUrl = `${baseUrl}/dashboard`
   const timestamp = new Date()
+  const telegramCredentials = await getUserTelegramCredentials(userId)
 
   if (result.success) {
     const details = `All Cypress tests passed for project "${projectName}".`
@@ -37,7 +36,7 @@ export async function sendCypressNotifications({
     if (trigger === 'manual') {
       const [emailResult] = await Promise.all([
         sendNotification(payload),
-        sendTelegramNotification(payload),
+        sendTelegramNotification(payload, telegramCredentials),
       ])
       if (!emailResult.success) {
         console.error(
@@ -46,8 +45,7 @@ export async function sendCypressNotifications({
         )
       }
     } else {
-      // cron: telegram only on success
-      await sendTelegramNotification(payload)
+      await sendTelegramNotification(payload, telegramCredentials)
     }
   } else {
     const failedPart =
@@ -63,10 +61,9 @@ export async function sendCypressNotifications({
       timestamp,
     }
 
-    // both triggers: email + telegram on failure
     const [emailResult] = await Promise.all([
       sendNotification(payload),
-      sendTelegramNotification(payload),
+      sendTelegramNotification(payload, telegramCredentials),
     ])
     if (!emailResult.success) {
       console.error(

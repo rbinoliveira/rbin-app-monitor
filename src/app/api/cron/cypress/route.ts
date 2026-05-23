@@ -8,6 +8,7 @@ import {
 import { sendCypressNotifications } from '@/features/monitoring/services/cypress-notify'
 import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
 import { getActiveProjects } from '@/features/projects/services/projects'
+import { getUserGithubToken } from '@/features/settings/services/user-github-credential'
 import type { ApiResponse } from '@/shared/types/api-response.type'
 
 export const maxDuration = 300
@@ -42,12 +43,23 @@ export async function GET(request: NextRequest) {
             }
           }
 
+          const credential = await getUserGithubToken(project.userId)
+          if (!credential) {
+            return {
+              projectId: project.id,
+              projectName: project.name,
+              success: false,
+              error: `User ${project.userId} has no GitHub integration configured`,
+            }
+          }
+
           console.log(
             `Dispatching GitHub Actions Cypress for project: ${project.name}`,
           )
           const result = await callGitHubActionsCypressRun(
             parsed.owner,
             parsed.repo,
+            credential.token,
           )
 
           await saveCypressResult({
@@ -63,6 +75,7 @@ export async function GET(request: NextRequest) {
               projectId: project.id,
               projectName: project.name,
               trigger: 'cron',
+              userId: project.userId,
             })
           } catch (notificationError) {
             console.error(

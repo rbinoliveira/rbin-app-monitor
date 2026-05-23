@@ -1,7 +1,8 @@
 import type { NotificationPayload } from '@/shared/types/notification.type'
 
-function isTelegramEnabled(): boolean {
-  return Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID)
+export interface TelegramCredentials {
+  botToken: string
+  chatId: string
 }
 
 function formatMessage(payload: NotificationPayload): string {
@@ -23,20 +24,18 @@ function formatMessage(payload: NotificationPayload): string {
 
 export async function sendTelegramNotification(
   payload: NotificationPayload,
+  credentials: TelegramCredentials | null,
 ): Promise<void> {
-  if (!isTelegramEnabled()) return
-
-  const token = process.env.TELEGRAM_BOT_TOKEN
-  const chatId = process.env.TELEGRAM_CHAT_ID
+  if (!credentials) return
 
   try {
     const res = await fetch(
-      `https://api.telegram.org/bot${token}/sendMessage`,
+      `https://api.telegram.org/bot${credentials.botToken}/sendMessage`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chat_id: chatId,
+          chat_id: credentials.chatId,
           text: formatMessage(payload),
           parse_mode: 'HTML',
         }),

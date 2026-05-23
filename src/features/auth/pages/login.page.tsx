@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import { AuthBootstrapScreen } from '@/features/auth/components/auth-bootstrap-screen'
 import { useAuth } from '@/features/auth/hooks/authentication.hook'
 import { Button } from '@/shared/components/button'
 import {
@@ -65,11 +66,9 @@ export function LoginPage() {
     }
   }
 
-  const message = loading
-    ? 'Validando sessão atual...'
-    : user
-      ? 'Redirecionando para o painel...'
-      : 'Autentique com Google para acessar o painel de monitoramento.'
+  if (loading || user) {
+    return <AuthBootstrapScreen />
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10 sm:px-6">
@@ -124,7 +123,7 @@ export function LoginPage() {
                 Bem-vindo de volta
               </CardTitle>
               <CardDescription className="mt-2 text-center">
-                {message}
+                Autentique com Google para acessar o painel de monitoramento.
               </CardDescription>
 
               <div className="mt-8">

@@ -7,10 +7,14 @@ import { useAuth } from '@/features/auth/hooks/authentication.hook'
 import { AddProjectModal } from '@/features/dashboard/components/add-project-modal'
 import { DashboardProjectList } from '@/features/dashboard/components/dashboard-project-list'
 import { EditProjectModal } from '@/features/dashboard/components/edit-project-modal'
+import { GithubIntegrationModal } from '@/features/dashboard/components/github-integration-modal'
 import type { ExecutionHistoryItem } from '@/features/dashboard/components/project-row'
 import { SummaryCards } from '@/features/dashboard/components/summary-cards'
+import { TelegramIntegrationModal } from '@/features/dashboard/components/telegram-integration-modal'
 import { useGetHistoryService } from '@/features/monitoring/services/get-history.service'
 import { useProjects } from '@/features/projects/hooks/use-projects.hook'
+import { useGetGithubIntegrationService } from '@/features/settings/services/github-integration.service'
+import { useGetTelegramIntegrationService } from '@/features/settings/services/telegram-integration.service'
 import { Button } from '@/shared/components/button'
 import type { Project } from '@/shared/types/project.type'
 
@@ -18,7 +22,11 @@ function DashboardScreen() {
   const { user } = useAuth()
   const { projects, loading, error, refresh } = useProjects()
   const [addOpen, setAddOpen] = useState(false)
+  const [githubOpen, setGithubOpen] = useState(false)
+  const [telegramOpen, setTelegramOpen] = useState(false)
   const [editProject, setEditProject] = useState<Project | null>(null)
+  const { data: githubStatus } = useGetGithubIntegrationService()
+  const { data: telegramStatus } = useGetTelegramIntegrationService()
 
   const {
     data: historyData,
@@ -70,13 +78,33 @@ function DashboardScreen() {
             </p>
           </div>
 
-          <div className="glass-surface rounded-[1.5rem] px-4 py-3">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-400/75">
-              Conectado como
-            </p>
-            <p className="mt-1 text-sm font-medium text-white">
-              {user?.displayName || user?.email || 'Operador'}
-            </p>
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-end">
+            <div className="glass-surface rounded-[1.5rem] px-4 py-3">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-400/75">
+                Conectado como
+              </p>
+              <p className="mt-1 text-sm font-medium text-white">
+                {user?.displayName || user?.email || 'Operador'}
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button
+                variant={githubStatus?.configured ? 'primary' : 'secondary'}
+                size="md"
+                onClick={() => setGithubOpen(true)}
+              >
+                {githubStatus?.configured ? 'GitHub integrado' : 'Integrar GitHub'}
+              </Button>
+              <Button
+                variant={telegramStatus?.configured ? 'primary' : 'secondary'}
+                size="md"
+                onClick={() => setTelegramOpen(true)}
+              >
+                {telegramStatus?.configured
+                  ? 'Telegram integrado'
+                  : 'Integrar Telegram'}
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -116,6 +144,18 @@ function DashboardScreen() {
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onSuccess={refreshAll}
+      />
+
+      <GithubIntegrationModal
+        open={githubOpen}
+        onClose={() => setGithubOpen(false)}
+        status={githubStatus}
+      />
+
+      <TelegramIntegrationModal
+        open={telegramOpen}
+        onClose={() => setTelegramOpen(false)}
+        status={telegramStatus}
       />
 
       {editProject && (

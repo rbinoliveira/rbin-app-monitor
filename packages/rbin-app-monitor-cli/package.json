@@ -1,0 +1,43 @@
+{
+  "name": "rbin-app-monitor",
+  "version": "1.0.1",
+  "description": "CLI para configurar projetos compatíveis com o RBIN App Monitor.",
+  "license": "MIT",
+  "author": "Rubens Oliveira",
+  "type": "module",
+  "bin": {
+    "rbin-app-monitor": "./bin/rbin-app-monitor.js"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "rbin",
+    "app-monitor",
+    "cypress",
+    "github-actions",
+    "monitoring",
+    "e2e"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/rbinoliveira/rbin-app-monitor.git",
+    "directory": "packages/rbin-app-monitor-cli"
+  },
+  "bugs": {
+    "url": "https://github.com/rbinoliveira/rbin-app-monitor/issues"
+  },
+  "homepage": "https://github.com/rbinoliveira/rbin-app-monitor#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.18"
+  },
+  "scripts": {
+    "smoke": "node ./bin/rbin-app-monitor.js --help",
+    "pack:dry-run": "npm pack --dry-run"
+  }
+}
