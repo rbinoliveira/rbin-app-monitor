@@ -27,7 +27,8 @@ rbin-app-monitor configure
 ## O que o comando faz
 
 - detecta Cypress no projeto atual
-- garante scripts `test` e `test:browser` quando eles não existem
+- garante o script `test:rbin-app-monitor` sem alterar o script `test`
+- garante o script `test:browser` quando ele não existe
 - cria `.github/workflows/cypress-e2e.yml`
 - cria `scripts/rbin-app-monitor/normalize-cypress-json.mjs`
 - cria `scripts/rbin-app-monitor/run-cypress-headless.mjs`

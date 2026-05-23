@@ -5,7 +5,7 @@ Objetivo:
 - o projeto destino deve seguir um contrato mínimo e padronizado
 
 Contrato obrigatório no projeto destino:
-- ter script `pnpm test` para rodar Cypress em modo headless
+- ter script `pnpm test:rbin-app-monitor` para rodar Cypress em modo headless
 - ter script `pnpm test:browser` para abrir Cypress em modo interativo
 - não usar scripts de teste que subam o servidor automaticamente
 - ter workflow em `.github/workflows/cypress-e2e.yml`
@@ -15,7 +15,7 @@ Contrato obrigatório no projeto destino:
   2. buildar a aplicação
   3. subir a aplicação localmente no CI
   4. esperar a URL local responder
-  5. rodar `pnpm test`
+  5. rodar `pnpm test:rbin-app-monitor`
 - evitar depender de `baseUrl` manual ou variáveis específicas só para o monitor
 
 Upload de resultados (obrigatório para o RBIN App Monitor exibir contadores de testes):
@@ -36,7 +36,7 @@ Regras da adaptação:
 - faça o menor número de mudanças possível fora da área de testes/CI
 - se já existir Cypress, reaproveite a estrutura atual
 - se houver animações que deixem o e2e instável, estabilize os testes
-- garanta que `pnpm lint`, `pnpm build` e `pnpm test` fiquem funcionando
+- garanta que `pnpm lint`, `pnpm build` e `pnpm test:rbin-app-monitor` fiquem funcionando
 - se houver health check, prefira uma rota simples como `/health`
 
 Entregáveis esperados:

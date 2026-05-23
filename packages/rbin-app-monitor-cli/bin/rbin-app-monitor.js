@@ -8,7 +8,8 @@ const ROOT = cwd()
 const WORKFLOW_PATH = '.github/workflows/cypress-e2e.yml'
 const NORMALIZER_PATH = 'scripts/rbin-app-monitor/normalize-cypress-json.mjs'
 const RUNNER_PATH = 'scripts/rbin-app-monitor/run-cypress-headless.mjs'
-const VERSION = '1.0.6'
+const HEADLESS_SCRIPT = 'test:rbin-app-monitor'
+const VERSION = '1.0.7'
 
 function main() {
   const args = process.argv.slice(2)
@@ -128,8 +129,8 @@ function ensureScripts(packageJson) {
   packageJson.scripts = packageJson.scripts ?? {}
   let changed = false
 
-  if (!packageJson.scripts.test) {
-    packageJson.scripts.test = `node ${RUNNER_PATH}`
+  if (packageJson.scripts[HEADLESS_SCRIPT] !== `node ${RUNNER_PATH}`) {
+    packageJson.scripts[HEADLESS_SCRIPT] = `node ${RUNNER_PATH}`
     changed = true
   }
 
@@ -244,7 +245,7 @@ jobs:
         id: cypress
         shell: bash
         run: |
-          node scripts/rbin-app-monitor/run-cypress-headless.mjs
+          ${run} ${HEADLESS_SCRIPT}
 
       - name: Upload test results
         if: always()
@@ -611,7 +612,9 @@ function printSummary({ created, dryRun }) {
   }
 
   console.log('\nContrato gerado:')
-  console.log('- comando headless: pnpm test / npm run test / yarn test')
+  console.log(
+    '- comando headless: pnpm test:rbin-app-monitor / npm run test:rbin-app-monitor / yarn test:rbin-app-monitor',
+  )
   console.log('- comando browser: pnpm test:browser / npm run test:browser / yarn test:browser')
   console.log('- workflow: .github/workflows/cypress-e2e.yml')
   console.log('- artifact: cypress-results contendo output.json')

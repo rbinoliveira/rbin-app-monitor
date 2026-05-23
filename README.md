@@ -164,8 +164,8 @@ Para que um repositório funcione bem com o App Monitor usando GitHub Actions, o
 - ter um workflow em `.github/workflows/cypress-e2e.yml`
 - esse workflow aceitar `workflow_dispatch`
 - o workflow subir a aplicação por conta própria no CI
-- o workflow rodar `pnpm test`
-- o repositório expor `pnpm test` para Cypress headless
+- o workflow rodar `pnpm test:rbin-app-monitor`
+- o repositório expor `pnpm test:rbin-app-monitor` para Cypress headless
 - opcionalmente expor `pnpm test:browser` para uso local
 
 O App Monitor hoje dispara o workflow remoto por nome de arquivo e faz polling da execução no GitHub. Quanto mais autossuficiente for esse workflow, menor o acoplamento por projeto.
@@ -184,7 +184,8 @@ O comando cria ou ajusta:
 
 - `.github/workflows/cypress-e2e.yml`
 - `scripts/rbin-app-monitor/normalize-cypress-json.mjs`
-- scripts `test` e `test:browser`, quando ausentes
+- script `test:rbin-app-monitor`, sem alterar `test`
+- script `test:browser`, quando ausente
 
 Use `rbin-app-monitor configure --dry-run` para ver as mudanças sem escrever arquivos. Por padrão, o comando sobrescreve os arquivos de integração gerados pelo CLI.
 
