@@ -8,7 +8,7 @@ const ROOT = cwd()
 const WORKFLOW_PATH = '.github/workflows/cypress-e2e.yml'
 const NORMALIZER_PATH = 'scripts/rbin-app-monitor/normalize-cypress-json.mjs'
 const RUNNER_PATH = 'scripts/rbin-app-monitor/run-cypress-headless.mjs'
-const VERSION = '1.0.5'
+const VERSION = '1.0.6'
 
 function main() {
   const args = process.argv.slice(2)
@@ -324,6 +324,7 @@ const cypressRun = spawnSync(
 
 const rawOutput = \`\${cypressRun.stdout ?? ''}\${cypressRun.stderr ?? ''}\`
 
+mkdirSync(dirname(rawReportPath), { recursive: true })
 writeFileSync(rawReportPath, rawOutput)
 
 function readJsonReportsFromText(rawText) {
@@ -467,7 +468,11 @@ if (cypressRun.error) {
   throw cypressRun.error
 }
 
-process.exit(parseError ? 1 : (cypressRun.status ?? 1))
+if (parseError || normalized.stats.failures > 0) {
+  process.exit(1)
+}
+
+process.exit(0)
 `
 }
 
