@@ -1,6 +1,6 @@
 {
   "name": "rbin-app-monitor",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "CLI para configurar projetos compatíveis com o RBIN App Monitor.",
   "license": "MIT",
   "author": "Rubens Oliveira",

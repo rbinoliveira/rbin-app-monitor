@@ -8,6 +8,7 @@ const ROOT = cwd()
 const WORKFLOW_PATH = '.github/workflows/cypress-e2e.yml'
 const NORMALIZER_PATH = 'scripts/rbin-app-monitor/normalize-cypress-json.mjs'
 const RUNNER_PATH = 'scripts/rbin-app-monitor/run-cypress-headless.mjs'
+const VERSION = '1.0.4'
 
 function main() {
   const args = process.argv.slice(2)
@@ -15,6 +16,11 @@ function main() {
 
   if (!command || command === '--help' || command === '-h') {
     printHelp()
+    return
+  }
+
+  if (command === '--version' || command === '-v') {
+    console.log(VERSION)
     return
   }
 
@@ -32,6 +38,7 @@ function printHelp() {
 
 Uso:
   rbin-app-monitor configure [--dry-run]
+  rbin-app-monitor --version
 
 Opções:
   --dry-run  mostra o que seria criado sem escrever arquivos`)
@@ -212,7 +219,9 @@ jobs:
       - name: Wait for base URL
         run: |
           for i in {1..60}; do
-            if curl -fsS "$CYPRESS_BASE_URL/health" > /dev/null || curl -fsS "$CYPRESS_BASE_URL" > /dev/null; then
+            if [ -n "$RBIN_EXTERNAL_BASE_URL" ]; then
+              curl -fsS "$CYPRESS_BASE_URL" > /dev/null && exit 0
+            elif curl -fsS "$CYPRESS_BASE_URL/health" > /dev/null || curl -fsS "$CYPRESS_BASE_URL" > /dev/null; then
               exit 0
             fi
             sleep 2
@@ -224,14 +233,7 @@ jobs:
         id: cypress
         shell: bash
         run: |
-          mkdir -p cypress/reports
-          set +e
-          ${run} test -- --quiet --reporter json > cypress/reports/output.raw.json
-          CYPRESS_EXIT_CODE=$?
-          if [ ! -f cypress/reports/output.json ]; then
-            node scripts/rbin-app-monitor/normalize-cypress-json.mjs cypress/reports/output.raw.json cypress/reports/output.json
-          fi
-          exit $CYPRESS_EXIT_CODE
+          node scripts/rbin-app-monitor/run-cypress-headless.mjs
 
       - name: Upload test results
         if: always()
@@ -277,70 +279,175 @@ const cypressBin = process.platform === 'win32'
 rmSync(reportDir, { force: true, recursive: true })
 mkdirSync(reportDir, { recursive: true })
 
+if (!existsSync(cypressBin)) {
+  const message = \`Cypress binary not found at \${cypressBin}. Run the dependency install step before this script.\`
+  const normalized = normalize(null, message)
+
+  writeFileSync(rawReportPath, '')
+  writeFileSync(outputPath, \`\${JSON.stringify(normalized, null, 2)}\\n\`)
+
+  console.error(message)
+  console.log('RBIN App Monitor Cypress result:')
+  console.log(JSON.stringify(normalized, null, 2))
+
+  process.exit(1)
+}
+
 const cypressRun = spawnSync(
   cypressBin,
   ['run', '--e2e', '--reporter', 'json'],
   {
     encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'inherit'],
+    stdio: ['ignore', 'pipe', 'pipe'],
   },
 )
 
-writeFileSync(rawReportPath, cypressRun.stdout ?? '')
+const rawOutput = \`\${cypressRun.stdout ?? ''}\${cypressRun.stderr ?? ''}\`
+
+writeFileSync(rawReportPath, rawOutput)
+
+function readJsonReportsFromText(rawText) {
+  const reports = []
+  let depth = 0
+  let start = -1
+  let inString = false
+  let escaped = false
+
+  for (let index = 0; index < rawText.length; index += 1) {
+    const char = rawText[index]
+
+    if (inString) {
+      if (escaped) {
+        escaped = false
+        continue
+      }
+
+      if (char === '\\\\') {
+        escaped = true
+        continue
+      }
+
+      if (char === '"' && !escaped) inString = false
+      continue
+    }
+
+    if (char === '"') {
+      inString = true
+      continue
+    }
+
+    if (char === '{') {
+      if (depth === 0) start = index
+      depth += 1
+      continue
+    }
+
+    if (char !== '}' || depth === 0) continue
+
+    depth -= 1
+
+    if (depth !== 0 || start === -1) continue
+
+    try {
+      const parsed = JSON.parse(rawText.slice(start, index + 1))
+      if (parsed?.stats) reports.push(parsed)
+    } catch {
+      start = -1
+      continue
+    }
+
+    start = -1
+  }
+
+  return reports
+}
 
 function readJsonFromOutput(path) {
-  if (!existsSync(path)) return null
+  if (!existsSync(path)) return []
 
-  const raw = readFileSync(path, 'utf8').trim()
-  const start = raw.indexOf('{')
-  const end = raw.lastIndexOf('}')
-
-  if (start === -1 || end === -1 || end <= start) return null
-
-  try {
-    return JSON.parse(raw.slice(start, end + 1))
-  } catch {
-    return null
-  }
+  return readJsonReportsFromText(readFileSync(path, 'utf8'))
 }
 
-function normalize(data) {
-  const stats = data?.stats ?? data
-  const tests = stats?.tests ?? data?.totalTests ?? data?.total ?? 0
-  const passes = stats?.passes ?? data?.passes ?? data?.passed ?? 0
-  const failures = stats?.failures ?? data?.failures ?? data?.failed ?? 0
-  const pending = stats?.pending ?? data?.pending ?? data?.skipped ?? 0
-  const duration = stats?.duration ?? data?.duration ?? 0
+function normalize(reports, error) {
+  const list = Array.isArray(reports) ? reports : [reports].filter(Boolean)
+  const totals = list.reduce(
+    (acc, report) => {
+      const stats = report?.stats ?? report
 
-  return {
-    totalTests: tests,
-    total: tests,
-    passes,
-    passed: passes,
-    failures,
-    failed: failures,
-    skipped: pending,
-    duration,
+      acc.tests += stats?.tests ?? report?.totalTests ?? report?.total ?? 0
+      acc.passes += stats?.passes ?? report?.passes ?? report?.passed ?? 0
+      acc.failures +=
+        stats?.failures ?? report?.failures ?? report?.failed ?? 0
+      acc.pending += stats?.pending ?? report?.pending ?? report?.skipped ?? 0
+      acc.duration += stats?.duration ?? report?.duration ?? 0
+
+      return acc
+    },
+    {
+      tests: 0,
+      passes: 0,
+      failures: 0,
+      pending: 0,
+      duration: 0,
+    },
+  )
+
+  const normalized = {
+    totalTests: totals.tests,
+    total: totals.tests,
+    passes: totals.passes,
+    passed: totals.passes,
+    failures: totals.failures,
+    failed: totals.failures,
+    skipped: totals.pending,
+    duration: totals.duration,
     stats: {
-      tests,
-      passes,
-      failures,
-      pending,
-      duration,
+      tests: totals.tests,
+      passes: totals.passes,
+      failures: totals.failures,
+      pending: totals.pending,
+      duration: totals.duration,
     },
   }
+
+  if (error) {
+    normalized.error = error
+  }
+
+  return normalized
 }
 
-const normalized = normalize(readJsonFromOutput(rawReportPath))
+const stdoutReports = readJsonReportsFromText(cypressRun.stdout ?? '')
+const parsed =
+  stdoutReports.length > 0 ? stdoutReports : readJsonFromOutput(rawReportPath)
+const parseError =
+  parsed.length === 0 && (rawOutput.trim() || cypressRun.error)
+    ? 'Cypress did not produce a valid JSON report. See output.raw.json or the workflow log for details.'
+    : undefined
+const normalized = normalize(
+  parsed,
+  cypressRun.error instanceof Error ? cypressRun.error.message : parseError,
+)
 
 mkdirSync(dirname(outputPath), { recursive: true })
 writeFileSync(outputPath, \`\${JSON.stringify(normalized, null, 2)}\\n\`)
+
+if (cypressRun.stderr) {
+  console.error(cypressRun.stderr)
+}
+
+if (parseError) {
+  console.error(parseError)
+}
+
+console.log('RBIN App Monitor Cypress result:')
+console.log(JSON.stringify(normalized, null, 2))
 
 if (cypressRun.error) {
   throw cypressRun.error
 }
 
-process.exit(cypressRun.status ?? 1)
+process.exit(parseError ? 1 : (cypressRun.status ?? 1))
 `
 }
 
@@ -354,45 +461,107 @@ import { mkdirSync } from 'node:fs'
 const inputPath = process.argv[2] ?? 'cypress/reports/output.raw.json'
 const outputPath = process.argv[3] ?? 'cypress/reports/output.json'
 
-function readJsonFromOutput(path) {
-  if (!existsSync(path)) return null
+function readJsonReportsFromText(rawText) {
+  const reports = []
+  let depth = 0
+  let start = -1
+  let inString = false
+  let escaped = false
 
-  const raw = readFileSync(path, 'utf8').trim()
-  const start = raw.indexOf('{')
-  const end = raw.lastIndexOf('}')
+  for (let index = 0; index < rawText.length; index += 1) {
+    const char = rawText[index]
 
-  if (start === -1 || end === -1 || end <= start) return null
+    if (inString) {
+      if (escaped) {
+        escaped = false
+        continue
+      }
 
-  try {
-    return JSON.parse(raw.slice(start, end + 1))
-  } catch {
-    return null
+      if (char === '\\\\') {
+        escaped = true
+        continue
+      }
+
+      if (char === '"' && !escaped) inString = false
+      continue
+    }
+
+    if (char === '"') {
+      inString = true
+      continue
+    }
+
+    if (char === '{') {
+      if (depth === 0) start = index
+      depth += 1
+      continue
+    }
+
+    if (char !== '}' || depth === 0) continue
+
+    depth -= 1
+
+    if (depth !== 0 || start === -1) continue
+
+    try {
+      const parsed = JSON.parse(rawText.slice(start, index + 1))
+      if (parsed?.stats) reports.push(parsed)
+    } catch {
+      start = -1
+      continue
+    }
+
+    start = -1
   }
+
+  return reports
 }
 
-function normalize(data) {
-  const stats = data?.stats ?? data
-  const tests = stats?.tests ?? data?.totalTests ?? data?.total ?? 0
-  const passes = stats?.passes ?? data?.passes ?? data?.passed ?? 0
-  const failures = stats?.failures ?? data?.failures ?? data?.failed ?? 0
-  const pending = stats?.pending ?? data?.pending ?? data?.skipped ?? 0
-  const duration = stats?.duration ?? data?.duration ?? 0
+function readJsonFromOutput(path) {
+  if (!existsSync(path)) return []
+
+  return readJsonReportsFromText(readFileSync(path, 'utf8'))
+}
+
+function normalize(reports) {
+  const list = Array.isArray(reports) ? reports : [reports].filter(Boolean)
+  const totals = list.reduce(
+    (acc, report) => {
+      const stats = report?.stats ?? report
+
+      acc.tests += stats?.tests ?? report?.totalTests ?? report?.total ?? 0
+      acc.passes += stats?.passes ?? report?.passes ?? report?.passed ?? 0
+      acc.failures +=
+        stats?.failures ?? report?.failures ?? report?.failed ?? 0
+      acc.pending += stats?.pending ?? report?.pending ?? report?.skipped ?? 0
+      acc.duration += stats?.duration ?? report?.duration ?? 0
+
+      return acc
+    },
+    {
+      tests: 0,
+      passes: 0,
+      failures: 0,
+      pending: 0,
+      duration: 0,
+    },
+  )
 
   return {
-    totalTests: tests,
-    total: tests,
-    passes,
-    passed: passes,
-    failures,
-    failed: failures,
-    skipped: pending,
-    duration,
+    totalTests: totals.tests,
+    total: totals.tests,
+    passes: totals.passes,
+    passed: totals.passes,
+    failures: totals.failures,
+    failed: totals.failures,
+    skipped: totals.pending,
+    duration: totals.duration,
     stats: {
-      tests,
-      passes,
-      failures,
-      pending,
-      duration,
+      tests: totals.tests,
+      passes: totals.passes,
+      failures: totals.failures,
+      pending: totals.pending,
+      duration: totals.duration,
     },
   }
 }
