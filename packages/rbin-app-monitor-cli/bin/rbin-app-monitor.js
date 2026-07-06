@@ -9,7 +9,7 @@ const WORKFLOW_PATH = '.github/workflows/cypress-e2e.yml'
 const NORMALIZER_PATH = 'scripts/rbin-app-monitor/normalize-cypress-json.mjs'
 const RUNNER_PATH = 'scripts/rbin-app-monitor/run-cypress-headless.mjs'
 const HEADLESS_SCRIPT = 'test:rbin-app-monitor'
-const VERSION = '1.0.7'
+const VERSION = '1.0.8'
 
 function main() {
   const args = process.argv.slice(2)
@@ -53,7 +53,9 @@ function configure(options) {
 
   const packageJson = readJson(packageJsonPath)
   if (!hasCypress(packageJson)) {
-    fail('Cypress não detectado. Instale/configure Cypress antes de rodar este comando.')
+    fail(
+      'Cypress não detectado. Instale/configure Cypress antes de rodar este comando.',
+    )
   }
 
   const packageManager = detectPackageManager()
@@ -119,9 +121,9 @@ function hasCypress(packageJson) {
 
   return Boolean(
     dependencies.cypress ||
-      existsSync(join(ROOT, 'cypress.config.ts')) ||
-      existsSync(join(ROOT, 'cypress.config.js')) ||
-      existsSync(join(ROOT, 'cypress')),
+    existsSync(join(ROOT, 'cypress.config.ts')) ||
+    existsSync(join(ROOT, 'cypress.config.js')) ||
+    existsSync(join(ROOT, 'cypress')),
   )
 }
 
@@ -280,6 +282,15 @@ jobs:
         with:
           name: rbin-app-monitor-server-log
           path: .rbin-app-monitor-server.log
+
+      - name: Notify RBIN App Monitor
+        if: always()
+        env:
+          MONITOR_URL: \${{ vars.RBIN_APP_MONITOR_URL || 'https://rbin-app-monitor.vercel.app' }}
+        run: |
+          curl -fsS -X POST "$MONITOR_URL/api/cypress/callback" \\
+            -H 'Content-Type: application/json' \\
+            -d '{"repo":"\${{ github.repository }}","runId":\${{ github.run_id }}}' || true
 `
 }
 
@@ -615,10 +626,14 @@ function printSummary({ created, dryRun }) {
   console.log(
     '- comando headless: pnpm test:rbin-app-monitor / npm run test:rbin-app-monitor / yarn test:rbin-app-monitor',
   )
-  console.log('- comando browser: pnpm test:browser / npm run test:browser / yarn test:browser')
+  console.log(
+    '- comando browser: pnpm test:browser / npm run test:browser / yarn test:browser',
+  )
   console.log('- workflow: .github/workflows/cypress-e2e.yml')
   console.log('- artifact: cypress-results contendo output.json')
-  console.log('- base URL remota opcional: input base_url ou variável CYPRESS_PRODUCTION_BASE_URL')
+  console.log(
+    '- base URL remota opcional: input base_url ou variável CYPRESS_PRODUCTION_BASE_URL',
+  )
 }
 
 function fail(message) {

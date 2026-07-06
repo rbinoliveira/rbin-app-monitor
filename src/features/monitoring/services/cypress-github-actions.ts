@@ -3,8 +3,8 @@ import AdmZip from 'adm-zip'
 import type { CypressRunResult } from './cypress-runner'
 
 const GITHUB_API_BASE = 'https://api.github.com'
-const POLL_INTERVAL_MS = 30_000
-const MAX_POLL_DURATION_MS = 9 * 60 * 1000
+const RUN_LOOKUP_INTERVAL_MS = 5_000
+const RUN_LOOKUP_TIMEOUT_MS = 60_000
 
 interface GitHubWorkflowRun {
   id: number
@@ -45,6 +45,11 @@ interface CypressResultsJson {
     pending?: number
     duration?: number
   }
+}
+
+export interface DispatchedCypressRun {
+  runId: number
+  htmlUrl: string
 }
 
 function makeHeaders(token: string) {
@@ -91,7 +96,7 @@ async function dispatchWorkflow(
   }
 }
 
-async function pollForCompletedRun(
+async function findDispatchedRun(
   owner: string,
   repo: string,
   workflow: string,
@@ -99,10 +104,10 @@ async function pollForCompletedRun(
   dispatchedAt: Date,
 ): Promise<GitHubWorkflowRun> {
   const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/actions/workflows/${workflow}/runs?per_page=5&event=workflow_dispatch`
-  const deadline = Date.now() + MAX_POLL_DURATION_MS
+  const deadline = Date.now() + RUN_LOOKUP_TIMEOUT_MS
 
   while (Date.now() < deadline) {
-    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
+    await new Promise((resolve) => setTimeout(resolve, RUN_LOOKUP_INTERVAL_MS))
 
     const response = await fetch(url, { headers: makeHeaders(token) })
     if (!response.ok) continue
@@ -112,11 +117,22 @@ async function pollForCompletedRun(
       (r) => new Date(r.created_at) >= dispatchedAt,
     )
 
-    if (!run) continue
-    if (run.status === 'completed') return run
+    if (run) return run
   }
 
-  throw new Error('GitHub Actions workflow timed out after 9 minutes')
+  throw new Error('GitHub Actions run did not appear within 60s after dispatch')
+}
+
+async function fetchRun(
+  owner: string,
+  repo: string,
+  runId: number,
+  token: string,
+): Promise<GitHubWorkflowRun | null> {
+  const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/actions/runs/${runId}`
+  const response = await fetch(url, { headers: makeHeaders(token) })
+  if (!response.ok) return null
+  return (await response.json()) as GitHubWorkflowRun
 }
 
 async function downloadArtifactResults(
@@ -168,59 +184,75 @@ async function downloadArtifactResults(
   }
 }
 
-export async function callGitHubActionsCypressRun(
+function buildResultFromRun(
+  run: GitHubWorkflowRun,
+  artifactResults: Awaited<ReturnType<typeof downloadArtifactResults>>,
+): CypressRunResult {
+  const success = run.conclusion === 'success'
+  const startedAt = run.run_started_at
+    ? new Date(run.run_started_at)
+    : new Date(run.created_at)
+  const duration = new Date(run.updated_at).getTime() - startedAt.getTime()
+
+  return {
+    success,
+    totalTests: artifactResults?.totalTests ?? 0,
+    passed: artifactResults?.passed ?? 0,
+    failed: artifactResults?.failed ?? 0,
+    skipped: artifactResults?.skipped ?? 0,
+    duration: artifactResults?.duration ?? duration,
+    specFiles: [],
+    output: run.html_url,
+    error: success ? undefined : `Workflow concluded: ${run.conclusion}`,
+  }
+}
+
+export async function dispatchCypressRun(
   owner: string,
   repo: string,
   token: string,
   workflow = 'cypress-e2e.yml',
-): Promise<CypressRunResult> {
+): Promise<DispatchedCypressRun> {
   if (!token) {
-    return makeErrorResult(
+    throw new Error(
       'No GitHub token provided. Configure GitHub integration in user settings.',
     )
   }
 
-  try {
-    const dispatchedAt = new Date()
-    await dispatchWorkflow(owner, repo, workflow, token)
+  const dispatchedAt = new Date()
+  await dispatchWorkflow(owner, repo, workflow, token)
+  const run = await findDispatchedRun(
+    owner,
+    repo,
+    workflow,
+    token,
+    dispatchedAt,
+  )
 
-    const run = await pollForCompletedRun(
-      owner,
-      repo,
-      workflow,
-      token,
-      dispatchedAt,
-    )
+  return { runId: run.id, htmlUrl: run.html_url }
+}
 
-    const success = run.conclusion === 'success'
-    const startedAt = run.run_started_at
-      ? new Date(run.run_started_at)
-      : new Date(run.created_at)
-    const duration = new Date(run.updated_at).getTime() - startedAt.getTime()
+export async function collectCypressRun(
+  owner: string,
+  repo: string,
+  runId: number,
+  token: string,
+): Promise<CypressRunResult | null> {
+  const run = await fetchRun(owner, repo, runId, token)
+  if (!run || run.status !== 'completed') return null
 
-    const artifactResults = await downloadArtifactResults(
-      owner,
-      repo,
-      run.id,
-      token,
-    )
+  const artifactResults = await downloadArtifactResults(
+    owner,
+    repo,
+    runId,
+    token,
+  )
 
-    return {
-      success,
-      totalTests: artifactResults?.totalTests ?? 0,
-      passed: artifactResults?.passed ?? 0,
-      failed: artifactResults?.failed ?? 0,
-      skipped: artifactResults?.skipped ?? 0,
-      duration: artifactResults?.duration ?? duration,
-      specFiles: [],
-      output: run.html_url,
-      error: success ? undefined : `Workflow concluded: ${run.conclusion}`,
-    }
-  } catch (error) {
-    return makeErrorResult(
-      error instanceof Error ? error.message : 'Unknown error',
-    )
-  }
+  return buildResultFromRun(run, artifactResults)
+}
+
+export function makeCypressErrorResult(error: string): CypressRunResult {
+  return makeErrorResult(error)
 }
 
 export function parseGithubRepo(repo: string): {

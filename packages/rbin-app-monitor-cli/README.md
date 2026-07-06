@@ -35,6 +35,7 @@ rbin-app-monitor configure
 - configura o workflow para instalar e verificar o binário do Cypress
 - configura o workflow para gerar artifact `cypress-results` com `output.json`
 - configura o workflow para gerar artifact `cypress-raw-output` com `output.raw.json`
+- configura o passo final `Notify RBIN App Monitor`, que avisa o monitor quando o run termina (callback em `/api/cypress/callback`)
 
 O workflow roda `workflow_dispatch`, usa uma URL remota quando configurada ou sobe
 a aplicação no CI, espera a URL responder e executa Cypress em modo headless.

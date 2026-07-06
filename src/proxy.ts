@@ -7,7 +7,7 @@ import {
   appRoutes,
 } from '@/shared/constants/app-routes.constants'
 
-const publicApiRoutes = ['/api/health', '/api/cron']
+const publicApiRoutes = ['/api/health', '/api/cron', '/api/cypress/callback']
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl

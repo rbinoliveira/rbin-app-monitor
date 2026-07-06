@@ -16,7 +16,15 @@ import { formatCypressSchedule } from '@/shared/utils/format-cypress-schedule.ut
 
 export type ExecutionHistoryItem = CypressResult
 
+function formatExecutionStatus(item: CypressResult): string {
+  if (item.status === 'pending') return 'Em execução'
+  return item.success ? 'Sucesso' : 'Falha'
+}
+
 function formatExecutionDetails(item: CypressResult): string {
+  if (item.status === 'pending') {
+    return 'Aguardando resultado do GitHub Actions…'
+  }
   const parts = [
     `${item.passed}/${item.totalTests} passed`,
     `${Math.round(item.duration / 1000)}s`,
@@ -69,7 +77,12 @@ export function ProjectRow({
     useRunCypressService({
       onSuccess: (data) => {
         const durationSeconds = Math.round(data.duration / 1000)
-        if (data.failed > 0) {
+        if (data.status === 'pending') {
+          addToast(
+            'Testes em execução no GitHub Actions. O resultado aparecerá no histórico em alguns minutos.',
+            'success',
+          )
+        } else if (data.failed > 0) {
           addToast(
             `Testes falharam: ${data.failed}/${data.totalTests} em ${durationSeconds}s`,
             'error',
@@ -151,7 +164,7 @@ export function ProjectRow({
                 </p>
                 <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-100">
                   {latestExecution
-                    ? `Cypress • ${latestExecution.success ? 'Sucesso' : 'Falha'}`
+                    ? `Cypress • ${formatExecutionStatus(latestExecution)}`
                     : historyLoading
                       ? 'Carregando histórico...'
                       : 'Nenhuma execução ainda'}
@@ -227,7 +240,7 @@ export function ProjectRow({
                     >
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <p className="flex items-center gap-2 text-sm text-white">
-                          Cypress • {item.success ? 'Sucesso' : 'Falha'}
+                          Cypress • {formatExecutionStatus(item)}
                           {item.trigger && (
                             <span
                               className={cn(

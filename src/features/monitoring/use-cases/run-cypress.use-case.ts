@@ -1,5 +1,6 @@
 export interface RunCypressResult {
   success: boolean
+  status?: 'pending' | 'completed'
   totalTests: number
   passed: number
   failed: number
@@ -29,6 +30,7 @@ export async function runCypressUseCase(
   const data = result.data ?? {}
   return {
     success: data.success ?? false,
+    status: data.status,
     totalTests: data.totalTests ?? 0,
     passed: data.passed ?? 0,
     failed: data.failed ?? 0,

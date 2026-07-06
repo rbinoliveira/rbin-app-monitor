@@ -61,6 +61,8 @@ export async function GET(request: NextRequest) {
           id: doc.id,
           runner: data.runner ?? 'cypress',
           trigger: data.trigger,
+          status: data.status ?? 'completed',
+          error: data.error,
           projectId: data.projectId,
           projectName: data.projectName,
           success: data.success,

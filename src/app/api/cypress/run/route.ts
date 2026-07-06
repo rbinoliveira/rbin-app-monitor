@@ -5,20 +5,26 @@ import {
   requireFirebaseAuth,
 } from '@/features/auth/libs/api-auth'
 import {
-  callGitHubActionsCypressRun,
+  dispatchCypressRun,
   parseGithubRepo,
 } from '@/features/monitoring/services/cypress-github-actions'
 import {
   acquireLock,
   releaseLock,
 } from '@/features/monitoring/services/cypress-lock'
-import { sendCypressNotifications } from '@/features/monitoring/services/cypress-notify'
-import { saveCypressResult } from '@/features/monitoring/services/cypress-results'
+import { reconcilePendingCypressResult } from '@/features/monitoring/services/cypress-reconcile'
+import {
+  getCypressResultById,
+  savePendingCypressResult,
+} from '@/features/monitoring/services/cypress-results'
 import { getProjectByIdForUser } from '@/features/projects/services/projects'
 import { getUserGithubToken } from '@/features/settings/services/user-github-credential'
 import type { ApiResponse } from '@/shared/types/api-response.type'
 
 export const maxDuration = 300
+
+const WAIT_BUDGET_MS = 220_000
+const WAIT_POLL_INTERVAL_MS = 15_000
 
 interface CypressRunRequest {
   projectId?: string
@@ -52,6 +58,8 @@ export async function POST(request: NextRequest) {
       { status: 409 },
     )
   }
+
+  const waitDeadline = Date.now() + WAIT_BUDGET_MS
 
   try {
     const project = await getProjectByIdForUser(projectId, user.id)
@@ -89,38 +97,59 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await callGitHubActionsCypressRun(
+    const dispatched = await dispatchCypressRun(
       parsed.owner,
       parsed.repo,
       credential.token,
     )
 
-    await saveCypressResult({
+    const pending = await savePendingCypressResult({
       projectId: project.id,
       projectName: project.name,
-      result,
       trigger: 'manual',
+      githubRepo: `${parsed.owner}/${parsed.repo}`,
+      githubRunId: dispatched.runId,
+      output: dispatched.htmlUrl,
     })
 
-    sendCypressNotifications({
-      result,
-      projectId: project.id,
-      projectName: project.name,
-      trigger: 'manual',
-      userId: user.id,
-    }).catch((err) => console.error('Error sending notifications:', err))
+    while (Date.now() < waitDeadline) {
+      const waitMs = Math.min(WAIT_POLL_INTERVAL_MS, waitDeadline - Date.now())
+      if (waitMs <= 0) break
+      await new Promise((resolve) => setTimeout(resolve, waitMs))
+
+      const outcome = await reconcilePendingCypressResult(pending)
+      if (outcome !== 'still-running') break
+    }
+
+    const finalResult = await getCypressResultById(pending.id)
+
+    if (!finalResult || finalResult.status === 'pending') {
+      return NextResponse.json<ApiResponse>({
+        success: true,
+        data: {
+          status: 'pending',
+          totalTests: 0,
+          passed: 0,
+          failed: 0,
+          skipped: 0,
+          duration: 0,
+          output: dispatched.htmlUrl,
+        },
+      })
+    }
 
     return NextResponse.json<ApiResponse>({
-      success: result.success,
+      success: finalResult.success,
       data: {
-        totalTests: result.totalTests,
-        passed: result.passed,
-        failed: result.failed,
-        skipped: result.skipped,
-        duration: result.duration,
-        specFiles: result.specFiles,
-        output: result.output,
-        error: result.error,
+        status: 'completed',
+        totalTests: finalResult.totalTests,
+        passed: finalResult.passed,
+        failed: finalResult.failed,
+        skipped: finalResult.skipped,
+        duration: finalResult.duration,
+        specFiles: finalResult.specFiles,
+        output: finalResult.output,
+        error: finalResult.error,
       },
     })
   } catch (error) {

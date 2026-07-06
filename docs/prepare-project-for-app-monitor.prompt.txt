@@ -31,6 +31,18 @@ Upload de resultados (obrigatório para o RBIN App Monitor exibir contadores de 
         path: cypress/reports/output.json
 - o JSON deve conter ao menos: totalTests (ou total), passes (ou passed), failures (ou failed), duration
 
+Callback de conclusão (obrigatório para o resultado aparecer sem atraso no monitor):
+- o último passo do workflow deve notificar o monitor quando o run terminar
+- exemplo de passo no workflow (sempre por último, com `if: always()`):
+    - name: Notify RBIN App Monitor
+      if: always()
+      env:
+        MONITOR_URL: ${{ vars.RBIN_APP_MONITOR_URL || 'https://rbin-app-monitor.vercel.app' }}
+      run: |
+        curl -fsS -X POST "$MONITOR_URL/api/cypress/callback" \
+          -H 'Content-Type: application/json' \
+          -d '{"repo":"${{ github.repository }}","runId":${{ github.run_id }}}' || true
+
 Regras da adaptação:
 - preserve a arquitetura existente do projeto
 - faça o menor número de mudanças possível fora da área de testes/CI
